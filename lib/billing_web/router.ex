@@ -23,6 +23,11 @@ defmodule BillingWeb.Router do
     live "/customers/new", CustomerLive.Form, :new
     live "/customers/:id", CustomerLive.Show, :show
     live "/customers/:id/edit", CustomerLive.Form, :edit
+
+    live "/invoices", InvoiceLive.Index, :index
+    live "/invoices/new", InvoiceLive.Form, :new
+    live "/invoices/:id", InvoiceLive.Show, :show
+    live "/invoices/:id/edit", InvoiceLive.Form, :edit
   end
 
   # Other scopes may use custom stacks.

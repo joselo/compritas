@@ -50,7 +50,9 @@ defmodule BillingWeb.Layouts do
             </.link>
           </li>
           <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
+            <.link navigate={~p"/invoices"} class="btn btn-ghost">
+              Invoices
+            </.link>
           </li>
           <li>
             <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
