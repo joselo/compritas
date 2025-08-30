@@ -9,6 +9,9 @@ defmodule Billing.Invoices.Invoice do
     field :description, :string
     field :due_date, :date
     field :amount, :decimal
+    field :tax_rate, :decimal, default: 15.0
+    field :amount_with_tax, :decimal
+    field :payment_method, Ecto.Enum, values: [:cash, :credit_card, :bank_transfer]
 
     timestamps(type: :utc_datetime)
   end
@@ -16,7 +19,7 @@ defmodule Billing.Invoices.Invoice do
   @doc false
   def changeset(invoice, attrs) do
     invoice
-    |> cast(attrs, [:customer_id, :issued_at, :description, :due_date, :amount])
-    |> validate_required([:customer_id, :issued_at, :description, :due_date, :amount])
+    |> cast(attrs, [:customer_id, :issued_at, :description, :due_date, :amount, :tax_rate, :payment_method])
+    |> validate_required([:customer_id, :issued_at, :description, :due_date, :amount, :tax_rate, :payment_method])
   end
 end

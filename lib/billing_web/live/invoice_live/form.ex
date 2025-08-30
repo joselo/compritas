@@ -19,6 +19,13 @@ defmodule BillingWeb.InvoiceLive.Form do
         <.input field={@form[:due_date]} type="date" label="Due Date" />
         <.input field={@form[:description]} type="textarea" label="Description" />
         <.input field={@form[:amount]} type="number" label="Amount" />
+        <.input field={@form[:tax_rate]} type="number" label="Tax Rate" />
+        <.input
+          field={@form[:payment_method]}
+          type="select"
+          options={@payment_methods}
+          label="Payment Method"
+        />
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Invoice</.button>
           <.button navigate={return_path(@return_to, @invoice)}>Cancel</.button>
@@ -32,10 +39,17 @@ defmodule BillingWeb.InvoiceLive.Form do
   def mount(params, _session, socket) do
     customers = Billing.Customers.list_customers() |> Enum.map(&{&1.full_name, &1.id})
 
+    payment_methods = [
+      {"Credit Card", :credit_card},
+      {"Cash", :cash},
+      {"Bank Transfer", :bank_transfer}
+    ]
+
     {:ok,
      socket
      |> assign(:return_to, return_to(params["return_to"]))
      |> assign(:customers, customers)
+     |> assign(:payment_methods, payment_methods)
      |> apply_action(socket.assigns.live_action, params)}
   end
 
@@ -73,6 +87,8 @@ defmodule BillingWeb.InvoiceLive.Form do
   defp save_invoice(socket, :edit, invoice_params) do
     case Invoices.update_invoice(socket.assigns.invoice, invoice_params) do
       {:ok, invoice} ->
+        save_invoice_taxes(invoice)
+
         {:noreply,
          socket
          |> put_flash(:info, "Invoice updated successfully")
@@ -86,6 +102,8 @@ defmodule BillingWeb.InvoiceLive.Form do
   defp save_invoice(socket, :new, invoice_params) do
     case Invoices.create_invoice(invoice_params) do
       {:ok, invoice} ->
+        save_invoice_taxes(invoice)
+
         {:noreply,
          socket
          |> put_flash(:info, "Invoice created successfully")
@@ -98,4 +116,9 @@ defmodule BillingWeb.InvoiceLive.Form do
 
   defp return_path("index", _invoice), do: ~p"/invoices"
   defp return_path("show", invoice), do: ~p"/invoices/#{invoice}"
+
+  defp save_invoice_taxes(invoice) do
+    amount_with_tax = Invoices.calculate_amount_with_tax(invoice)
+    Invoices.save_taxes(invoice, amount_with_tax)
+  end
 end
