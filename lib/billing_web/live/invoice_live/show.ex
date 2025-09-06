@@ -2,6 +2,8 @@ defmodule BillingWeb.InvoiceLive.Show do
   use BillingWeb, :live_view
 
   alias Billing.Invoices
+  alias Billing.Invoicing
+  alias Billing.TaxiDriver
 
   @impl true
   def render(assigns) do
@@ -16,6 +18,9 @@ defmodule BillingWeb.InvoiceLive.Show do
           </.button>
           <.button variant="primary" navigate={~p"/invoices/#{@invoice}/edit?return_to=show"}>
             <.icon name="hero-pencil-square" /> Edit invoice
+          </.button>
+          <.button phx-click="build_xml">
+            <.icon name="hero-pencil-square" /> Build XML
           </.button>
         </:actions>
       </.header>
@@ -34,5 +39,20 @@ defmodule BillingWeb.InvoiceLive.Show do
      socket
      |> assign(:page_title, "Show Invoice")
      |> assign(:invoice, Invoices.get_invoice!(id))}
+  end
+
+  @impl true
+  def handle_event("build_xml", _params, socket) do
+    invoice_params = Invoicing.build_request_params(socket.assigns.invoice)
+
+    case TaxiDriver.build_invoice_xml(invoice_params) do
+      {:ok, xml} ->
+        File.write("/home/joselo/Documents/invoice-#{socket.assigns.invoice.id}.xml", xml)
+
+        {:noreply, put_flash(socket, :info, "Xml success!!")}
+
+      {:error, error} ->
+        {:noreply, put_flash(socket, :error, "Xml error: #{inspect(error)}")}
+    end
   end
 end
