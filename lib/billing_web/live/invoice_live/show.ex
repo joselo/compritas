@@ -48,8 +48,9 @@ defmodule BillingWeb.InvoiceLive.Show do
     with {:ok, invoice_params} <- Invoicing.build_request_params(socket.assigns.invoice),
          {:ok, xml} <- TaxiDriver.build_invoice_xml(invoice_params),
          {:ok, xml_path} <- save_xml(xml, socket.assigns.invoice.id),
-         {:ok, signed_xml} <- TaxiDriver.sing_invoice_xml(xml_path, certificate) do
-      IO.inspect(signed_xml)
+         {:ok, signed_xml} <- TaxiDriver.sing_invoice_xml(xml_path, certificate),
+         {:ok, signed_xml_path} <- save_signed_xml(signed_xml, socket.assigns.invoice.id) do
+      IO.inspect(signed_xml_path)
 
       {:noreply, put_flash(socket, :info, "Xml success!!")}
     else
@@ -60,6 +61,13 @@ defmodule BillingWeb.InvoiceLive.Show do
 
   defp save_xml(xml, invoice_id) do
     path = "/home/joselo/Documents/invoice-#{invoice_id}.xml"
+    File.write(path, xml)
+
+    {:ok, path}
+  end
+
+  defp save_signed_xml(xml, invoice_id) do
+    path = "/home/joselo/Documents/invoice-#{invoice_id}-signed.xml"
     File.write(path, xml)
 
     {:ok, path}

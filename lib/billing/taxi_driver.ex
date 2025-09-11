@@ -23,25 +23,27 @@ defmodule Billing.TaxiDriver do
   end
 
   def sing_invoice_xml(xml_path, certificate) do
-    headers = ["Content-Type": "multipart/form-data"]
+    p12_path = "/home/joselo/Facturacion/billing/priv/static/uploads/#{certificate.file}"
 
-    form_data = [
-      {"p12_file", "priv/static/uploads/#{certificate.file}"},
-      {"xml_file", xml_path},
-      {"p12_password", certificate.password}
+    multipart_body = [
+      {"p12_password", certificate.password},
+      {:file, p12_path, {"form-data", [name: "p12_file", filename: Path.basename(p12_path)]},
+       [{"Content-Type", "text/plain"}]},
+      {:file, xml_path, {"form-data", [name: "xml_file", filename: Path.basename(xml_path)]},
+       [{"Content-Type", "text/plain"}]}
     ]
 
-    IO.inspect(HTTPoison.post(@sign_invoice_url, {:multipart, form_data}, headers))
+    headers = [{"Content-Type", "multipart/form-data"}]
 
-    # case HTTPoison.post(@sign_invoice_url, {:multipart, form_data}, headers) do
-    #   {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
-    #     {:ok, body}
+    case HTTPoison.post(@sign_invoice_url, {:multipart, multipart_body}, headers) do
+      {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
+        {:ok, body}
 
-    #   {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
-    #     {:error, %{status_code: status_code, body: body}}
+      {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
+        {:error, %{status_code: status_code, body: body}}
 
-    #   {:error, %HTTPoison.Error{reason: reason}} ->
-    #     {:error, reason}
-    # end
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, reason}
+    end
   end
 end
