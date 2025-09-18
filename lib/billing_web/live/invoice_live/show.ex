@@ -53,9 +53,11 @@ defmodule BillingWeb.InvoiceLive.Show do
          {:ok, response_xml} <- TaxiDriver.send_invoice_xml(signed_xml_path),
          {:ok, _response_xml_path} <- save_response_xml(response_xml, socket.assigns.invoice.id),
          {:ok, body: auth_xml, sri_status: sri_status} <- TaxiDriver.auth_invoice(access_key),
-         {:ok, auth_xml_path} <- save_auth_response_xml(auth_xml, socket.assigns.invoice.id) do
+         {:ok, auth_xml_path} <- save_auth_response_xml(auth_xml, socket.assigns.invoice.id),
+         {:ok, pdf_content} <- TaxiDriver.pdf_invoice_xml(auth_xml_path),
+         {:ok, pdf_file_path} <- save_pdf_file(pdf_content, socket.assigns.invoice.id) do
       IO.inspect("--------")
-      IO.inspect(auth_xml_path)
+      IO.inspect(pdf_file_path)
       IO.inspect("--------")
       IO.inspect(sri_status)
       IO.inspect("--------")
@@ -91,6 +93,13 @@ defmodule BillingWeb.InvoiceLive.Show do
   defp save_auth_response_xml(xml, invoice_id) do
     path = "/home/joselo/Documents/invoice-#{invoice_id}-auth.xml"
     File.write(path, xml)
+
+    {:ok, path}
+  end
+
+  defp save_pdf_file(pdf_content, invoice_id) do
+    path = "/home/joselo/Documents/invoice-#{invoice_id}-auth.pdf"
+    File.write(path, pdf_content)
 
     {:ok, path}
   end

@@ -3,6 +3,7 @@ defmodule Billing.TaxiDriver do
   @sign_invoice_url "https://api.taxideral.com/firmar"
   @send_invoice_url "https://api.taxideral.com/enviar"
   @auth_invoice_url "https://api.taxideral.com/consultar_autorizacion"
+  @pdf_invoice_url "https://api.taxideral.com/facturas/pdf"
 
   @headers [
     {"Content-Type", "application/json"},
@@ -87,6 +88,27 @@ defmodule Billing.TaxiDriver do
           Enum.find(headers, fn {key, _value} -> key == "x-sri-status" end)
 
         {:ok, body: body, sri_status: sri_status}
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
+        {:error, %{status_code: status_code, body: body}}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, reason}
+    end
+  end
+
+  def pdf_invoice_xml(xml_signed_path) do
+    multipart_body = [
+      {:file, xml_signed_path,
+       {"form-data", [name: "xml_file", filename: Path.basename(xml_signed_path)]},
+       [{"Content-Type", "text/plain"}]}
+    ]
+
+    headers = [{"Content-Type", "multipart/form-data"}]
+
+    case HTTPoison.post(@pdf_invoice_url, {:multipart, multipart_body}, headers) do
+      {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
+        {:ok, body}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
         {:error, %{status_code: status_code, body: body}}
