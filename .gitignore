@@ -38,3 +38,6 @@ npm-debug.log
 # Ignore certifcates directory
 certificates/*
 priv/static/uploads/*
+
+# Ignore storage dir
+storage/**/*

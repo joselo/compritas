@@ -64,6 +64,8 @@ config :mime, :types, %{
   "application/x-pkcs12" => ["p12"]
 }
 
+config :billing, storage_path: "./storage"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

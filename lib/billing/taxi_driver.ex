@@ -10,6 +10,8 @@ defmodule Billing.TaxiDriver do
     {"accept", "application/xml"}
   ]
 
+  @multipart_headers [{"Content-Type", "multipart/form-data"}]
+
   def build_invoice_xml(invoice_params) do
     json_body = Jason.encode!(invoice_params)
 
@@ -39,9 +41,7 @@ defmodule Billing.TaxiDriver do
        [{"Content-Type", "text/plain"}]}
     ]
 
-    headers = [{"Content-Type", "multipart/form-data"}]
-
-    case HTTPoison.post(@sign_invoice_url, {:multipart, multipart_body}, headers) do
+    case HTTPoison.post(@sign_invoice_url, {:multipart, multipart_body}, @multipart_headers) do
       {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
         {:ok, body}
 
@@ -61,9 +61,7 @@ defmodule Billing.TaxiDriver do
        [{"Content-Type", "text/plain"}]}
     ]
 
-    headers = [{"Content-Type", "multipart/form-data"}]
-
-    case HTTPoison.post(@send_invoice_url, {:multipart, multipart_body}, headers) do
+    case HTTPoison.post(@send_invoice_url, {:multipart, multipart_body}, @multipart_headers) do
       {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
         {:ok, body}
 
@@ -104,9 +102,7 @@ defmodule Billing.TaxiDriver do
        [{"Content-Type", "text/plain"}]}
     ]
 
-    headers = [{"Content-Type", "multipart/form-data"}]
-
-    case HTTPoison.post(@pdf_invoice_url, {:multipart, multipart_body}, headers) do
+    case HTTPoison.post(@pdf_invoice_url, {:multipart, multipart_body}, @multipart_headers) do
       {:ok, %HTTPoison.Response{status_code: 201, body: body}} ->
         {:ok, body}
 

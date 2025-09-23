@@ -5,7 +5,7 @@ defmodule Billing.Invoicing do
   alias Billing.Repo
   alias Billing.Certificates.Certificate
 
-  @secuencial 529
+  @secuencial 543
 
   def build_request_params(%Invoice{} = invoice) do
     query =

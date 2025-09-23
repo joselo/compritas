@@ -20,7 +20,7 @@ defmodule BillingWeb.InvoiceLive.Show do
             <.icon name="hero-pencil-square" /> Edit invoice
           </.button>
           <.button phx-click="sign_xml">
-            <.icon name="hero-pencil-square" /> Sign XML
+            <.icon name="hero-pencil-square" /> Crear Factura
           </.button>
         </:actions>
       </.header>
@@ -47,15 +47,15 @@ defmodule BillingWeb.InvoiceLive.Show do
 
     with {:ok, invoice_params} <- Invoicing.build_request_params(socket.assigns.invoice),
          {:ok, body: xml, access_key: access_key} <- TaxiDriver.build_invoice_xml(invoice_params),
-         {:ok, xml_path} <- save_xml(xml, socket.assigns.invoice.id),
+         {:ok, xml_path} <- save_xml(xml, access_key),
          {:ok, signed_xml} <- TaxiDriver.sing_invoice_xml(xml_path, certificate),
-         {:ok, signed_xml_path} <- save_signed_xml(signed_xml, socket.assigns.invoice.id),
+         {:ok, signed_xml_path} <- save_signed_xml(signed_xml, access_key),
          {:ok, response_xml} <- TaxiDriver.send_invoice_xml(signed_xml_path),
-         {:ok, _response_xml_path} <- save_response_xml(response_xml, socket.assigns.invoice.id),
+         {:ok, _response_xml_path} <- save_response_xml(response_xml, access_key),
          {:ok, body: auth_xml, sri_status: sri_status} <- TaxiDriver.auth_invoice(access_key),
-         {:ok, auth_xml_path} <- save_auth_response_xml(auth_xml, socket.assigns.invoice.id),
+         {:ok, auth_xml_path} <- save_auth_response_xml(auth_xml, access_key),
          {:ok, pdf_content} <- TaxiDriver.pdf_invoice_xml(auth_xml_path),
-         {:ok, pdf_file_path} <- save_pdf_file(pdf_content, socket.assigns.invoice.id) do
+         {:ok, pdf_file_path} <- save_pdf_file(pdf_content, access_key) do
       IO.inspect("--------")
       IO.inspect(pdf_file_path)
       IO.inspect("--------")
@@ -69,38 +69,42 @@ defmodule BillingWeb.InvoiceLive.Show do
     end
   end
 
-  defp save_xml(xml, invoice_id) do
-    path = "/home/joselo/Documents/invoice-#{invoice_id}.xml"
+  defp save_xml(xml, access_key) do
+    path = "#{get_storage_path()}/#{access_key}.xml"
     File.write(path, xml)
 
     {:ok, path}
   end
 
-  defp save_signed_xml(xml, invoice_id) do
-    path = "/home/joselo/Documents/invoice-#{invoice_id}-signed.xml"
+  defp save_signed_xml(xml, access_key) do
+    path = "#{get_storage_path()}/#{access_key}-signed.xml"
     File.write(path, xml)
 
     {:ok, path}
   end
 
-  defp save_response_xml(xml, invoice_id) do
-    path = "/home/joselo/Documents/invoice-#{invoice_id}-response.xml"
+  defp save_response_xml(xml, access_key) do
+    path = "#{get_storage_path()}/#{access_key}-response.xml"
     File.write(path, xml)
 
     {:ok, path}
   end
 
-  defp save_auth_response_xml(xml, invoice_id) do
-    path = "/home/joselo/Documents/invoice-#{invoice_id}-auth.xml"
+  defp save_auth_response_xml(xml, access_key) do
+    path = "#{get_storage_path()}/#{access_key}-auth.xml"
     File.write(path, xml)
 
     {:ok, path}
   end
 
-  defp save_pdf_file(pdf_content, invoice_id) do
-    path = "/home/joselo/Documents/invoice-#{invoice_id}-auth.pdf"
+  defp save_pdf_file(pdf_content, access_key) do
+    path = "#{get_storage_path()}/#{access_key}.pdf"
     File.write(path, pdf_content)
 
     {:ok, path}
+  end
+
+  defp get_storage_path do
+    Application.get_env(:billing, :storage_path)
   end
 end
