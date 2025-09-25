@@ -22,6 +22,7 @@ defmodule BillingWeb.EmissionProfileLive.Form do
           label="Certificate"
           options={@certificates}
         />
+        <.input field={@form[:sequence]} type="number" step="1" label="Sequence" />
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Emission profile</.button>
           <.button navigate={return_path(@return_to, @emission_profile)}>Cancel</.button>

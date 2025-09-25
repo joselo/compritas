@@ -8,6 +8,7 @@ defmodule Billing.EmissionProfiles.EmissionProfile do
     has_many :invoices, Billing.Invoices.Invoice
 
     field :name, :string
+    field :sequence, :integer
 
     timestamps(type: :utc_datetime)
   end
@@ -15,7 +16,7 @@ defmodule Billing.EmissionProfiles.EmissionProfile do
   @doc false
   def changeset(emission_profile, attrs) do
     emission_profile
-    |> cast(attrs, [:name, :certificate_id, :company_id])
-    |> validate_required([:name, :certificate_id, :company_id])
+    |> cast(attrs, [:name, :certificate_id, :company_id, :sequence])
+    |> validate_required([:name, :certificate_id, :company_id, :sequence])
   end
 end
