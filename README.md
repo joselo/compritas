@@ -1,3 +1,4 @@
+
 # Billing
 
 > IMPORTANTE: El desarrollo de la aplicación  está en procesos, aún no se libera el primer reléase
@@ -31,11 +32,21 @@ Si todo ha ido correctamente visita: http://localhost:4000/
 
 # Notas de desarrollo
 
+## Api de facturación
+
 El proyecto usa el API de facturación [api.taxideral.com](https://api.taxideral.com/).
 
 ## Diagrama ERB
 
 ![Diagrama ERD](erd.png)
+
+## IA Tidewave
+
+El proyecto incluye una librería para realizar cambios usando inteligencia artificial:
+
+ - [Tidewave](https://tidewave.ai/)
+
+Para realizar cambios en la aplicación usando IA abrir la siguiente dirección http://localhost:4000/tidewave
 
 ## Requerimientos para desarrollo
 
@@ -63,7 +74,7 @@ Comprobar si podemos conectarnos a postgres:
 
     psql -Upostgres
 
-### Dependencias par Debian/Ubuntu
+### Dependencias para Debian/Ubuntu
 
 Se recomienda tambien instalar las siguientes dependencias:
 
@@ -73,5 +84,5 @@ Se recomienda tambien instalar las siguientes dependencias:
 ## Licencia
 
 Este proyecto está bajo la Licencia MIT.
-Consulta el archivo [LICENSE](./LICENSE) para más detalles.
+Consulta el archivo [LICENSE](./LICENSE.md) para más detalles.
 
