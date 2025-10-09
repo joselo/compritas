@@ -21,7 +21,7 @@ defmodule BillingWeb.InvoiceLive.Show do
           <.button variant="primary" navigate={~p"/invoices/#{@invoice}/edit?return_to=show"}>
             <.icon name="hero-pencil-square" /> Edit invoice
           </.button>
-          <.button phx-click="sign_xml">
+          <.button phx-click="create_electronic_invoice">
             <.icon name="hero-pencil-square" /> Crear Factura
           </.button>
         </:actions>
@@ -50,7 +50,7 @@ defmodule BillingWeb.InvoiceLive.Show do
   end
 
   @impl true
-  def handle_event("sign_xml", _params, socket) do
+  def handle_event("create_electronic_invoice", _params, socket) do
     %{"invoice_id" => socket.assigns.invoice.id}
     |> InvoicingWorker.new()
     |> Oban.insert()
@@ -62,7 +62,6 @@ defmodule BillingWeb.InvoiceLive.Show do
   def handle_info({:invoice_update, %{id: invoice_id}}, socket) do
     {:noreply,
      socket
-     |> assign(:invoice, Invoices.get_invoice!(invoice_id))
      |> assign(
        :electronic_invoice,
        ElectronicInvoices.get_electronic_invoice_by_invoice_id(invoice_id)
@@ -71,15 +70,14 @@ defmodule BillingWeb.InvoiceLive.Show do
   end
 
   @impl true
-  def handle_info({:invoice_error, %{id: invoice_id}}, socket) do
+  def handle_info({:invoice_error, %{id: invoice_id, error: error}}, socket) do
     {:noreply,
      socket
-     |> assign(:invoice, Invoices.get_invoice!(invoice_id))
      |> assign(
        :electronic_invoice,
        ElectronicInvoices.get_electronic_invoice_by_invoice_id(invoice_id)
      )
-     |> put_flash(:error, "La facturación no se completo")}
+     |> put_flash(:error, "Error en la facturación: #{error}")}
   end
 
   attr :electronic_invoice, ElectronicInvoice, default: nil

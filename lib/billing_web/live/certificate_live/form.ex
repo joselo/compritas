@@ -103,26 +103,7 @@ defmodule BillingWeb.CertificateLive.Form do
   end
 
   defp save_certificate(socket, :edit, certificate_params) do
-    uploaded_files =
-      consume_uploaded_entries(socket, :certificate_file, fn %{path: path}, entry ->
-        file_name = entry.uuid
-
-        dest =
-          Path.join(Billing.get_storage_path(), file_name)
-
-        File.cp!(path, dest)
-        {:ok, Path.basename(dest)}
-      end)
-
-    certificate_params =
-      case uploaded_files do
-        [file_name | _tail] ->
-          Map.put(certificate_params, "file", file_name)
-
-        _ ->
-          certificate_params
-      end
-
+    certificate_params = set_uploads_to_params(socket, certificate_params)
     password = certificate_params["password"]
 
     with {:ok, certificate} <-
@@ -142,19 +123,7 @@ defmodule BillingWeb.CertificateLive.Form do
   end
 
   defp save_certificate(socket, :new, certificate_params) do
-    uploaded_files =
-      consume_uploaded_entries(socket, :certificate_file, fn %{path: path}, entry ->
-        file_name = entry.uuid
-
-        dest =
-          Path.join(Billing.get_storage_path(), file_name)
-
-        File.cp!(path, dest)
-        {:ok, Path.basename(dest)}
-      end)
-
-    [file_name | _tail] = uploaded_files
-    certificate_params = Map.put(certificate_params, "file", file_name)
+    certificate_params = set_uploads_to_params(socket, certificate_params)
     password = certificate_params["password"]
 
     with {:ok, certificate} <- Certificates.create_certificate(certificate_params),
@@ -177,4 +146,25 @@ defmodule BillingWeb.CertificateLive.Form do
 
   defp error_to_string(:too_large), do: "Too large"
   defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
+
+  defp set_uploads_to_params(socket, params) do
+    uploaded_files =
+      consume_uploaded_entries(socket, :certificate_file, fn %{path: path}, entry ->
+        file_name = entry.uuid
+
+        dest =
+          Path.join(Billing.get_storage_path(), file_name)
+
+        File.cp!(path, dest)
+        {:ok, Path.basename(dest)}
+      end)
+
+    case uploaded_files do
+      [file_name | _tail] ->
+        Map.put(params, "file", file_name)
+
+      _ ->
+        params
+    end
+  end
 end

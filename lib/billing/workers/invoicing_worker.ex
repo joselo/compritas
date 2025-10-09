@@ -26,7 +26,7 @@ defmodule Billing.InvoicingWorker do
         PubSub.broadcast(
           Billing.PubSub,
           "invoice:#{invoice_id}",
-          {:invoice_error, %{id: invoice_id}}
+          {:invoice_error, %{id: invoice_id, error: inspect(error)}}
         )
 
         {:error, error}

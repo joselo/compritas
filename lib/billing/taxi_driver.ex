@@ -13,6 +13,7 @@ defmodule Billing.TaxiDriver do
   @multipart_headers [{"Content-Type", "multipart/form-data"}]
 
   alias Billing.Util.Crypto
+  alias Billing.Certificates
 
   def build_invoice_xml(invoice_params) do
     json_body = Jason.encode!(invoice_params)
@@ -32,10 +33,24 @@ defmodule Billing.TaxiDriver do
     end
   end
 
-  def sing_invoice_xml(xml_path, certificate) do
+  def sign_invoice_xml(xml_path, certificate) do
     p12_path = Path.join(Billing.get_storage_path(), certificate.file)
-    {:ok, p12_password} = Crypto.decrypt("crt", certificate.encrypted_password)
+    salt = Certificates.get_certificate_encryption_salt(certificate)
+    opts = Certificates.get_certificate_encryption_opts()
 
+    case Crypto.decrypt(salt, certificate.encrypted_password, opts) do
+      {:ok, p12_password} ->
+        sign_invoice_xml_with_password(xml_path, p12_path, p12_password)
+
+      {:error, :expired} ->
+        {:error, "Contraseña del certificado expirado"}
+
+      {:error, :invalid} ->
+        {:error, "Contraseña del certificado inválida"}
+    end
+  end
+
+  defp sign_invoice_xml_with_password(xml_path, p12_path, p12_password) do
     multipart_body = [
       {"p12_password", p12_password},
       {:file, p12_path, {"form-data", [name: "p12_file", filename: Path.basename(p12_path)]},

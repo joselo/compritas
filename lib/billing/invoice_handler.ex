@@ -15,7 +15,7 @@ defmodule Billing.InvoiceHandler do
          {:ok, electronic_invoice} <-
            ElectronicInvoices.create_electronic_invoice(invoice.id, access_key),
          {:ok, xml_path} <- save_xml(xml, access_key),
-         {:ok, signed_xml} <- TaxiDriver.sing_invoice_xml(xml_path, certificate),
+         {:ok, signed_xml} <- TaxiDriver.sign_invoice_xml(xml_path, certificate),
          {:ok, _electronic_invoice} <-
            ElectronicInvoices.update_electronic_invoice(electronic_invoice, :signed),
          {:ok, signed_xml_path} <- save_signed_xml(signed_xml, access_key),
