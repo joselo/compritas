@@ -130,7 +130,8 @@ defmodule Billing.InvoiceHandler do
 
   # Electronic Invoice :authorized | :unauthorized | :error | :not_found_or_pending
 
-  defp verify_authorization(%ElectronicInvoice{state: :sent} = electronic_invoice) do
+  defp verify_authorization(%ElectronicInvoice{state: state} = electronic_invoice)
+       when state in [:sent, :not_found_or_pending] do
     with {:ok, body: auth_xml, sri_status: sri_status} <-
            TaxiDriver.auth_invoice(electronic_invoice.access_key),
          {:ok, electronic_invoice} <-

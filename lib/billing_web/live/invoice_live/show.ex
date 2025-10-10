@@ -7,6 +7,7 @@ defmodule BillingWeb.InvoiceLive.Show do
   alias Billing.Invoices.ElectronicInvoice
   alias Billing.InvoicingWorker
   alias Phoenix.PubSub
+  alias Billing.InvoiceHandler
 
   @impl true
   def render(assigns) do
@@ -59,6 +60,13 @@ defmodule BillingWeb.InvoiceLive.Show do
   end
 
   @impl true
+  def handle_event("check_electronic_invoice", _params, socket) do
+    InvoiceHandler.run_authorization_checker(socket.assigns.electronic_invoice.id)
+
+    {:noreply, put_flash(socket, :info, "Verifición en proceso")}
+  end
+
+  @impl true
   def handle_info({:update_electronic_invoice, %{invoice_id: invoice_id}}, socket) do
     {:noreply,
      socket
@@ -106,7 +114,7 @@ defmodule BillingWeb.InvoiceLive.Show do
       when state in [:created, :signed, :sent] do
     ~H"""
     <span>
-      Procesando
+      <span class="loading loading-spinner loading-md"></span>
     </span>
     """
   end
@@ -116,7 +124,7 @@ defmodule BillingWeb.InvoiceLive.Show do
       )
       when state in [:not_found_or_pending] do
     ~H"""
-    <.button phx-click="create_electronic_invoice">
+    <.button phx-click="check_electronic_invoice">
       <.icon name="hero-pencil-square" /> Verificar estado
     </.button>
     """
@@ -127,6 +135,7 @@ defmodule BillingWeb.InvoiceLive.Show do
       )
       when state in [:authorized] do
     ~H"""
+    Dropdown here
     """
   end
 
