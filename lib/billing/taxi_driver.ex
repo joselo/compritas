@@ -35,18 +35,23 @@ defmodule Billing.TaxiDriver do
 
   def sign_invoice_xml(xml_path, certificate) do
     p12_path = Path.join(Billing.get_storage_path(), certificate.file)
-    salt = Certificates.get_certificate_encryption_salt(certificate)
-    opts = Certificates.get_certificate_encryption_opts()
 
-    case Crypto.decrypt(salt, certificate.encrypted_password, opts) do
-      {:ok, p12_password} ->
-        sign_invoice_xml_with_password(xml_path, p12_path, p12_password)
+    if File.exists?(p12_path) do
+      salt = Certificates.get_certificate_encryption_salt(certificate)
+      opts = Certificates.get_certificate_encryption_opts()
 
-      {:error, :expired} ->
-        {:error, "Contraseña del certificado expirado"}
+      case Crypto.decrypt(salt, certificate.encrypted_password, opts) do
+        {:ok, p12_password} ->
+          sign_invoice_xml_with_password(xml_path, p12_path, p12_password)
 
-      {:error, :invalid} ->
-        {:error, "Contraseña del certificado inválida"}
+        {:error, :expired} ->
+          {:error, "Contraseña del certificado expirado"}
+
+        {:error, :invalid} ->
+          {:error, "Contraseña del certificado inválida"}
+      end
+    else
+      {:error, "El certificado no existe"}
     end
   end
 
