@@ -46,6 +46,8 @@ defmodule BillingWeb.Router do
 
     get "/electronic_invoice/:id/pdf", ElectronicInvoiceController, :pdf
     get "/electronic_invoice/:id/xml", ElectronicInvoiceController, :xml
+
+    live "/agent_chat", AgentChatLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
