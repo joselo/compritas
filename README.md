@@ -1,6 +1,8 @@
 
 # Billing
 
+[![App](https://github.com/joselo/billing/workflows/Elixir%20CI/badge.svg)](https://github.com/joselo/billing/actions)
+
 > IMPORTANTE: El desarrollo de la aplicación  está en procesos, aún no se libera el primer reléase
 
 Billing es una aplicación web de facturación  electrónica para Ecuador escrita [Phoenix](https://phoenixframework.org/) un framework web escrito en el lenguaje [Elixir](https://elixir-lang.org/). El desarrollo de la aplicación la he estado desarrollando en vivo transmitiendo en YouTube:
