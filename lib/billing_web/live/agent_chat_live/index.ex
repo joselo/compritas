@@ -38,9 +38,9 @@ defmodule BillingWeb.AgentChatLive.Index do
       </div>
 
       <%= if @llm_chain.delta do %>
-        <div class="text-center">
+        <div>
+          <.markdown :if={@llm_chain.delta.role == :assistant} text={@delta_text} />
           <span class="loading loading-dots loading-md"></span>
-          <.markdown :if={@llm_chain.delta.role == :assistant} text={@llm_chain.delta.content} />
         </div>
       <% end %>
     </Layouts.app>
@@ -52,7 +52,8 @@ defmodule BillingWeb.AgentChatLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Agent Chat")
-     |> assign(:form, to_form(%{"message" => ""}))}
+     |> assign(:form, to_form(%{"message" => ""}))
+     |> assign(:delta_text, nil)}
   end
 
   @impl true
@@ -63,7 +64,8 @@ defmodule BillingWeb.AgentChatLive.Index do
         %{
           role: :assistant,
           hidden: false,
-          content: "¡Hola! Me llamo Joselo y soy tu contador personal. ¿Cómo puedo ayudarte?"
+          content:
+            "¡Hola! Me llamo Joselo y soy tu asistente tributario personal. ¿Cómo puedo ayudarte?"
         }
       ])
       |> assign_llm_chain()
@@ -127,8 +129,11 @@ defmodule BillingWeb.AgentChatLive.Index do
           tool_calls: message.tool_calls,
           tool_results: message.tool_results
         })
+        |> assign(:delta_text, nil)
       else
-        socket
+        delta_text = ContentPart.content_to_string(updated_chain.delta.merged_content)
+
+        assign(socket, :delta_text, delta_text)
       end
 
     {:noreply, assign(socket, :llm_chain, updated_chain)}
@@ -145,12 +150,13 @@ defmodule BillingWeb.AgentChatLive.Index do
     }
 
     system_message = """
-    Eres un asistente útil llamado Joselo que responde en español.
-    Tu objetivo es ayudar al usuario de forma clara, respetuosa y eficiente.
+      Eres Joselo, un asistente inteligente especializado en temas tributarios del Ecuador.
+      Respondes siempre en español, de forma clara, respetuosa y eficiente.
+      Tu objetivo es ayudar al usuario con información precisa sobre impuestos, facturación electrónica, obligaciones fiscales, y normativa tributaria vigente en Ecuador.
 
-    ## Herramientas disponibles
+      ## Herramientas disponibles
 
-    - `invoices`: Usa esta herramienta cuando el usuario pregunte sobre montos, totales o detalles relacionados con facturas.
+      - `invoices`: Usa esta herramienta cuando el usuario pregunte sobre montos, totales o información relacionada con facturas.
     """
 
     llm_chain =
