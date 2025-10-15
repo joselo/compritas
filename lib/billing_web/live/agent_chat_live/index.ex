@@ -9,6 +9,7 @@ defmodule BillingWeb.AgentChatLive.Index do
   alias LangChain.Chains.LLMChain
   alias LangChain.Message
   alias LangChain.PromptTemplate
+  alias LangChain.Message
 
   require Logger
 
@@ -35,11 +36,15 @@ defmodule BillingWeb.AgentChatLive.Index do
         <span :if={message.role == :user} class="whitespace-pre-wrap">
           {message.content}
         </span>
+
+        <div :if={message.role == :tool} class="text-sm text-gray-500 italic">
+          {message.content}
+        </div>
       </div>
 
-      <%= if @llm_chain.delta do %>
+      <%= if @delta_text do %>
         <div>
-          <.markdown :if={@llm_chain.delta.role == :assistant} text={@delta_text} />
+          <.markdown text={@delta_text} />
           <span class="loading loading-dots loading-md"></span>
         </div>
       <% end %>
@@ -52,8 +57,8 @@ defmodule BillingWeb.AgentChatLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Agent Chat")
-     |> assign(:form, to_form(%{"message" => ""}))
-     |> assign(:delta_text, nil)}
+     |> assign(:delta_text, nil)
+     |> assign(:display_messages, [])}
   end
 
   @impl true
@@ -68,6 +73,7 @@ defmodule BillingWeb.AgentChatLive.Index do
             "¡Hola! Me llamo Joselo y soy tu asistente tributario personal. ¿Cómo puedo ayudarte?"
         }
       ])
+      |> reset_message_form()
       |> assign_llm_chain()
       |> assign(:async_result, %AsyncResult{})
 
@@ -76,10 +82,17 @@ defmodule BillingWeb.AgentChatLive.Index do
 
   @impl true
   def handle_event("save", %{"message" => text}, socket) do
+    text = String.trim(text)
+
     socket =
-      socket
-      |> add_user_message(text)
-      |> run_chain()
+      if text != "" do
+        socket
+        |> add_user_message(text)
+        |> reset_message_form()
+        |> run_chain()
+      else
+        socket
+      end
 
     {:noreply, socket}
   end
@@ -90,8 +103,11 @@ defmodule BillingWeb.AgentChatLive.Index do
   end
 
   @impl true
-  def handle_async(:running_llm, {:ok, :ok = _success}, socket) do
-    {:noreply, assign(socket, :async_result, AsyncResult.ok(%AsyncResult{}, :ok))}
+  def handle_async(:running_llm, {:ok, {:ok, chain_updated}}, socket) do
+    {:noreply,
+     socket
+     |> assign(:llm_chain, chain_updated)
+     |> assign(:async_result, AsyncResult.ok(%AsyncResult{}, :ok))}
   end
 
   @impl true
@@ -99,6 +115,7 @@ defmodule BillingWeb.AgentChatLive.Index do
     socket =
       socket
       |> put_flash(:error, reason)
+      |> assign(:delta_text, nil)
       |> assign(:async_result, AsyncResult.failed(%AsyncResult{}, reason))
 
     {:noreply, socket}
@@ -115,28 +132,48 @@ defmodule BillingWeb.AgentChatLive.Index do
   end
 
   @impl true
-  def handle_info({:chat_delta, deltas}, socket) do
-    updated_chain = LLMChain.apply_deltas(socket.assigns.llm_chain, deltas)
+  def handle_info({:chat_delta, delta}, socket) do
+    if delta && delta.content do
+      content = ContentPart.content_to_string([delta.content])
+      delta_text = socket.assigns.delta_text || ""
 
-    socket =
-      if updated_chain.delta == nil do
-        message = updated_chain.last_message
-        content = ContentPart.content_to_string(message.content)
+      {:noreply, assign(socket, :delta_text, delta_text <> content)}
+    else
+      {:noreply, socket}
+    end
+  end
 
-        append_display_message(socket, %{
-          role: message.role,
-          content: content,
-          tool_calls: message.tool_calls,
-          tool_results: message.tool_results
-        })
-        |> assign(:delta_text, nil)
+  @impl true
+  def handle_info({:message_processed, last_message}, socket) do
+    content =
+      if last_message.content do
+        ContentPart.content_to_string(last_message.content)
       else
-        delta_text = ContentPart.content_to_string(updated_chain.delta.merged_content)
-
-        assign(socket, :delta_text, delta_text)
+        ""
       end
 
-    {:noreply, assign(socket, :llm_chain, updated_chain)}
+    socket =
+      socket
+      |> append_display_message(%{
+        role: last_message.role,
+        content: content,
+        tool_calls: last_message.tool_calls,
+        tool_results: last_message.tool_results
+      })
+      |> assign(:delta_text, nil)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:tool_executed, tool_message}, socket) do
+    message = %{
+      role: tool_message.role,
+      hidden: false,
+      content: "Ejecutando herramienta",
+      tool_results: tool_message.tool_results
+    }
+
+    {:noreply, append_display_message(socket, message)}
   end
 
   defp assign_llm_chain(socket) do
@@ -145,7 +182,15 @@ defmodule BillingWeb.AgentChatLive.Index do
 
     handlers = %{
       on_llm_new_delta: fn _chain, deltas ->
-        send(live_view_pid, {:chat_delta, deltas})
+        Enum.each(deltas, fn delta ->
+          send(live_view_pid, {:chat_delta, delta})
+        end)
+      end,
+      on_message_processed: fn _chain, %Message{} = data ->
+        send(live_view_pid, {:message_processed, data})
+      end,
+      on_tool_response_created: fn _chain, %Message{role: :tool} = message ->
+        send(live_view_pid, {:tool_executed, message})
       end
     }
 
@@ -213,8 +258,8 @@ El usuario dice:
     |> assign(:async_result, AsyncResult.loading())
     |> start_async(:running_llm, fn ->
       case LLMChain.run(chain, mode: :while_needs_response) do
-        {:ok, _chain_result} ->
-          :ok
+        {:ok, chain_updated} ->
+          {:ok, chain_updated}
 
         {:error, _update_chain, %LangChainError{} = error} ->
           Logger.error("Se recibió un error al ejecutar la cadena: #{error.message}")
@@ -225,5 +270,9 @@ El usuario dice:
 
   defp append_display_message(socket, %{} = message) do
     assign(socket, :display_messages, socket.assigns.display_messages ++ [message])
+  end
+
+  defp reset_message_form(socket) do
+    assign(socket, :form, to_form(%{"message" => ""}))
   end
 end
