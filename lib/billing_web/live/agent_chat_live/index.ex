@@ -6,6 +6,8 @@ defmodule BillingWeb.AgentChatLive.Index do
   alias LangChain.LangChainError
   alias LangChain.Message.ContentPart
   alias LangChain.Chains.LLMChain
+  alias LangChain.Message
+  alias LangChain.PromptTemplate
 
   require Logger
 
@@ -46,48 +48,35 @@ defmodule BillingWeb.AgentChatLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    live_view_pid = self()
-
-    handlers = %{
-      on_llm_new_delta: fn _chain, deltas ->
-        send(live_view_pid, {:chat_delta, deltas})
-      end
-    }
-
-    system_message = %{role: :system, message_text: Ai.System.default_message()}
-    messages = [system_message]
-    model = Ai.Models.get_default_llm()
-    llm_chain = Ai.Agent.build(model, messages, handlers)
-
     {:ok,
      socket
      |> assign(:page_title, "Agent Chat")
-     |> assign(:form, to_form(%{"message" => ""}))
-     |> assign(:display_messages, [])
-     |> assign(:llm_chain, llm_chain)
-     |> assign(:async_result, %AsyncResult{})
-     |> append_display_message(system_message)}
+     |> assign(:form, to_form(%{"message" => ""}))}
+  end
+
+  @impl true
+  def handle_params(_params, _uri, socket) do
+    socket =
+      socket
+      |> assign(:display_messages, [
+        %{
+          role: :assistant,
+          hidden: false,
+          content: "¡Hola! Me llamo Joselo y soy tu contador personal. ¿Cómo puedo ayudarte?"
+        }
+      ])
+      |> assign_llm_chain()
+      |> assign(:async_result, %AsyncResult{})
+
+    {:noreply, socket}
   end
 
   @impl true
   def handle_event("save", %{"message" => text}, socket) do
-    chain = socket.assigns.llm_chain
-    user_message = Ai.Agent.new_message(%{role: :user, message_text: text})
-    updated_chain = Ai.Agent.add_message(chain, user_message)
-
     socket =
       socket
-      |> assign(:async_result, AsyncResult.loading())
-      |> start_async(:running_llm, fn ->
-        case LLMChain.run(updated_chain, mode: :while_needs_response) do
-          {:ok, _chain_result} ->
-            :ok
-
-          {:error, _update_chain, %LangChainError{} = error} ->
-            Logger.error("Se recibió un error al ejecutar la cadena: #{error.message}")
-            {:error, error.message}
-        end
-      end)
+      |> add_user_message(text)
+      |> run_chain()
 
     {:noreply, socket}
   end
@@ -144,21 +133,88 @@ defmodule BillingWeb.AgentChatLive.Index do
     {:noreply, assign(socket, :llm_chain, updated_chain)}
   end
 
-  # def handle_info({:tool_executed, tool_message}, socket) do
-  #   # message = %ChatMessage{
-  #   #   role: tool_message.role,
-  #   #   hidden: false,
-  #   #   content: nil,
-  #   #   tool_results: tool_message.tool_results
-  #   # }
-  #   #
-  #   # socket =
-  #   #   socket
-  #   #   |> assign(:llm_chain, LLMChain.add_message(socket.assigns.llm_chain, tool_message))
-  #   #   |> append_display_message(message)
-  #
-  #   {:noreply, socket}
-  # end
+  defp assign_llm_chain(socket) do
+    live_view_pid = self()
+
+    llm = Ai.Models.get_default_llm()
+
+    handlers = %{
+      on_llm_new_delta: fn _chain, deltas ->
+        send(live_view_pid, {:chat_delta, deltas})
+      end
+    }
+
+    system_message = """
+    Eres un asistente útil llamado Joselo que responde en español.
+    Tu objetivo es ayudar al usuario de forma clara, respetuosa y eficiente.
+
+    ## Herramientas disponibles
+
+    - `invoices`: Usa esta herramienta cuando el usuario pregunte sobre montos, totales o detalles relacionados con facturas.
+    """
+
+    llm_chain =
+      %{llm: llm}
+      |> LLMChain.new!()
+      |> LLMChain.add_callback(handlers)
+      |> LLMChain.add_tools(Ai.Tools.InvoiceFunction.new!())
+      |> LLMChain.add_message(Message.new_system!(system_message))
+
+    assign(socket, :llm_chain, llm_chain)
+  end
+
+  defp add_user_message(
+         %{assigns: %{llm_chain: %LLMChain{last_message: %Message{role: :system}} = llm_chain}} =
+           socket,
+         user_text
+       )
+       when is_binary(user_text) do
+    today = Date.utc_today()
+
+    template =
+      PromptTemplate.from_template!(~S|
+Hoy es <%= @today %>
+
+El usuario dice:
+<%= @user_text %>|)
+
+    updated_chain =
+      llm_chain
+      |> LLMChain.add_message(
+        PromptTemplate.to_message!(template, %{
+          today: today |> Calendar.strftime("%A, %Y-%m-%d")
+        })
+      )
+
+    socket
+    |> assign(llm_chain: updated_chain)
+    |> append_display_message(%{role: :user, content: user_text})
+  end
+
+  defp add_user_message(socket, user_text) when is_binary(user_text) do
+    updated_chain = LLMChain.add_message(socket.assigns.llm_chain, Message.new_user!(user_text))
+
+    socket
+    |> assign(llm_chain: updated_chain)
+    |> append_display_message(%{role: :user, content: user_text})
+  end
+
+  defp run_chain(socket) do
+    chain = socket.assigns.llm_chain
+
+    socket
+    |> assign(:async_result, AsyncResult.loading())
+    |> start_async(:running_llm, fn ->
+      case LLMChain.run(chain, mode: :while_needs_response) do
+        {:ok, _chain_result} ->
+          :ok
+
+        {:error, _update_chain, %LangChainError{} = error} ->
+          Logger.error("Se recibió un error al ejecutar la cadena: #{error.message}")
+          {:error, error.message}
+      end
+    end)
+  end
 
   defp append_display_message(socket, %{} = message) do
     assign(socket, :display_messages, socket.assigns.display_messages ++ [message])
