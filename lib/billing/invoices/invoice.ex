@@ -2,6 +2,8 @@ defmodule Billing.Invoices.Invoice do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, only: [:amount]}
+
   schema "invoices" do
     belongs_to :customer, Billing.Customers.Customer
     belongs_to :emission_profile, Billing.EmissionProfiles.EmissionProfile
