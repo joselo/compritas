@@ -1,8 +1,8 @@
 defmodule BillingWeb.Router do
   use BillingWeb, :router
 
-  alias BillingWeb.Plugs.ShoppingCartPlug
-  alias BillingWeb.LiveSessions.ShoppingCartSession
+  alias BillingWeb.Plugs.CartPlug
+  alias BillingWeb.LiveSessions.CartSession
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -11,7 +11,7 @@ defmodule BillingWeb.Router do
     plug :put_root_layout, html: {BillingWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug ShoppingCartPlug
+    plug CartPlug
   end
 
   pipeline :api do
@@ -21,7 +21,7 @@ defmodule BillingWeb.Router do
   scope "/", BillingWeb do
     pipe_through :browser
 
-    live_session :init_assings, on_mount: [{ShoppingCartSession, :mount_session}] do
+    live_session :init_assings, on_mount: [{CartSession, :mount_session}] do
       live "/", CatalogLive.Index, :index
     end
 

@@ -11,7 +11,7 @@ defmodule BillingWeb.CatalogLive.Index do
         Product Catalog
       </.header>
 
-      {inspect(@cart_token)}
+      {inspect(@cart_uuid)}
 
       <.table
         id="products"
