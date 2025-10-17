@@ -18,6 +18,7 @@ alias Billing.EmissionProfiles.EmissionProfile
 alias Billing.Invoices.Invoice
 alias Billing.Invoices
 alias Billing.Certificates
+alias Billing.Products.Product
 
 identification_number = "1234567890"
 sequence = 1
@@ -76,3 +77,10 @@ Enum.each(1..20, fn _ ->
   amount_with_tax = Invoices.calculate_amount_with_tax(invoice)
   Invoices.save_taxes(invoice, amount_with_tax)
 end)
+
+customer =
+  %Product{
+    name: "Mortal Kombat I",
+    price: Decimal.new("5.0")
+  }
+  |> Repo.insert!()

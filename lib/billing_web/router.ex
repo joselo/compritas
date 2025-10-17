@@ -47,6 +47,11 @@ defmodule BillingWeb.Router do
     get "/electronic_invoice/:id/pdf", ElectronicInvoiceController, :pdf
     get "/electronic_invoice/:id/xml", ElectronicInvoiceController, :xml
 
+    live "/products", ProductLive.Index, :index
+    live "/products/new", ProductLive.Form, :new
+    live "/products/:id", ProductLive.Show, :show
+    live "/products/:id/edit", ProductLive.Form, :edit
+
     live "/agent_chat", AgentChatLive.Index, :index
   end
 
