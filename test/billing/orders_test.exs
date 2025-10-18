@@ -23,12 +23,24 @@ defmodule Billing.OrdersTest do
     test "create_order/1 with valid data creates a order" do
       valid_attrs = %{
         full_name: "some full_name",
-        phone_number: "some phone_number"
+        phone_number: "some phone_number",
+        items: [
+          %{
+            name: "Product",
+            price: "5.0"
+          }
+        ]
       }
 
       assert {:ok, %Order{} = order} = Orders.create_order(valid_attrs)
       assert order.full_name == "some full_name"
       assert order.phone_number == "some phone_number"
+
+      [item | tail] = order.items
+
+      assert item.name == "Product"
+      assert item.price == Decimal.new("5.0")
+      assert tail == []
     end
 
     test "create_order/1 with invalid data returns error changeset" do

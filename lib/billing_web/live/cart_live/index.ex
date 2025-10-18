@@ -29,7 +29,7 @@ defmodule BillingWeb.CartLive.Index do
         </:action>
       </.table>
 
-      <.form for={@form} id="order-form" phx-change="validate" phx-submit="save">
+      <.form for={@form} id="order-form" phx-change="validate" phx-submit="save" autocomplete="off">
         <.input field={@form[:full_name]} type="text" label="Your Name" />
         <.input field={@form[:phone_number]} type="text" label="Your Phone Number" />
         <footer>
@@ -67,7 +67,12 @@ defmodule BillingWeb.CartLive.Index do
   end
 
   def handle_event("save", %{"order" => order_params}, socket) do
-    params = Map.put(order_params, "cart_uuid", socket.assigns.cart_uuid)
+    items =
+      Enum.map(list_carts(), fn cart ->
+        %{name: cart.product_name, price: cart.product_price}
+      end)
+
+    params = Map.put(order_params, "items", items)
 
     case Orders.create_order(params) do
       {:ok, _order} ->
