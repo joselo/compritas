@@ -17,8 +17,10 @@ defmodule Billing.Carts do
       [%Cart{}, ...]
 
   """
-  def list_carts do
-    Repo.all(Cart)
+  def list_carts(cart_uuid) do
+    query = from(c in Cart, where: c.cart_uuid == ^cart_uuid)
+
+    Repo.all(query)
   end
 
   @doc """
@@ -100,5 +102,11 @@ defmodule Billing.Carts do
   """
   def change_cart(%Cart{} = cart, attrs \\ %{}) do
     Cart.changeset(cart, attrs)
+  end
+
+  def clean_cart(cart_uuid) do
+    query = from(c in Cart, where: c.cart_uuid == ^cart_uuid)
+
+    Repo.delete_all(query)
   end
 end

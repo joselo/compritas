@@ -40,6 +40,16 @@ defmodule BillingWeb.CartLive.Index do
     """
   end
 
+  on_mount {__MODULE__, :default}
+
+  def on_mount(:default, _params, _session, socket) do
+    if Enum.empty?(list_carts(socket.assigns.cart_uuid)) do
+      {:halt, redirect(socket, to: ~p"/")}
+    else
+      {:cont, socket}
+    end
+  end
+
   @impl true
   def mount(_params, _session, socket) do
     order = %Order{}
@@ -49,7 +59,7 @@ defmodule BillingWeb.CartLive.Index do
      |> assign(:page_title, "Your Cart")
      |> assign(:order, order)
      |> assign(:form, to_form(Orders.change_order(order)))
-     |> stream(:carts, list_carts())}
+     |> stream(:carts, list_carts(socket.assigns.cart_uuid))}
   end
 
   @impl true
@@ -67,8 +77,18 @@ defmodule BillingWeb.CartLive.Index do
   end
 
   def handle_event("save", %{"order" => order_params}, socket) do
+    carts = list_carts(socket.assigns.cart_uuid)
+
+    if Enum.empty?(carts) do
+      {:noreply, redirect(socket, to: ~p"/")}
+    else
+      save_order(carts, order_params, socket)
+    end
+  end
+
+  defp save_order(carts, order_params, socket) do
     items =
-      Enum.map(list_carts(), fn cart ->
+      Enum.map(carts, fn cart ->
         %{name: cart.product_name, price: cart.product_price}
       end)
 
@@ -76,6 +96,8 @@ defmodule BillingWeb.CartLive.Index do
 
     case Orders.create_order(params) do
       {:ok, _order} ->
+        Carts.clean_cart(socket.assigns.cart_uuid)
+
         {:noreply,
          socket
          |> put_flash(:info, "Order created successfully")
@@ -86,7 +108,7 @@ defmodule BillingWeb.CartLive.Index do
     end
   end
 
-  defp list_carts() do
-    Carts.list_carts()
+  defp list_carts(cart_uuid) do
+    Carts.list_carts(cart_uuid)
   end
 end

@@ -12,10 +12,10 @@ defmodule Billing.CartsTest do
 
     @invalid_attrs %{cart_uuid: nil, product_name: nil, product_price: nil}
 
-    test "list_carts/0 returns all carts" do
+    test "list_carts/1 returns all carts" do
       cart = cart_fixture()
 
-      assert Carts.list_carts() == [cart]
+      assert Carts.list_carts(cart.cart_uuid) == [cart]
     end
 
     test "get_cart!/1 returns the cart with given id" do
