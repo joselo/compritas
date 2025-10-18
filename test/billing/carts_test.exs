@@ -1,30 +1,21 @@
 defmodule Billing.CartsTest do
   use Billing.DataCase
 
-  import Billing.ProductsFixtures
-
   alias Billing.Carts
   alias Billing.Cart
   alias Repo
-
-  setup do
-    product = product_fixture()
-
-    {:ok, product: product}
-  end
 
   describe "carts" do
     alias Billing.Carts.Cart
 
     import Billing.CartsFixtures
 
-    @invalid_attrs %{cart_uuid: nil, product_id: nil}
+    @invalid_attrs %{cart_uuid: nil, product_name: nil, product_price: nil}
 
     test "list_carts/0 returns all carts" do
-      _cart = cart_fixture()
-      carts = Repo.all(Cart) |> Repo.preload(:product)
+      cart = cart_fixture()
 
-      assert Carts.list_carts() == carts
+      assert Carts.list_carts() == [cart]
     end
 
     test "get_cart!/1 returns the cart with given id" do
@@ -32,25 +23,36 @@ defmodule Billing.CartsTest do
       assert Carts.get_cart!(cart.id) == cart
     end
 
-    test "create_cart/1 with valid data creates a cart", %{product: product} do
-      valid_attrs = %{cart_uuid: "7488a646-e31f-11e4-aace-600308960662", product_id: product.id}
+    test "create_cart/1 with valid data creates a cart" do
+      valid_attrs = %{
+        cart_uuid: "7488a646-e31f-11e4-aace-600308960662",
+        product_name: "Product",
+        product_price: "5.0"
+      }
 
       assert {:ok, %Cart{} = cart} = Carts.create_cart(valid_attrs)
       assert cart.cart_uuid == "7488a646-e31f-11e4-aace-600308960662"
-      assert cart.product_id == product.id
+      assert cart.product_name == "Product"
+      assert cart.product_price == Decimal.new("5.0")
     end
 
     test "create_cart/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Carts.create_cart(@invalid_attrs)
     end
 
-    test "update_cart/2 with valid data updates the cart", %{product: product} do
+    test "update_cart/2 with valid data updates the cart" do
       cart = cart_fixture()
-      update_attrs = %{cart_uuid: "7488a646-e31f-11e4-aace-600308960668", product_id: product.id}
+
+      update_attrs = %{
+        cart_uuid: "7488a646-e31f-11e4-aace-600308960668",
+        product_name: "Product Updated",
+        product_price: Decimal.new("10.0")
+      }
 
       assert {:ok, %Cart{} = cart} = Carts.update_cart(cart, update_attrs)
       assert cart.cart_uuid == "7488a646-e31f-11e4-aace-600308960668"
-      assert cart.product_id == product.id
+      assert cart.product_name == "Product Updated"
+      assert cart.product_price == Decimal.new("10.0")
     end
 
     test "update_cart/2 with invalid data returns error changeset" do

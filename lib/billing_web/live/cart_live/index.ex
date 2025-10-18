@@ -15,8 +15,8 @@ defmodule BillingWeb.CartLive.Index do
         id="carts"
         rows={@streams.carts}
       >
-        <:col :let={{_id, cart}} label="Name">{cart.product.name}</:col>
-        <:col :let={{_id, cart}} label="Price">{cart.product.price}</:col>
+        <:col :let={{_id, cart}} label="Name">{cart.product_name}</:col>
+        <:col :let={{_id, cart}} label="Price">{cart.product_price}</:col>
         <:action :let={{id, cart}}>
           <.button
             phx-click={JS.push("delete", value: %{id: cart.id}) |> hide("##{id}")}

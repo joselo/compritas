@@ -39,7 +39,12 @@ defmodule BillingWeb.CatalogLive.Index do
   @impl true
   def handle_event("add_to_cart", %{"id" => id}, socket) do
     product = Products.get_product!(id)
-    attrs = %{cart_uuid: socket.assigns.cart_uuid, product_id: product.id}
+
+    attrs = %{
+      cart_uuid: socket.assigns.cart_uuid,
+      product_name: product.name,
+      product_price: product.price
+    }
 
     case Carts.create_cart(attrs) do
       {:ok, _cart} ->

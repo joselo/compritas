@@ -8,16 +8,13 @@ defmodule Billing.CartsFixtures do
   Generate a cart.
   """
 
-  import Billing.ProductsFixtures
-
   def cart_fixture(attrs \\ %{}) do
-    product = product_fixture()
-
     {:ok, cart} =
       attrs
       |> Enum.into(%{
         cart_uuid: Ecto.UUID.generate(),
-        product_id: product.id
+        product_name: "Product",
+        product_price: Decimal.new("5.00")
       })
       |> Billing.Carts.create_cart()
 

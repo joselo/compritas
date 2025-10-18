@@ -2,12 +2,10 @@ defmodule Billing.Carts.Cart do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Billing.Products.Product
-
   schema "carts" do
-    belongs_to :product, Product
-
     field :cart_uuid, Ecto.UUID
+    field :product_name, :string
+    field :product_price, :decimal, default: 0.0
 
     timestamps(type: :utc_datetime)
   end
@@ -15,8 +13,8 @@ defmodule Billing.Carts.Cart do
   @doc false
   def changeset(cart, attrs) do
     cart
-    |> cast(attrs, [:cart_uuid, :product_id])
-    |> validate_required([:cart_uuid, :product_id])
-    |> unique_constraint([:cart_uuid, :product_id])
+    |> cast(attrs, [:cart_uuid, :product_name, :product_price])
+    |> validate_required([:cart_uuid, :product_name, :product_price])
+    |> unique_constraint([:cart_uuid, :product_name, :product_price])
   end
 end

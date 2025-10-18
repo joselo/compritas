@@ -19,7 +19,6 @@ defmodule Billing.Carts do
   """
   def list_carts do
     Repo.all(Cart)
-    |> Repo.preload(:product)
   end
 
   @doc """
