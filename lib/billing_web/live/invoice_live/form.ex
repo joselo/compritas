@@ -46,8 +46,6 @@ defmodule BillingWeb.InvoiceLive.Form do
 
   @impl true
   def mount(params, _session, socket) do
-    customers = Billing.Customers.list_customers() |> Enum.map(&{&1.full_name, &1.id})
-
     emission_profiles =
       Billing.EmissionProfiles.list_emission_profiles() |> Enum.map(&{&1.name, &1.id})
 
@@ -60,9 +58,9 @@ defmodule BillingWeb.InvoiceLive.Form do
     {:ok,
      socket
      |> assign(:return_to, return_to(params["return_to"]))
-     |> assign(:customers, customers)
      |> assign(:emission_profiles, emission_profiles)
      |> assign(:payment_methods, payment_methods)
+     |> assign_customers()
      |> apply_action(socket.assigns.live_action, params)}
   end
 
@@ -98,7 +96,9 @@ defmodule BillingWeb.InvoiceLive.Form do
 
       attrs = Map.merge(order_attrs, %{"customer_id" => customer.id})
 
-      assign_new_invoice(socket, attrs)
+      socket
+      |> assign_customers()
+      |> assign_new_invoice(attrs)
     else
       {:error, error} ->
         put_flash(socket, :error, inspect(error))
@@ -170,5 +170,11 @@ defmodule BillingWeb.InvoiceLive.Form do
     |> assign(:page_title, "New Invoice")
     |> assign(:invoice, invoice)
     |> assign(:form, to_form(Invoices.change_invoice(invoice, params)))
+  end
+
+  defp assign_customers(socket) do
+    customers = Billing.Customers.list_customers() |> Enum.map(&{&1.full_name, &1.id})
+
+    assign(socket, :customers, customers)
   end
 end
