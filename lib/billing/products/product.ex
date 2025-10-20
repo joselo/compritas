@@ -5,6 +5,7 @@ defmodule Billing.Products.Product do
   schema "products" do
     field :name, :string
     field :price, :decimal, default: 0.0
+    field :files, {:array, :string}, default: []
 
     timestamps(type: :utc_datetime)
   end
@@ -12,7 +13,7 @@ defmodule Billing.Products.Product do
   @doc false
   def changeset(product, attrs) do
     product
-    |> cast(attrs, [:name, :price])
+    |> cast(attrs, [:name, :price, :files])
     |> validate_required([:name, :price])
   end
 end

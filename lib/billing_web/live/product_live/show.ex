@@ -24,6 +24,10 @@ defmodule BillingWeb.ProductLive.Show do
         <:item title="Name">{@product.name}</:item>
         <:item title="Price">{@product.price}</:item>
       </.list>
+
+      <div>
+        <img :for={file <- @product.files} src={file} />
+      </div>
     </Layouts.app>
     """
   end
