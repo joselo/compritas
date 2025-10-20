@@ -11,6 +11,11 @@ defmodule BillingWeb.CartLive.Index do
     <Layouts.app flash={@flash}>
       <.header>
         Your Cart
+        <:actions>
+          <.button navigate={~p"/"}>
+            <.icon name="hero-arrow-left" />
+          </.button>
+        </:actions>
       </.header>
 
       <.table

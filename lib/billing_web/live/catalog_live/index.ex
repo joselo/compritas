@@ -10,6 +10,11 @@ defmodule BillingWeb.CatalogLive.Index do
     <Layouts.app flash={@flash}>
       <.header>
         Product Catalog
+        <:actions>
+          <.link :if={@cart_size > 0} navigate={~p"/cart"} class="btn btn-primary">
+            <.icon name="hero-shopping-cart" /> {@cart_size}
+          </.link>
+        </:actions>
       </.header>
 
       <.table
@@ -33,6 +38,7 @@ defmodule BillingWeb.CatalogLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Listing Products")
+     |> assign(:cart_size, cart_size(socket.assigns.cart_uuid))
      |> stream(:products, list_products())}
   end
 
@@ -48,7 +54,10 @@ defmodule BillingWeb.CatalogLive.Index do
 
     case Carts.create_cart(attrs) do
       {:ok, _cart} ->
-        {:noreply, put_flash(socket, :info, "#{product.name} added to your cart")}
+        {:noreply,
+         socket
+         |> assign(:cart_size, cart_size(socket.assigns.cart_uuid))
+         |> put_flash(:info, "#{product.name} added to your cart")}
 
       {:error, changeset} ->
         {:noreply, put_flash(socket, :error, inspect(changeset))}
@@ -57,5 +66,9 @@ defmodule BillingWeb.CatalogLive.Index do
 
   defp list_products() do
     Products.list_products()
+  end
+
+  defp cart_size(cart_uuid) do
+    Enum.count(Carts.list_carts(cart_uuid))
   end
 end
