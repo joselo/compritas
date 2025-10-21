@@ -3,6 +3,7 @@ defmodule BillingWeb.CertificateLiveTest do
 
   import Phoenix.LiveViewTest
   import Billing.CertificatesFixtures
+  import Billing.AccountsFixtures
 
   @create_attrs %{
     name: "My P12 file",
@@ -21,7 +22,7 @@ defmodule BillingWeb.CertificateLiveTest do
     %{certificate: certificate}
   end
 
-  setup do
+  setup %{conn: conn} do
     file_path = "./test/support/fixtures/fake-p12-file.p12"
     file_content = File.read!(file_path)
     %{size: file_size} = File.stat!(file_path)
@@ -35,7 +36,9 @@ defmodule BillingWeb.CertificateLiveTest do
         type: "application/x-pkcs12"
       }
 
-    {:ok, certificate_file: certificate_file}
+    user = user_fixture()
+
+    %{conn: log_in_user(conn, user), certificate_file: certificate_file}
   end
 
   describe "Index" do

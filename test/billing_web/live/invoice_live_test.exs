@@ -5,6 +5,7 @@ defmodule BillingWeb.InvoiceLiveTest do
   import Billing.InvoicesFixtures
   import Billing.CustomersFixtures
   import Billing.EmissionProfilesFixtures
+  import Billing.AccountsFixtures
 
   @create_attrs %{
     issued_at: ~D[2025-08-28],
@@ -23,11 +24,12 @@ defmodule BillingWeb.InvoiceLiveTest do
     %{invoice: invoice}
   end
 
-  setup do
+  setup %{conn: conn} do
     customer = customer_fixture()
     emission_profile = emission_profile_fixture()
+    user = user_fixture()
 
-    {:ok, customer: customer, emission_profile: emission_profile}
+    %{conn: log_in_user(conn, user), customer: customer, emission_profile: emission_profile}
   end
 
   describe "Index" do

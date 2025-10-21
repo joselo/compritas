@@ -3,6 +3,7 @@ defmodule BillingWeb.ProductLiveTest do
 
   import Phoenix.LiveViewTest
   import Billing.ProductsFixtures
+  import Billing.AccountsFixtures
 
   @create_attrs %{name: "some name", price: "120.5"}
   @update_attrs %{name: "some updated name", price: "456.7"}
@@ -11,6 +12,11 @@ defmodule BillingWeb.ProductLiveTest do
     product = product_fixture()
 
     %{product: product}
+  end
+
+  setup %{conn: conn} do
+    user = user_fixture()
+    %{conn: log_in_user(conn, user), user: user}
   end
 
   describe "Index" do

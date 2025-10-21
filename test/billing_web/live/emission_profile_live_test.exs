@@ -5,6 +5,7 @@ defmodule BillingWeb.EmissionProfileLiveTest do
   import Billing.EmissionProfilesFixtures
   import Billing.CertificatesFixtures
   import Billing.CompaniesFixtures
+  import Billing.AccountsFixtures
 
   @create_attrs %{name: "some name", sequence: 1}
   @update_attrs %{name: "some updated name"}
@@ -15,11 +16,12 @@ defmodule BillingWeb.EmissionProfileLiveTest do
     %{emission_profile: emission_profile}
   end
 
-  setup do
+  setup %{conn: conn} do
     certificate = certificate_fixture()
     company = company_fixture()
+    user = user_fixture()
 
-    {:ok, certificate: certificate, company: company}
+    %{conn: log_in_user(conn, user), certificate: certificate, company: company}
   end
 
   describe "Index" do
