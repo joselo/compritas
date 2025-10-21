@@ -7,7 +7,7 @@ defmodule BillingWeb.CompanyLive.Form do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
         {@page_title}
         <:subtitle>Use this form to manage company records in your database.</:subtitle>

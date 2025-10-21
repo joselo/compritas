@@ -5,6 +5,8 @@ defmodule BillingWeb.Router do
 
   alias BillingWeb.Plugs.CartPlug
   alias BillingWeb.LiveSessions.CartSession
+  alias BillingWeb.Plugs.SetupGatePlug
+  alias BillingWeb.Plugs.SetupPlug
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -21,8 +23,16 @@ defmodule BillingWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :setup do
+    plug SetupPlug
+  end
+
+  pipeline :setup_gate do
+    plug SetupGatePlug
+  end
+
   scope "/", BillingWeb do
-    pipe_through :browser
+    pipe_through [:browser, :setup_gate]
 
     live_session :init_assings, on_mount: [{CartSession, :mount_session}] do
       live "/", CatalogLive.Index, :index
@@ -55,7 +65,7 @@ defmodule BillingWeb.Router do
   ## Authentication routes
 
   scope "/", BillingWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :setup_gate, :require_authenticated_user]
 
     live_session :require_authenticated_user,
       on_mount: [{BillingWeb.UserAuth, :require_authenticated}] do
@@ -106,16 +116,24 @@ defmodule BillingWeb.Router do
   end
 
   scope "/", BillingWeb do
-    pipe_through [:browser]
+    pipe_through [:browser, :setup_gate]
 
     live_session :current_user,
       on_mount: [{BillingWeb.UserAuth, :mount_current_scope}] do
-      live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/log-in/:token", UserLive.Confirmation, :new
     end
 
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete
+  end
+
+  scope "/", BillingWeb do
+    pipe_through [:browser, :setup]
+
+    live_session :setup_current_user,
+      on_mount: [{BillingWeb.UserAuth, :mount_current_scope}] do
+      live "/users/register", UserLive.Registration, :new
+    end
   end
 end

@@ -6,10 +6,11 @@ defmodule BillingWeb.UserLive.LoginTest do
 
   describe "login page" do
     test "renders login page", %{conn: conn} do
+      _user = user_fixture()
+
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
       assert html =~ "Log in"
-      assert html =~ "Register"
       assert html =~ "Log in with email"
     end
   end
@@ -32,6 +33,8 @@ defmodule BillingWeb.UserLive.LoginTest do
     end
 
     test "does not disclose if user is registered", %{conn: conn} do
+      _user = user_fixture()
+
       {:ok, lv, _html} = live(conn, ~p"/users/log-in")
 
       {:ok, _lv, html} =
@@ -62,6 +65,7 @@ defmodule BillingWeb.UserLive.LoginTest do
     test "redirects to login page with a flash error if credentials are invalid", %{
       conn: conn
     } do
+      _user = user_fixture()
       {:ok, lv, _html} = live(conn, ~p"/users/log-in")
 
       form =
@@ -72,20 +76,6 @@ defmodule BillingWeb.UserLive.LoginTest do
       conn = follow_trigger_action(form, conn)
       assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Invalid email or password"
       assert redirected_to(conn) == ~p"/users/log-in"
-    end
-  end
-
-  describe "login navigation" do
-    test "redirects to registration page when the Register button is clicked", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/log-in")
-
-      {:ok, _login_live, login_html} =
-        lv
-        |> element("main a", "Sign up")
-        |> render_click()
-        |> follow_redirect(conn, ~p"/users/register")
-
-      assert login_html =~ "Register"
     end
   end
 

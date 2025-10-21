@@ -18,7 +18,7 @@ defmodule BillingWeb.AgentChatLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
         {@page_title}
         <:subtitle>Use this form to chat with the ai agent.</:subtitle>

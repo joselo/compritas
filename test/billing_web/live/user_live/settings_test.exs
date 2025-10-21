@@ -17,6 +17,8 @@ defmodule BillingWeb.UserLive.SettingsTest do
     end
 
     test "redirects if user is not logged in", %{conn: conn} do
+      _user = user_fixture()
+
       assert {:error, redirect} = live(conn, ~p"/users/settings")
 
       assert {:redirect, %{to: path, flash: flash}} = redirect

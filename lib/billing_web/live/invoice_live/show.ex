@@ -13,7 +13,7 @@ defmodule BillingWeb.InvoiceLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
         Invoice {@invoice.id}
         <:subtitle>This is a invoice record from your database.</:subtitle>

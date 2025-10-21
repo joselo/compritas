@@ -6,7 +6,7 @@ defmodule BillingWeb.EmissionProfileLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
         Emission profile {@emission_profile.id}
         <:subtitle>This is a emission_profile record from your database.</:subtitle>

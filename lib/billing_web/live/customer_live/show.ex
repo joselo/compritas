@@ -6,7 +6,7 @@ defmodule BillingWeb.CustomerLive.Show do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
         Customer {@customer.id}
         <:subtitle>This is a customer record from your database.</:subtitle>
