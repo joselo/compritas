@@ -7,7 +7,7 @@ defmodule BillingWeb.CatalogLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.public flash={@flash} current_scope={@current_scope}>
       <.header>
         Product Catalog
         <:actions>
@@ -29,7 +29,7 @@ defmodule BillingWeb.CatalogLive.Index do
           </.button>
         </:action>
       </.table>
-    </Layouts.app>
+    </Layouts.public>
     """
   end
 

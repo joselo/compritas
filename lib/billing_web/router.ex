@@ -34,7 +34,8 @@ defmodule BillingWeb.Router do
   scope "/", BillingWeb do
     pipe_through [:browser, :setup_gate]
 
-    live_session :init_assings, on_mount: [{CartSession, :mount_session}] do
+    live_session :init_assings,
+      on_mount: [{CartSession, :mount_session}, {BillingWeb.UserAuth, :mount_current_scope}] do
       live "/", CatalogLive.Index, :index
       live "/cart", CartLive.Index, :index
     end

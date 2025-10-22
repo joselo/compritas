@@ -42,7 +42,7 @@ defmodule BillingWeb.Layouts do
           Open drawer
         </label>
 
-        <main>
+        <main class="px-4 py-20 sm:px-6 lg:px-8">
           <div class="mx-auto max-w-2xl space-y-4">
             {render_slot(@inner_block)}
           </div>
@@ -53,42 +53,52 @@ defmodule BillingWeb.Layouts do
         <ul class="menu bg-base-200 min-h-full w-80 p-4">
           <li>
             <.link navigate={~p"/agent_chat"}>
-              AI Chat
+              <.icon name="hero-sparkles" /> AI Chat
             </.link>
           </li>
           <li>
             <.link navigate={~p"/orders"}>
-              Orders
+              <.icon name="hero-inbox" /> Orders
             </.link>
           </li>
           <li>
             <.link navigate={~p"/invoices"}>
-              Invoices
+              <.icon name="hero-currency-dollar" /> Invoices
             </.link>
           </li>
           <li>
             <.link navigate={~p"/products"}>
-              Products
+              <.icon name="hero-tag" /> Products
             </.link>
           </li>
           <li>
             <.link navigate={~p"/customers"}>
-              Customers
+              <.icon name="hero-users" /> Customers
             </.link>
           </li>
           <li>
             <.link navigate={~p"/certificates"}>
-              Certificates
+              <.icon name="hero-key" /> Certificates
             </.link>
           </li>
           <li>
             <.link navigate={~p"/companies"}>
-              Companies
+              <.icon name="hero-building-office" /> Companies
             </.link>
           </li>
           <li>
             <.link navigate={~p"/emission_profiles"}>
-              Emission Profiles
+              <.icon name="hero-finger-print" /> Emission Profiles
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/users/settings"}>
+              <.icon name="hero-user-circle" /> Your Account
+            </.link>
+          </li>
+          <li>
+            <.link href={~p"/users/log-out"} method="delete">
+              <.icon name="hero-arrow-left-start-on-rectangle" /> Log out
             </.link>
           </li>
           <li>
@@ -99,6 +109,54 @@ defmodule BillingWeb.Layouts do
         </ul>
       </div>
     </div>
+
+    <.flash_group flash={@flash} />
+    """
+  end
+
+  @doc """
+  Renders your app layout.
+
+  This function is typically invoked from every template,
+  and it often contains your application menu, sidebar,
+  or similar.
+
+  ## Examples
+
+      <Layouts.app flash={@flash}>
+        <h1>Content</h1>
+      </Layouts.app>
+
+  """
+  attr :flash, :map, required: true, doc: "the map of flash messages"
+
+  attr :current_scope, :map,
+    default: nil,
+    doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
+
+  slot :inner_block, required: true
+
+  def public(assigns) do
+    ~H"""
+    <header class="navbar px-4 sm:px-6 lg:px-8">
+      <div class="flex-1">
+        <a href="/" class="flex-1 flex w-fit items-center gap-2">
+          <img src={~p"/images/logo.svg"} width="36" />
+          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
+        </a>
+      </div>
+      <div class="flex-none">
+        <%= if @current_scope do %>
+          <.link navigate={~p"/invoices"}>Dashboard</.link>
+        <% end %>
+      </div>
+    </header>
+
+    <main class="px-4 py-20 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl space-y-4">
+        {render_slot(@inner_block)}
+      </div>
+    </main>
 
     <.flash_group flash={@flash} />
     """
