@@ -9,7 +9,7 @@ defmodule Billing.InvoiceHandler do
   alias Billing.ElectronicInvoiceCheckerWorker
   alias Billing.ElectronicInvoicePdfWorker
 
-  def handle_invoice(invoice_id) do
+  def build_electronic_invoice(invoice_id) do
     invoice = Invoices.get_invoice!(invoice_id)
     certificate = Billing.Invoicing.fetch_certificate(invoice)
 
@@ -23,23 +23,26 @@ defmodule Billing.InvoiceHandler do
          {:ok, invoice_params} <- Invoicing.build_request_params(invoice),
 
          # Electronic Invoice :created
-         {:ok, electronic_invoice} <- create_electronic_invoice(invoice.id, invoice_params),
-         {:ok, _invoice_id} <- broadcast_success(invoice_id),
+         {:ok, electronic_invoice} <- create_electronic_invoice(invoice.id, invoice_params) do
+      sign_xml(electronic_invoice, certificate)
+    else
+      {:error, error} ->
+        {:error, error}
+    end
+  end
 
-         # Electronic Invoice :signed
-         {:ok, electronic_invoice} <- signed_xml(electronic_invoice, certificate),
-         {:ok, _invoice_id} <- broadcast_success(invoice_id),
-
-         # Electronic Invoice :send | :back | :error
-         {:ok, electronic_invoice} <- send_invoice(electronic_invoice),
-         {:ok, _invoice_id} <- broadcast_success(invoice_id),
+  def handle_electronic_invoice(electronic_invoice_id) do
+    electronic_invoice = ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
+    # Electronic Invoice :send | :back | :error
+    with {:ok, electronic_invoice} <- send_invoice(electronic_invoice),
+         {:ok, _invoice_id} <- broadcast_success(electronic_invoice.id),
 
          # Run authorization checker using oban worker
          {:ok, _oban_job} <- run_authorization_checker(electronic_invoice) do
       {:ok, electronic_invoice}
     else
       {:error, error} ->
-        broadcast_error(invoice_id, error)
+        # broadcast_error(invoice_id, error)
 
         {:error, error}
     end
@@ -57,7 +60,7 @@ defmodule Billing.InvoiceHandler do
       {:ok, electronic_invoice}
     else
       {:error, error} ->
-        broadcast_error(invoice.id, error)
+        broadcast_error(electronic_invoice.id, error)
 
         {:error, error}
     end
@@ -71,7 +74,7 @@ defmodule Billing.InvoiceHandler do
         {:ok, pdf_file_path}
 
       {:error, error} ->
-        broadcast_error(electronic_invoice.invoice_id, error)
+        broadcast_error(electronic_invoice.id, error)
 
         {:error, error}
     end
@@ -90,7 +93,7 @@ defmodule Billing.InvoiceHandler do
 
   # Electronic Invoice :signed
 
-  def signed_xml(%ElectronicInvoice{state: :created} = electronic_invoice, certificate) do
+  def sign_xml(%ElectronicInvoice{state: :created} = electronic_invoice, certificate) do
     xml_path = xml_path(electronic_invoice.access_key)
 
     with {:ok, signed_xml} <- TaxiDriver.sign_invoice_xml(xml_path, certificate),
@@ -103,7 +106,7 @@ defmodule Billing.InvoiceHandler do
     end
   end
 
-  def signed_xml(_electronic_invoice, _certificate) do
+  def sign_xml(_electronic_invoice, _certificate) do
     {:error, "Factura no creada"}
   end
 
@@ -246,21 +249,22 @@ defmodule Billing.InvoiceHandler do
 
   # Broadcast section
 
-  defp broadcast_success(invoice_id) do
+  defp broadcast_success(electronic_invoice_id) do
     PubSub.broadcast(
       Billing.PubSub,
-      "invoice:#{invoice_id}",
-      {:update_electronic_invoice, %{invoice_id: invoice_id}}
+      "electronic_invoice:#{electronic_invoice_id}",
+      {:update_electronic_invoice, %{electronic_invoice_id: electronic_invoice_id}}
     )
 
-    {:ok, invoice_id}
+    {:ok, electronic_invoice_id}
   end
 
-  def broadcast_error(invoice_id, error) do
+  def broadcast_error(electronic_invoice_id, error) do
     PubSub.broadcast(
       Billing.PubSub,
-      "invoice:#{invoice_id}",
-      {:electronic_invoice_error, %{invoice_id: invoice_id, error: inspect(error)}}
+      "electronic_invoice_id:#{electronic_invoice_id}",
+      {:electronic_invoice_error,
+       %{electronic_invoice_id: electronic_invoice_id, error: inspect(error)}}
     )
 
     {:error, error}
