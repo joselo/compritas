@@ -35,61 +35,138 @@ defmodule BillingWeb.Layouts do
 
   def app(assigns) do
     ~H"""
+    <div class="drawer lg:drawer-open">
+      <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
+      <div class="drawer-content flex flex-col">
+        <label for="my-drawer-3" class="btn drawer-button lg:hidden">
+          Open drawer
+        </label>
+
+        <main class="px-4 py-4 sm:px-6 lg:px-8">
+          <div class="mx-auto max-w-2xl space-y-4">
+            <div class="flex justify-end">
+              <.theme_toggle />
+            </div>
+
+            <div class="py-20">
+              {render_slot(@inner_block)}
+            </div>
+          </div>
+        </main>
+      </div>
+      <div class="drawer-side">
+        <label for="my-drawer-3" aria-label="close sidebar" class="drawer-overlay"></label>
+        <ul class="menu bg-base-200 min-h-full w-80 p-4">
+          <li class="menu-title inline-block">
+            <.link navigate={~p"/"}>
+              <img src={~p"/images/logo.svg"} width="36" />
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/agent_chat"}>
+              <.icon name="hero-sparkles" /> AI Chat
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/orders"}>
+              <.icon name="hero-inbox" /> Orders
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/invoices"}>
+              <.icon name="hero-currency-dollar" /> Invoices
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/products"}>
+              <.icon name="hero-tag" /> Products
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/customers"}>
+              <.icon name="hero-users" /> Customers
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/certificates"}>
+              <.icon name="hero-key" /> Certificates
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/companies"}>
+              <.icon name="hero-building-office" /> Companies
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/emission_profiles"}>
+              <.icon name="hero-finger-print" /> Emission Profiles
+            </.link>
+          </li>
+          <li>
+            <.link navigate={~p"/users/settings"}>
+              <.icon name="hero-user-circle" /> Your Account
+            </.link>
+          </li>
+          <li>
+            <.link href={~p"/users/log-out"} method="delete">
+              <.icon name="hero-arrow-left-start-on-rectangle" /> Log out
+            </.link>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <.flash_group flash={@flash} />
+    """
+  end
+
+  @doc """
+  Renders your app layout.
+
+  This function is typically invoked from every template,
+  and it often contains your application menu, sidebar,
+  or similar.
+
+  ## Examples
+
+      <Layouts.app flash={@flash}>
+        <h1>Content</h1>
+      </Layouts.app>
+
+  """
+  attr :flash, :map, required: true, doc: "the map of flash messages"
+
+  attr :current_scope, :map,
+    default: nil,
+    doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
+
+  slot :inner_block, required: true
+
+  def public(assigns) do
+    ~H"""
     <header class="navbar px-4 sm:px-6 lg:px-8">
       <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
+        <.link navigate={~p"/"} class="flex-1 flex w-fit items-center gap-2">
           <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
+        </.link>
       </div>
-      <div class="flex-none">
+      <div class="flex justify-end items-center space-x-2">
         <%= if @current_scope do %>
-          <ul class="flex flex-column px-1 space-x-4 items-center">
-            <li>
-              <.link navigate={~p"/agent_chat"} class="btn btn-ghost">
-                AI Chat
-              </.link>
-            </li>
-            <li>
-              <.link navigate={~p"/orders"} class="btn btn-ghost">
-                Orders
-              </.link>
-            </li>
-            <li>
-              <.link navigate={~p"/invoices"} class="btn btn-ghost">
-                Invoices
-              </.link>
-            </li>
-            <li>
-              <.link navigate={~p"/products"} class="btn btn-ghost">
-                Products
-              </.link>
-            </li>
-            <li>
-              <.link navigate={~p"/customers"} class="btn btn-ghost">
-                Customers
-              </.link>
-            </li>
-            <li>
-              <.link navigate={~p"/certificates"} class="btn btn-ghost">
-                Certificates
-              </.link>
-            </li>
-            <li>
-              <.link navigate={~p"/companies"} class="btn btn-ghost">
-                Companies
-              </.link>
-            </li>
-            <li>
-              <.link navigate={~p"/emission_profiles"} class="btn btn-ghost">
-                Emission Profiles
-              </.link>
-            </li>
-            <li>
-              <.theme_toggle />
-            </li>
-          </ul>
+          <.link navigate={~p"/invoices"} class="btn btn-ghost">
+            <.icon name="hero-cog-6-tooth" /> Manager
+          </.link>
+          <.link href={~p"/users/log-out"} method="delete" class="btn btn-ghost">
+            <.icon name="hero-arrow-left-start-on-rectangle" /> Log out
+          </.link>
+        <% else %>
+          <.link href={~p"/users/log-in"} class="btn btn-ghost">
+            <.icon name="hero-arrow-right-start-on-rectangle" /> Log in
+          </.link>
         <% end %>
+
+        <div class="flex justify-end">
+          <.theme_toggle />
+        </div>
       </div>
     </header>
 

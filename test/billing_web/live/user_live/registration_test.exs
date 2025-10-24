@@ -8,7 +8,7 @@ defmodule BillingWeb.UserLive.RegistrationTest do
     test "renders registration page", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/register")
 
-      assert html =~ "Log in"
+      assert html =~ "Register for an account"
     end
 
     test "redirects if already logged in", %{conn: conn} do

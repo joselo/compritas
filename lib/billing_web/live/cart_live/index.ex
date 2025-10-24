@@ -8,7 +8,7 @@ defmodule BillingWeb.CartLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.public flash={@flash} current_scope={@current_scope}>
       <.header>
         Your Cart
         <:actions>
@@ -51,7 +51,7 @@ defmodule BillingWeb.CartLive.Index do
           <.button phx-disable-with="Saving..." variant="primary">Create order</.button>
         </footer>
       </.form>
-    </Layouts.app>
+    </Layouts.public>
     """
   end
 
