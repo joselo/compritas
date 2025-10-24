@@ -50,7 +50,7 @@ defmodule Billing.InvoiceHandler do
     # end
   end
 
-  def handle_auth_electronic_invoice(electronic_invoice_id) do
+  def auth_electronic_invoice(electronic_invoice_id) do
     electronic_invoice = ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
     invoice = Invoices.get_invoice!(electronic_invoice.invoice_id)
 
