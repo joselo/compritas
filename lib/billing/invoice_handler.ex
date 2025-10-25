@@ -8,8 +8,9 @@ defmodule Billing.InvoiceHandler do
   alias Phoenix.PubSub
   alias Billing.ElectronicInvoiceCheckerWorker
   alias Billing.ElectronicInvoicePdfWorker
+  alias Billing.InvoicingWorker
 
-  def handle_invoice(invoice_id) do
+  def sign_electronic_invoice(invoice_id) do
     invoice = Invoices.get_invoice!(invoice_id)
     certificate = Billing.Invoicing.fetch_certificate(invoice)
 
@@ -23,47 +24,52 @@ defmodule Billing.InvoiceHandler do
          {:ok, invoice_params} <- Invoicing.build_request_params(invoice),
 
          # Electronic Invoice :created
-         {:ok, electronic_invoice} <- create_electronic_invoice(invoice.id, invoice_params),
-         {:ok, _invoice_id} <- broadcast_success(invoice_id),
+         {:ok, electronic_invoice} <- create_electronic_invoice(invoice.id, invoice_params) do
+      sign_xml(electronic_invoice, certificate)
+    else
+      {:error, error} ->
+        {:error, error}
+    end
+  end
 
-         # Electronic Invoice :signed
-         {:ok, electronic_invoice} <- signed_xml(electronic_invoice, certificate),
-         {:ok, _invoice_id} <- broadcast_success(invoice_id),
+  # Electronic Invoice :send | :back | :error
+  def send_electronic_invoice(electronic_invoice_id) do
+    electronic_invoice = ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
 
-         # Electronic Invoice :send | :back | :error
-         {:ok, electronic_invoice} <- send_invoice(electronic_invoice),
-         {:ok, _invoice_id} <- broadcast_success(invoice_id),
+    # Electronic Invoice :send | :back | :error
+
+    with {:ok, electronic_invoice} <- send_invoice(electronic_invoice),
+         {:ok, _electronic_invoice_id} <- broadcast_success(electronic_invoice),
 
          # Run authorization checker using oban worker
-         {:ok, _oban_job} <- run_authorization_checker(electronic_invoice) do
+         {:ok, _oban_job} <- start_authorization_checker(electronic_invoice) do
       {:ok, electronic_invoice}
     else
       {:error, error} ->
-        broadcast_error(invoice_id, error)
+        broadcast_error(electronic_invoice.id, error)
 
         {:error, error}
     end
   end
 
-  def handle_auth_invoice(electronic_invoice_id) do
+  def auth_electronic_invoice(electronic_invoice_id) do
     electronic_invoice = ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
-    invoice = Invoices.get_invoice!(electronic_invoice.invoice_id)
 
     # Electronic Invoice :authorized | :unauthorized | :error | :not_found_or_pending
 
     with {:ok, electronic_invoice} <- verify_authorization(electronic_invoice),
-         {:ok, _invoice_id} <- broadcast_success(invoice.id),
+         {:ok, _invoice_id} <- broadcast_success(electronic_invoice),
          {:ok, _oban_job} <- run_pdf_worker(electronic_invoice) do
       {:ok, electronic_invoice}
     else
       {:error, error} ->
-        broadcast_error(invoice.id, error)
+        broadcast_error(electronic_invoice.id, error)
 
         {:error, error}
     end
   end
 
-  def handle_invoice_pdf(electronic_invoice_id) do
+  def handle_electronic_invoice_pdf(electronic_invoice_id) do
     electronic_invoice = ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
 
     case create_pdf(electronic_invoice) do
@@ -71,7 +77,7 @@ defmodule Billing.InvoiceHandler do
         {:ok, pdf_file_path}
 
       {:error, error} ->
-        broadcast_error(electronic_invoice.invoice_id, error)
+        broadcast_error(electronic_invoice.id, error)
 
         {:error, error}
     end
@@ -90,7 +96,7 @@ defmodule Billing.InvoiceHandler do
 
   # Electronic Invoice :signed
 
-  def signed_xml(%ElectronicInvoice{state: :created} = electronic_invoice, certificate) do
+  def sign_xml(%ElectronicInvoice{state: :created} = electronic_invoice, certificate) do
     xml_path = xml_path(electronic_invoice.access_key)
 
     with {:ok, signed_xml} <- TaxiDriver.sign_invoice_xml(xml_path, certificate),
@@ -103,7 +109,7 @@ defmodule Billing.InvoiceHandler do
     end
   end
 
-  def signed_xml(_electronic_invoice, _certificate) do
+  def sign_xml(_electronic_invoice, _certificate) do
     {:error, "Factura no creada"}
   end
 
@@ -149,8 +155,8 @@ defmodule Billing.InvoiceHandler do
     end
   end
 
-  defp verify_authorization(%ElectronicInvoice{state: :authorized} = electronic_invoice) do
-    {:ok, electronic_invoice}
+  defp verify_authorization(%ElectronicInvoice{state: :authorized} = _electronic_invoice) do
+    {:error, "La Factura ya fue autorizada"}
   end
 
   defp verify_authorization(_electronic_invoice) do
@@ -246,21 +252,35 @@ defmodule Billing.InvoiceHandler do
 
   # Broadcast section
 
-  defp broadcast_success(invoice_id) do
+  defp broadcast_success(electronic_invoice) do
     PubSub.broadcast(
       Billing.PubSub,
-      "invoice:#{invoice_id}",
-      {:update_electronic_invoice, %{invoice_id: invoice_id}}
+      "electronic_invoice:#{electronic_invoice.id}",
+      {:electronic_invoice_updated, %{electronic_invoice_id: electronic_invoice.id}}
     )
 
-    {:ok, invoice_id}
-  end
-
-  def broadcast_error(invoice_id, error) do
     PubSub.broadcast(
       Billing.PubSub,
-      "invoice:#{invoice_id}",
-      {:electronic_invoice_error, %{invoice_id: invoice_id, error: inspect(error)}}
+      "invoice:#{electronic_invoice.invoice_id}",
+      {:electronic_invoice_updated, %{electronic_invoice_id: electronic_invoice.id}}
+    )
+
+    {:ok, electronic_invoice}
+  end
+
+  def broadcast_error(electronic_invoice, error) do
+    PubSub.broadcast(
+      Billing.PubSub,
+      "electronic_invoice_id:#{electronic_invoice.id}",
+      {:electronic_invoice_error,
+       %{electronic_invoice_id: electronic_invoice.id, error: inspect(error)}}
+    )
+
+    PubSub.broadcast(
+      Billing.PubSub,
+      "invoice_id:#{electronic_invoice.invoice_id}",
+      {:electronic_invoice_error,
+       %{electronic_invoice_id: electronic_invoice.id, error: inspect(error)}}
     )
 
     {:error, error}
@@ -268,13 +288,23 @@ defmodule Billing.InvoiceHandler do
 
   # Workers
 
-  def run_authorization_checker(%ElectronicInvoice{state: :sent} = electronic_invoice) do
+  def start_authorization_checker(%ElectronicInvoice{state: :sent} = electronic_invoice) do
     %{"electronic_invoice_id" => electronic_invoice.id}
     |> ElectronicInvoiceCheckerWorker.new()
     |> Oban.insert()
   end
 
-  def run_authorization_checker(%ElectronicInvoice{state: _state}) do
+  def start_authorization_checker(%ElectronicInvoice{state: _state}) do
+    {:ok, nil}
+  end
+
+  def start_send_worker(%ElectronicInvoice{state: :signed} = electronic_invoice) do
+    %{"electronic_invoice_id" => electronic_invoice.id}
+    |> InvoicingWorker.new()
+    |> Oban.insert()
+  end
+
+  def start_send_worker(%ElectronicInvoice{state: _state}) do
     {:ok, nil}
   end
 

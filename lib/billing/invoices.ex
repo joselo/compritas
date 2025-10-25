@@ -18,8 +18,9 @@ defmodule Billing.Invoices do
 
   """
   def list_invoices do
-    Repo.all(Invoice)
-    |> Repo.preload(:customer)
+    query = from(i in Invoice, preload: [:customer], order_by: [desc: :inserted_at])
+
+    Repo.all(query)
   end
 
   @doc """

@@ -22,15 +22,14 @@ defmodule Billing.ElectronicInvoices do
     |> Repo.update()
   end
 
-  def get_electronic_invoice_by_invoice_id(invoice_id) do
+  def list_electronic_invoices_by_invoice_id(invoice_id) do
     query =
       from(ei in ElectronicInvoice,
         where: ei.invoice_id == ^invoice_id,
-        order_by: [desc: ei.inserted_at],
-        limit: 1
+        order_by: [desc: ei.inserted_at]
       )
 
-    Repo.one(query)
+    Repo.all(query)
   end
 
   def get_electronic_invoice!(id) do
@@ -47,5 +46,11 @@ defmodule Billing.ElectronicInvoices do
     query = from(ei in ElectronicInvoice, where: ei.state in ^pending_states)
 
     Repo.all(query)
+  end
+
+  def list_electronic_invoices do
+    ElectronicInvoice
+    |> Repo.all()
+    |> Repo.preload(invoice: :customer)
   end
 end

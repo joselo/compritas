@@ -14,7 +14,7 @@ defmodule Billing.ElectronicInvoiceCheckerWorker do
     # un documento electronico de "Recibido" a "Autorizado"
     Process.sleep(@sleep_milliseconds)
 
-    case InvoiceHandler.handle_auth_invoice(electronic_invoice_id) do
+    case InvoiceHandler.auth_electronic_invoice(electronic_invoice_id) do
       {:ok, _electronic_invoice} ->
         Logger.info("Facturado!: #{electronic_invoice_id}")
 

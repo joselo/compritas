@@ -78,6 +78,11 @@ defmodule BillingWeb.Layouts do
             </.link>
           </li>
           <li>
+            <.link navigate={~p"/electronic_invoices"}>
+              <.icon name="hero-at-symbol" /> Electronic Invoices
+            </.link>
+          </li>
+          <li>
             <.link navigate={~p"/products"}>
               <.icon name="hero-tag" /> Products
             </.link>
