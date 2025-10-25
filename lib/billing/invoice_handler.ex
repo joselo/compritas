@@ -31,23 +31,10 @@ defmodule Billing.InvoiceHandler do
     end
   end
 
+  # Electronic Invoice :send | :back | :error
   def send_electronic_invoice(electronic_invoice_id) do
     electronic_invoice = ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
-    # Electronic Invoice :send | :back | :error
     send_invoice(electronic_invoice)
-
-    # with {:ok, electronic_invoice} <- send_invoice(electronic_invoice),
-    #      {:ok, _invoice_id} <- broadcast_success(electronic_invoice.id),
-    #
-    #      # Run authorization checker using oban worker
-    #      {:ok, _oban_job} <- run_authorization_checker(electronic_invoice) do
-    #   {:ok, electronic_invoice}
-    # else
-    #   {:error, error} ->
-    #     broadcast_error(electronic_invoice_id, error)
-    #
-    #     {:error, error}
-    # end
   end
 
   def auth_electronic_invoice(electronic_invoice_id) do
