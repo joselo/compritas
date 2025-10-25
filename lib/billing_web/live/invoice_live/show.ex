@@ -6,6 +6,8 @@ defmodule BillingWeb.InvoiceLive.Show do
   alias Phoenix.PubSub
   alias Billing.InvoiceHandler
   alias Phoenix.LiveView.AsyncResult
+  alias Billing.ElectronicInvoices
+  alias BillingWeb.ElectronicInvoiceComponents
 
   @impl true
   def render(assigns) do
@@ -30,6 +32,30 @@ defmodule BillingWeb.InvoiceLive.Show do
         <:item title="Issued at">{@invoice.issued_at}</:item>
         <:item title="Customer">{@invoice.customer.full_name}</:item>
       </.list>
+
+      <div class="divider"></div>
+
+      <h2 class="font-semibold">
+        Electronic Invoices
+      </h2>
+
+      <.table
+        id="electronic_invoices"
+        rows={@streams.electronic_invoices}
+        row_click={
+          fn {_id, electronic_invoice} ->
+            JS.navigate(~p"/electronic_invoices/#{electronic_invoice}")
+          end
+        }
+      >
+        <:col :let={{_id, electronic_invoice}} label="Id">{electronic_invoice.id}</:col>
+        <:col :let={{_id, electronic_invoice}} label="Access Key">
+          {electronic_invoice.access_key}
+        </:col>
+        <:col :let={{_id, electronic_invoice}} label="State">
+          <ElectronicInvoiceComponents.state electronic_invoice={electronic_invoice} />
+        </:col>
+      </.table>
     </Layouts.app>
     """
   end
@@ -38,11 +64,13 @@ defmodule BillingWeb.InvoiceLive.Show do
   def mount(%{"id" => id}, _session, socket) do
     PubSub.subscribe(Billing.PubSub, "invoice:#{id}")
 
+    socket = assign(socket, :invoice, Invoices.get_invoice!(id))
+
     {:ok,
      socket
      |> assign(:page_title, "Show Invoice")
-     |> assign(:invoice, Invoices.get_invoice!(id))
-     |> assign(:sign_result, %AsyncResult{})}
+     |> assign(:sign_result, %AsyncResult{})
+     |> assign_electronic_invoices()}
   end
 
   @impl true
@@ -66,6 +94,7 @@ defmodule BillingWeb.InvoiceLive.Show do
     {:noreply,
      socket
      |> assign(:sign_result, AsyncResult.ok(electronic_invoice))
+     |> assign_electronic_invoices()
      |> put_flash(:info, "Electronic invoice signed")}
   end
 
@@ -73,6 +102,7 @@ defmodule BillingWeb.InvoiceLive.Show do
     {:noreply,
      socket
      |> assign(:sign_result, AsyncResult.failed(%AsyncResult{}, {:error, error}))
+     |> assign_electronic_invoices()
      |> put_flash(:error, "Error: #{inspect(error)}")}
   end
 
@@ -80,6 +110,7 @@ defmodule BillingWeb.InvoiceLive.Show do
     {:noreply,
      socket
      |> assign(:sign_result, AsyncResult.failed(%AsyncResult{}, {:exit, reason}))
+     |> assign_electronic_invoices()
      |> put_flash(:error, "Error: #{inspect(reason)}")}
   end
 
@@ -92,5 +123,13 @@ defmodule BillingWeb.InvoiceLive.Show do
       <.icon :if={!@sign_result.loading} name="hero-finger-print" /> Sign electronic invoice
     </.button>
     """
+  end
+
+  defp assign_electronic_invoices(socket) do
+    stream(
+      socket,
+      :electronic_invoices,
+      ElectronicInvoices.list_electronic_invoices_by_invoice_id(socket.assigns.invoice.id)
+    )
   end
 end

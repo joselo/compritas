@@ -2,7 +2,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Index do
   use BillingWeb, :live_view
 
   alias Billing.ElectronicInvoices
-  alias Billing.Invoices.ElectronicInvoice
+  alias BillingWeb.ElectronicInvoiceComponents
 
   @impl true
   def render(assigns) do
@@ -22,13 +22,11 @@ defmodule BillingWeb.ElectronicInvoiceLive.Index do
         }
       >
         <:col :let={{_id, electronic_invoice}} label="Invoice">
-          <.link navigate={~p"/invoices/#{electronic_invoice.invoice_id}"} class="link">
-            {electronic_invoice.invoice_id}
-          </.link>
+          {electronic_invoice.invoice.customer.full_name}
         </:col>
         <:col :let={{_id, electronic_invoice}} label="Name">{electronic_invoice.access_key}</:col>
         <:col :let={{_id, electronic_invoice}} label="State">
-          <.electronic_state electronic_invoice={electronic_invoice} />
+          <ElectronicInvoiceComponents.state electronic_invoice={electronic_invoice} />
         </:col>
       </.table>
     </Layouts.app>
@@ -45,25 +43,5 @@ defmodule BillingWeb.ElectronicInvoiceLive.Index do
 
   defp list_electronic_invoices() do
     ElectronicInvoices.list_electronic_invoices()
-  end
-
-  defp electronic_state(assigns) do
-    assigns =
-      assign_new(assigns, :state, fn ->
-        if assigns.electronic_invoice do
-          %{
-            label: ElectronicInvoice.label_status(assigns.electronic_invoice.state),
-            css_class: "badge-primary"
-          }
-        else
-          %{label: "Not invoice yet", css_class: "badge-info"}
-        end
-      end)
-
-    ~H"""
-    <span class={["badge", @state.css_class]}>
-      {@state.label}
-    </span>
-    """
   end
 end

@@ -8,6 +8,8 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
   alias Billing.InvoiceHandler
   alias Billing.ElectronicInvoiceErrors
   alias Phoenix.LiveView.AsyncResult
+  alias BillingWeb.ElectronicInvoiceComponents
+  alias Billing.Invoices
 
   @impl true
   def render(assigns) do
@@ -30,12 +32,12 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
 
       <.list>
         <:item title="Status">
-          <.electronic_state electronic_invoice={@electronic_invoice} />
+          <ElectronicInvoiceComponents.state electronic_invoice={@electronic_invoice} />
         </:item>
         <:item title="Access Key">{@electronic_invoice.access_key}</:item>
         <:item title="Invoice">
-          <.link navigate={~p"/invoices/#{@electronic_invoice.invoice_id}"} class="link">
-            {@electronic_invoice.invoice_id}
+          <.link navigate={~p"/invoices/#{@invoice.id}"} class="link">
+            {@invoice.customer.full_name}
           </.link>
         </:item>
       </.list>
@@ -47,12 +49,14 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
   def mount(%{"id" => id}, _session, socket) do
     PubSub.subscribe(Billing.PubSub, "electronic_invoice:#{id}")
 
+    socket = assign_electronic_invoice(socket, id)
+
     {:ok,
      socket
      |> assign(:page_title, "Show Electronic Invoice")
      |> assign(:send_result, %AsyncResult{})
      |> assign(:auth_result, %AsyncResult{})
-     |> assign_electronic_invoice(id)}
+     |> assign_invoice()}
   end
 
   @impl true
@@ -204,6 +208,10 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
     socket
     |> assign(:electronic_invoice, electronic_invoice)
     |> assign(:electronic_invoice_errors, electronic_invoice_errors)
+  end
+
+  defp assign_invoice(socket) do
+    assign(socket, :invoice, Invoices.get_invoice!(socket.assigns.electronic_invoice.invoice_id))
   end
 
   attr :send_result, AsyncResult, required: true
