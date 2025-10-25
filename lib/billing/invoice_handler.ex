@@ -39,14 +39,14 @@ defmodule Billing.InvoiceHandler do
     # Electronic Invoice :send | :back | :error
 
     with {:ok, electronic_invoice} <- send_invoice(electronic_invoice),
-         {:ok, _electronic_invoice_id} <- broadcast_success(electronic_invoice_id),
+         {:ok, _electronic_invoice_id} <- broadcast_success(electronic_invoice),
 
          # Run authorization checker using oban worker
          {:ok, _oban_job} <- start_authorization_checker(electronic_invoice) do
       {:ok, electronic_invoice}
     else
       {:error, error} ->
-        broadcast_error(electronic_invoice_id, error)
+        broadcast_error(electronic_invoice.id, error)
 
         {:error, error}
     end
@@ -58,12 +58,12 @@ defmodule Billing.InvoiceHandler do
     # Electronic Invoice :authorized | :unauthorized | :error | :not_found_or_pending
 
     with {:ok, electronic_invoice} <- verify_authorization(electronic_invoice),
-         {:ok, _invoice_id} <- broadcast_success(electronic_invoice_id),
+         {:ok, _invoice_id} <- broadcast_success(electronic_invoice),
          {:ok, _oban_job} <- run_pdf_worker(electronic_invoice) do
       {:ok, electronic_invoice}
     else
       {:error, error} ->
-        broadcast_error(electronic_invoice_id, error)
+        broadcast_error(electronic_invoice.id, error)
 
         {:error, error}
     end
@@ -77,7 +77,7 @@ defmodule Billing.InvoiceHandler do
         {:ok, pdf_file_path}
 
       {:error, error} ->
-        broadcast_error(electronic_invoice_id, error)
+        broadcast_error(electronic_invoice.id, error)
 
         {:error, error}
     end
@@ -252,22 +252,35 @@ defmodule Billing.InvoiceHandler do
 
   # Broadcast section
 
-  defp broadcast_success(electronic_invoice_id) do
+  defp broadcast_success(electronic_invoice) do
     PubSub.broadcast(
       Billing.PubSub,
-      "electronic_invoice:#{electronic_invoice_id}",
-      {:electronic_invoice_updated, %{electronic_invoice_id: electronic_invoice_id}}
+      "electronic_invoice:#{electronic_invoice.id}",
+      {:electronic_invoice_updated, %{electronic_invoice_id: electronic_invoice.id}}
     )
 
-    {:ok, electronic_invoice_id}
-  end
-
-  def broadcast_error(electronic_invoice_id, error) do
     PubSub.broadcast(
       Billing.PubSub,
-      "electronic_invoice_id:#{electronic_invoice_id}",
+      "invoice:#{electronic_invoice.invoice_id}",
+      {:electronic_invoice_updated, %{electronic_invoice_id: electronic_invoice.id}}
+    )
+
+    {:ok, electronic_invoice}
+  end
+
+  def broadcast_error(electronic_invoice, error) do
+    PubSub.broadcast(
+      Billing.PubSub,
+      "electronic_invoice_id:#{electronic_invoice.id}",
       {:electronic_invoice_error,
-       %{electronic_invoice_id: electronic_invoice_id, error: inspect(error)}}
+       %{electronic_invoice_id: electronic_invoice.id, error: inspect(error)}}
+    )
+
+    PubSub.broadcast(
+      Billing.PubSub,
+      "invoice_id:#{electronic_invoice.invoice_id}",
+      {:electronic_invoice_error,
+       %{electronic_invoice_id: electronic_invoice.id, error: inspect(error)}}
     )
 
     {:error, error}

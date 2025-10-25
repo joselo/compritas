@@ -112,6 +112,26 @@ defmodule BillingWeb.InvoiceLive.Show do
      |> put_flash(:error, "Error: #{inspect(reason)}")}
   end
 
+  @impl true
+  def handle_info(
+        {:electronic_invoice_updated, %{electronic_invoice_id: _electronic_invoice_id}},
+        socket
+      ) do
+    {:noreply, assign_electronic_invoices(socket)}
+  end
+
+  @impl true
+  def handle_info(
+        {:electronic_invoice_error,
+         %{electronic_invoice_id: _electronic_invoice_id, error: error}},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign_electronic_invoices()
+     |> put_flash(:error, "Error en la facturación: #{error}")}
+  end
+
   attr :sign_result, AsyncResult, required: true
 
   defp sign_electronic_invoice_button(assigns) do
