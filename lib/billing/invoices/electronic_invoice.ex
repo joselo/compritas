@@ -72,4 +72,8 @@ defmodule Billing.Invoices.ElectronicInvoice do
   def allow_verify_authorization(current_state) do
     current_state == :not_found_or_pending
   end
+
+  def authorized?(current_state) do
+    current_state == :authorized
+  end
 end

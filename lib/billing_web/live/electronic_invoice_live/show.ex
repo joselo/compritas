@@ -43,6 +43,15 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
             {@invoice.customer.full_name}
           </.link>
         </:item>
+        <:item :if={ElectronicInvoice.authorized?(@electronic_invoice.state)} title="Documents">
+          <.link href={~p"/electronic_invoice/#{@electronic_invoice.id}/xml"} class="btn btn-ghost">
+            <.icon name="hero-arrow-down-tray" /> XML
+          </.link>
+
+          <.link href={~p"/electronic_invoice/#{@electronic_invoice.id}/pdf"} class="btn btn-ghost">
+            <.icon name="hero-arrow-down-tray" /> PDF
+          </.link>
+        </:item>
       </.list>
     </Layouts.app>
     """
