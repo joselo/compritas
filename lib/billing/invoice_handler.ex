@@ -1,30 +1,30 @@
 defmodule Billing.InvoiceHandler do
-  alias Billing.Invoices
+  alias Billing.Quotes
   alias Billing.Invoicing
   alias Billing.TaxiDriver
   alias Billing.ElectronicInvoices
   alias Billing.EmissionProfiles
-  alias Billing.Invoices.ElectronicInvoice
+  alias Billing.Quotes.ElectronicInvoice
   alias Phoenix.PubSub
   alias Billing.ElectronicInvoiceCheckerWorker
   alias Billing.ElectronicInvoicePdfWorker
   alias Billing.InvoicingWorker
 
-  def sign_electronic_invoice(invoice_id) do
-    invoice = Invoices.get_invoice!(invoice_id)
-    certificate = Billing.Invoicing.fetch_certificate(invoice)
+  def sign_electronic_invoice(quote_id) do
+    quote = Quotes.get_quote!(quote_id)
+    certificate = Billing.Invoicing.fetch_certificate(quote)
 
     with {:ok, _p12_path} <- p12_file_exists?(certificate.file),
 
          # Increment the emoission profile sequence
          {:ok, _emission_profile} <-
-           increment_emission_profile_sequence(invoice.emission_profile_id),
+           increment_emission_profile_sequence(quote.emission_profile_id),
 
          # Build Invoice params
-         {:ok, invoice_params} <- Invoicing.build_request_params(invoice),
+         {:ok, invoice_params} <- Invoicing.build_request_params(quote),
 
          # Electronic Invoice :created
-         {:ok, electronic_invoice} <- create_electronic_invoice(invoice.id, invoice_params) do
+         {:ok, electronic_invoice} <- create_electronic_invoice(quote.id, invoice_params) do
       sign_xml(electronic_invoice, certificate)
     else
       {:error, error} ->
@@ -85,10 +85,10 @@ defmodule Billing.InvoiceHandler do
 
   # Electronic Invoice :created
 
-  def create_electronic_invoice(invoice_id, invoice_params) do
+  def create_electronic_invoice(quote_id, invoice_params) do
     with {:ok, body: xml, access_key: access_key} <- TaxiDriver.build_invoice_xml(invoice_params),
          {:ok, _xml_path} <- save_xml(xml, access_key) do
-      ElectronicInvoices.create_electronic_invoice(invoice_id, access_key)
+      ElectronicInvoices.create_electronic_invoice(quote_id, access_key)
     else
       error -> error
     end
@@ -261,7 +261,7 @@ defmodule Billing.InvoiceHandler do
 
     PubSub.broadcast(
       Billing.PubSub,
-      "invoice:#{electronic_invoice.invoice_id}",
+      "quote:#{electronic_invoice.quote_id}",
       {:electronic_invoice_updated, %{electronic_invoice_id: electronic_invoice.id}}
     )
 
@@ -278,7 +278,7 @@ defmodule Billing.InvoiceHandler do
 
     PubSub.broadcast(
       Billing.PubSub,
-      "invoice_id:#{electronic_invoice.invoice_id}",
+      "quote_id:#{electronic_invoice.quote_id}",
       {:electronic_invoice_error,
        %{electronic_invoice_id: electronic_invoice.id, error: inspect(error)}}
     )

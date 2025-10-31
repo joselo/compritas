@@ -15,8 +15,8 @@ alias Billing.Customers.Customer
 alias Billing.Companies.Company
 alias Billing.Certificates.Certificate
 alias Billing.EmissionProfiles.EmissionProfile
-alias Billing.Invoices.Invoice
-alias Billing.Invoices
+alias Billing.Quotes.Quote
+alias Billing.Quotes
 alias Billing.Certificates
 alias Billing.Products.Product
 
@@ -61,8 +61,8 @@ emission_profile =
   |> Repo.insert!()
 
 Enum.each(1..20, fn _ ->
-  invoice =
-    %Invoice{
+  quote =
+    %Quote{
       customer_id: customer.id,
       emission_profile_id: emission_profile.id,
       issued_at: Date.utc_today(),
@@ -74,8 +74,8 @@ Enum.each(1..20, fn _ ->
     }
     |> Repo.insert!()
 
-  amount_without_tax = Invoices.calculate_amount_without_tax(invoice)
-  Invoices.save_taxes(invoice, amount_without_tax)
+  amount_without_tax = Quotes.calculate_amount_without_tax(quote)
+  Quotes.save_taxes(quote, amount_without_tax)
 end)
 
 %Product{

@@ -78,11 +78,11 @@ defmodule BillingWeb.Router do
       live "/customers/:id", CustomerLive.Show, :show
       live "/customers/:id/edit", CustomerLive.Form, :edit
 
-      live "/invoices", InvoiceLive.Index, :index
-      live "/invoices/new/:order_id", InvoiceLive.Form, :new
-      live "/invoices/new", InvoiceLive.Form, :new
-      live "/invoices/:id", InvoiceLive.Show, :show
-      live "/invoices/:id/edit", InvoiceLive.Form, :edit
+      live "/quotes", QuoteLive.Index, :index
+      live "/quotes/new/:order_id", QuoteLive.Form, :new
+      live "/quotes/new", QuoteLive.Form, :new
+      live "/quotes/:id", QuoteLive.Show, :show
+      live "/quotes/:id/edit", QuoteLive.Form, :edit
 
       live "/certificates", CertificateLive.Index, :index
       live "/certificates/new", CertificateLive.Form, :new

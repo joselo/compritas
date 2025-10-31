@@ -2,7 +2,7 @@ defmodule BillingWeb.ElectronicInvoiceComponents do
   use Phoenix.Component
   use Gettext, backend: BillingWeb.Gettext
 
-  alias Billing.Invoices.ElectronicInvoice
+  alias Billing.Quotes.ElectronicInvoice
 
   @statuses_css_class %{
     created: "badge-primary",

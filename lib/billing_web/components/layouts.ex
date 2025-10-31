@@ -73,13 +73,13 @@ defmodule BillingWeb.Layouts do
             </.link>
           </li>
           <li>
-            <.link navigate={~p"/invoices"}>
-              <.icon name="hero-currency-dollar" /> Invoices
+            <.link navigate={~p"/quotes"}>
+              <.icon name="hero-currency-dollar" /> Quotes
             </.link>
           </li>
           <li>
             <.link navigate={~p"/electronic_invoices"}>
-              <.icon name="hero-at-symbol" /> Electronic Invoices
+              <.icon name="hero-at-symbol" /> Electronic Quotes
             </.link>
           </li>
           <li>
@@ -157,7 +157,7 @@ defmodule BillingWeb.Layouts do
       </div>
       <div class="flex justify-end items-center space-x-2">
         <%= if @current_scope do %>
-          <.link navigate={~p"/invoices"} class="btn btn-ghost">
+          <.link navigate={~p"/quotes"} class="btn btn-ghost">
             <.icon name="hero-cog-6-tooth" /> Manager
           </.link>
           <.link href={~p"/users/log-out"} method="delete" class="btn btn-ghost">

@@ -1,8 +1,8 @@
-defmodule BillingWeb.InvoiceLiveTest do
+defmodule BillingWeb.QuoteLiveTest do
   use BillingWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Billing.InvoicesFixtures
+  import Billing.QuotesFixtures
   import Billing.CustomersFixtures
   import Billing.EmissionProfilesFixtures
   import Billing.AccountsFixtures
@@ -19,9 +19,9 @@ defmodule BillingWeb.InvoiceLiveTest do
   @update_attrs %{issued_at: "2025-08-29"}
   @invalid_attrs %{issued_at: nil}
   defp create_invoice(_) do
-    invoice = invoice_fixture()
+    quote = invoice_fixture()
 
-    %{invoice: invoice}
+    %{quote: quote}
   end
 
   setup %{conn: conn} do
@@ -35,29 +35,29 @@ defmodule BillingWeb.InvoiceLiveTest do
   describe "Index" do
     setup [:create_invoice]
 
-    test "lists all invoices", %{conn: conn} do
-      {:ok, _index_live, html} = live(conn, ~p"/invoices")
+    test "lists all quotes", %{conn: conn} do
+      {:ok, _index_live, html} = live(conn, ~p"/quotes")
 
       assert html =~ "Listado de Facturas"
     end
 
-    test "saves new invoice", %{
+    test "saves new quote", %{
       conn: conn,
       customer: customer,
       emission_profile: emission_profile
     } do
-      {:ok, index_live, _html} = live(conn, ~p"/invoices")
+      {:ok, index_live, _html} = live(conn, ~p"/quotes")
 
       assert {:ok, form_live, _} =
                index_live
                |> element("a", "New Invoice")
                |> render_click()
-               |> follow_redirect(conn, ~p"/invoices/new")
+               |> follow_redirect(conn, ~p"/quotes/new")
 
       assert render(form_live) =~ "New Invoice"
 
       assert form_live
-             |> form("#invoice-form", invoice: @invalid_attrs)
+             |> form("#quote-form", quote: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       attrs =
@@ -67,76 +67,76 @@ defmodule BillingWeb.InvoiceLiveTest do
 
       assert {:ok, index_live, _html} =
                form_live
-               |> form("#invoice-form", invoice: attrs)
+               |> form("#quote-form", quote: attrs)
                |> render_submit()
-               |> follow_redirect(conn, ~p"/invoices")
+               |> follow_redirect(conn, ~p"/quotes")
 
       html = render(index_live)
       assert html =~ "Invoice created successfully"
     end
 
-    test "updates invoice in listing", %{conn: conn, invoice: invoice} do
-      {:ok, index_live, _html} = live(conn, ~p"/invoices")
+    test "updates quote in listing", %{conn: conn, quote: quote} do
+      {:ok, index_live, _html} = live(conn, ~p"/quotes")
 
       assert {:ok, form_live, _html} =
                index_live
-               |> element("#invoices-#{invoice.id} a", "Edit")
+               |> element("#quotes-#{quote.id} a", "Edit")
                |> render_click()
-               |> follow_redirect(conn, ~p"/invoices/#{invoice}/edit")
+               |> follow_redirect(conn, ~p"/quotes/#{quote}/edit")
 
       assert render(form_live) =~ "Edit Invoice"
 
       assert form_live
-             |> form("#invoice-form", invoice: @invalid_attrs)
+             |> form("#quote-form", quote: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       assert {:ok, index_live, _html} =
                form_live
-               |> form("#invoice-form", invoice: @update_attrs)
+               |> form("#quote-form", quote: @update_attrs)
                |> render_submit()
-               |> follow_redirect(conn, ~p"/invoices")
+               |> follow_redirect(conn, ~p"/quotes")
 
       html = render(index_live)
       assert html =~ "Invoice updated successfully"
     end
 
-    test "deletes invoice in listing", %{conn: conn, invoice: invoice} do
-      {:ok, index_live, _html} = live(conn, ~p"/invoices")
+    test "deletes quote in listing", %{conn: conn, quote: quote} do
+      {:ok, index_live, _html} = live(conn, ~p"/quotes")
 
-      assert index_live |> element("#invoices-#{invoice.id} a", "Delete") |> render_click()
-      refute has_element?(index_live, "#invoices-#{invoice.id}")
+      assert index_live |> element("#quotes-#{quote.id} a", "Delete") |> render_click()
+      refute has_element?(index_live, "#quotes-#{quote.id}")
     end
   end
 
   describe "Show" do
     setup [:create_invoice]
 
-    test "displays invoice", %{conn: conn, invoice: invoice} do
-      {:ok, _show_live, html} = live(conn, ~p"/invoices/#{invoice}")
+    test "displays quote", %{conn: conn, quote: quote} do
+      {:ok, _show_live, html} = live(conn, ~p"/quotes/#{quote}")
 
       assert html =~ "Show Invoice"
     end
 
-    test "updates invoice and returns to show", %{conn: conn, invoice: invoice} do
-      {:ok, show_live, _html} = live(conn, ~p"/invoices/#{invoice}")
+    test "updates quote and returns to show", %{conn: conn, quote: quote} do
+      {:ok, show_live, _html} = live(conn, ~p"/quotes/#{quote}")
 
       assert {:ok, form_live, _} =
                show_live
                |> element("a", "Edit")
                |> render_click()
-               |> follow_redirect(conn, ~p"/invoices/#{invoice}/edit?return_to=show")
+               |> follow_redirect(conn, ~p"/quotes/#{quote}/edit?return_to=show")
 
       assert render(form_live) =~ "Edit Invoice"
 
       assert form_live
-             |> form("#invoice-form", invoice: @invalid_attrs)
+             |> form("#quote-form", quote: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       assert {:ok, show_live, _html} =
                form_live
-               |> form("#invoice-form", invoice: @update_attrs)
+               |> form("#quote-form", quote: @update_attrs)
                |> render_submit()
-               |> follow_redirect(conn, ~p"/invoices/#{invoice}")
+               |> follow_redirect(conn, ~p"/quotes/#{quote}")
 
       html = render(show_live)
       assert html =~ "Invoice updated successfully"

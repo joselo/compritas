@@ -1,10 +1,10 @@
 defmodule Billing.LLM.InvoiceTool do
   alias LangChain.Function
-  alias Billing.Invoices
+  alias Billing.Quotes
 
   def new!() do
     Function.new!(%{
-      name: "invoices",
+      name: "quotes",
       display_text: "Facturas",
       description: "Obtiene la información de las facturas.",
       parameters_schema: %{},
@@ -13,7 +13,7 @@ defmodule Billing.LLM.InvoiceTool do
   end
 
   def execute(_args, _context) do
-    json_invoices = Jason.encode!(Invoices.list_invoices())
+    json_invoices = Jason.encode!(Quotes.list_quotes())
 
     {:ok, json_invoices}
   end

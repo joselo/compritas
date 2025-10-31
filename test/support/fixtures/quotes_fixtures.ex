@@ -1,20 +1,20 @@
-defmodule Billing.InvoicesFixtures do
+defmodule Billing.QuotesFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Billing.Invoices` context.
+  entities via the `Billing.Quotes` context.
   """
 
   import Billing.CustomersFixtures
   import Billing.EmissionProfilesFixtures
 
   @doc """
-  Generate a invoice.
+  Generate a quote.
   """
   def invoice_fixture(attrs \\ %{}) do
     customer = customer_fixture()
     emission_profile = emission_profile_fixture()
 
-    {:ok, invoice} =
+    {:ok, quote} =
       attrs
       |> Enum.into(%{
         customer_id: customer.id,
@@ -26,8 +26,8 @@ defmodule Billing.InvoicesFixtures do
         tax_rate: Decimal.new("15.0"),
         payment_method: :cash
       })
-      |> Billing.Invoices.create_invoice()
+      |> Billing.Quotes.create_quote()
 
-    invoice
+    quote
   end
 end

@@ -5,7 +5,7 @@ defmodule Billing.EmissionProfiles.EmissionProfile do
   schema "emission_profiles" do
     belongs_to :certificate, Billing.Certificates.Certificate
     belongs_to :company, Billing.Companies.Company
-    has_many :invoices, Billing.Invoices.Invoice
+    has_many :quotes, Billing.Quotes.Quote
 
     field :name, :string
     field :sequence, :integer

@@ -14,7 +14,7 @@ defmodule BillingWeb.OrderLive.Show do
           <.button navigate={~p"/orders"}>
             <.icon name="hero-arrow-left" />
           </.button>
-          <.link navigate={~p"/invoices/new/#{@order.id}"} class="btn btn-primary">
+          <.link navigate={~p"/quotes/new/#{@order.id}"} class="btn btn-primary">
             <.icon name="hero-plus" /> New Invoice
           </.link>
         </:actions>

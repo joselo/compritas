@@ -9,7 +9,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Index do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
-        Listing Electronic Invoices
+        Listing Electronic Quotes
       </.header>
 
       <.table
@@ -22,7 +22,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Index do
         }
       >
         <:col :let={{_id, electronic_invoice}} label="Invoice">
-          {electronic_invoice.invoice.customer.full_name}
+          {electronic_invoice.quote.customer.full_name}
         </:col>
         <:col :let={{_id, electronic_invoice}} label="Name">{electronic_invoice.access_key}</:col>
         <:col :let={{_id, electronic_invoice}} label="State">
@@ -37,7 +37,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Index do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Listing Electronic Invoices")
+     |> assign(:page_title, "Listing Electronic Quotes")
      |> stream(:electronic_invoices, list_electronic_invoices())}
   end
 

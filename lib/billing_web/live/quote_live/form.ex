@@ -1,8 +1,8 @@
-defmodule BillingWeb.InvoiceLive.Form do
+defmodule BillingWeb.QuoteLive.Form do
   use BillingWeb, :live_view
 
-  alias Billing.Invoices
-  alias Billing.Invoices.Invoice
+  alias Billing.Quotes
+  alias Billing.Quotes.Quote
   alias Billing.Customers
   alias Billing.Customers.Customer
   alias Billing.Orders
@@ -13,10 +13,10 @@ defmodule BillingWeb.InvoiceLive.Form do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
         {@page_title}
-        <:subtitle>Use this form to manage invoice records in your database.</:subtitle>
+        <:subtitle>Use this form to manage quote records in your database.</:subtitle>
       </.header>
 
-      <.form for={@form} id="invoice-form" phx-change="validate" phx-submit="save">
+      <.form for={@form} id="quote-form" phx-change="validate" phx-submit="save">
         <.input field={@form[:customer_id]} type="select" options={@customers} label="Customer" />
         <.input
           field={@form[:emission_profile_id]}
@@ -37,7 +37,7 @@ defmodule BillingWeb.InvoiceLive.Form do
         />
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Invoice</.button>
-          <.button navigate={return_path(@return_to, @invoice)}>Cancel</.button>
+          <.button navigate={return_path(@return_to, @quote)}>Cancel</.button>
         </footer>
       </.form>
     </Layouts.app>
@@ -68,12 +68,12 @@ defmodule BillingWeb.InvoiceLive.Form do
   defp return_to(_), do: "index"
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    invoice = Invoices.get_invoice!(id)
+    quote = Quotes.get_quote!(id)
 
     socket
     |> assign(:page_title, "Edit Invoice")
-    |> assign(:invoice, invoice)
-    |> assign(:form, to_form(Invoices.change_invoice(invoice)))
+    |> assign(:quote, quote)
+    |> assign(:form, to_form(Quotes.change_quote(quote)))
   end
 
   defp apply_action(socket, :new, %{"order_id" => order_id}) do
@@ -110,24 +110,24 @@ defmodule BillingWeb.InvoiceLive.Form do
   end
 
   @impl true
-  def handle_event("validate", %{"invoice" => invoice_params}, socket) do
-    changeset = Invoices.change_invoice(socket.assigns.invoice, invoice_params)
+  def handle_event("validate", %{"quote" => invoice_params}, socket) do
+    changeset = Quotes.change_quote(socket.assigns.quote, invoice_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
-  def handle_event("save", %{"invoice" => invoice_params}, socket) do
+  def handle_event("save", %{"quote" => invoice_params}, socket) do
     save_invoice(socket, socket.assigns.live_action, invoice_params)
   end
 
   defp save_invoice(socket, :edit, invoice_params) do
-    case Invoices.update_invoice(socket.assigns.invoice, invoice_params) do
-      {:ok, invoice} ->
-        save_invoice_taxes(invoice)
+    case Quotes.update_quote(socket.assigns.quote, invoice_params) do
+      {:ok, quote} ->
+        save_invoice_taxes(quote)
 
         {:noreply,
          socket
          |> put_flash(:info, "Invoice updated successfully")
-         |> push_navigate(to: return_path(socket.assigns.return_to, invoice))}
+         |> push_navigate(to: return_path(socket.assigns.return_to, quote))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -135,26 +135,26 @@ defmodule BillingWeb.InvoiceLive.Form do
   end
 
   defp save_invoice(socket, :new, invoice_params) do
-    case Invoices.create_invoice(invoice_params) do
-      {:ok, invoice} ->
-        save_invoice_taxes(invoice)
+    case Quotes.create_quote(invoice_params) do
+      {:ok, quote} ->
+        save_invoice_taxes(quote)
 
         {:noreply,
          socket
          |> put_flash(:info, "Invoice created successfully")
-         |> push_navigate(to: return_path(socket.assigns.return_to, invoice))}
+         |> push_navigate(to: return_path(socket.assigns.return_to, quote))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
     end
   end
 
-  defp return_path("index", _invoice), do: ~p"/invoices"
-  defp return_path("show", invoice), do: ~p"/invoices/#{invoice}"
+  defp return_path("index", _invoice), do: ~p"/quotes"
+  defp return_path("show", quote), do: ~p"/quotes/#{quote}"
 
-  defp save_invoice_taxes(invoice) do
-    amount_without_tax = Invoices.calculate_amount_without_tax(invoice)
-    Invoices.save_taxes(invoice, amount_without_tax)
+  defp save_invoice_taxes(quote) do
+    amount_without_tax = Quotes.calculate_amount_without_tax(quote)
+    Quotes.save_taxes(quote, amount_without_tax)
   end
 
   defp find_or_create_customer(order) do
@@ -164,12 +164,12 @@ defmodule BillingWeb.InvoiceLive.Form do
   end
 
   defp assign_new_invoice(socket, params \\ %{}) do
-    invoice = %Invoice{}
+    quote = %Quote{}
 
     socket
     |> assign(:page_title, "New Invoice")
-    |> assign(:invoice, invoice)
-    |> assign(:form, to_form(Invoices.change_invoice(invoice, params)))
+    |> assign(:quote, quote)
+    |> assign(:form, to_form(Quotes.change_quote(quote, params)))
   end
 
   defp assign_customers(socket) do

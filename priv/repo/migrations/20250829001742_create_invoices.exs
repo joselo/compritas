@@ -2,7 +2,7 @@ defmodule Billing.Repo.Migrations.CreateInvoices do
   use Ecto.Migration
 
   def change do
-    create table(:invoices) do
+    create table(:quotes) do
       add :customer_id, references(:customers, on_delete: :delete_all)
       add :issued_at, :date
       add :due_date, :date
@@ -15,6 +15,6 @@ defmodule Billing.Repo.Migrations.CreateInvoices do
       timestamps(type: :utc_datetime)
     end
 
-    create index(:invoices, [:customer_id])
+    create index(:quotes, [:customer_id])
   end
 end

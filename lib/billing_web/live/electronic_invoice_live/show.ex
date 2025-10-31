@@ -3,13 +3,13 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
 
   alias Billing.ElectronicInvoices
   alias Billing.ElectronicInvoice
-  alias Billing.Invoices.ElectronicInvoice
+  alias Billing.Quotes.ElectronicInvoice
   alias Phoenix.PubSub
   alias Billing.InvoiceHandler
   alias Billing.ElectronicInvoiceErrors
   alias Phoenix.LiveView.AsyncResult
   alias BillingWeb.ElectronicInvoiceComponents
-  alias Billing.Invoices
+  alias Billing.Quotes
 
   @impl true
   def render(assigns) do
@@ -17,7 +17,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <.header>
         Electronic Invoice {@electronic_invoice.id}
-        <:subtitle>This is a electronic invoice record from your database.</:subtitle>
+        <:subtitle>This is a electronic quote record from your database.</:subtitle>
         <:actions>
           <.button navigate={~p"/electronic_invoices"}>
             <.icon name="hero-arrow-left" />
@@ -39,8 +39,8 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
         </:item>
         <:item title="Access Key">{@electronic_invoice.access_key}</:item>
         <:item title="Invoice">
-          <.link navigate={~p"/invoices/#{@invoice.id}"} class="link">
-            {@invoice.customer.full_name}
+          <.link navigate={~p"/quotes/#{@quote.id}"} class="link">
+            {@quote.customer.full_name}
           </.link>
         </:item>
         <:item :if={ElectronicInvoice.authorized?(@electronic_invoice.state)} title="Documents">
@@ -172,7 +172,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
             css_class: "badge-primary"
           }
         else
-          %{label: "Not invoice yet", css_class: "badge-info"}
+          %{label: "Not quote yet", css_class: "badge-info"}
         end
       end)
 
@@ -216,7 +216,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
   end
 
   defp assign_invoice(socket) do
-    assign(socket, :invoice, Invoices.get_invoice!(socket.assigns.electronic_invoice.invoice_id))
+    assign(socket, :quote, Quotes.get_quote!(socket.assigns.electronic_invoice.quote_id))
   end
 
   attr :send_result, AsyncResult, required: true
@@ -225,7 +225,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
     ~H"""
     <.button variant="primary" phx-click="send_electronic_invoice" disabled={@send_result.loading}>
       <span :if={@send_result.loading} class="loading loading-spinner loading-md"></span>
-      <.icon :if={!@send_result.loading} name="hero-paper-airplane" /> Send electronic invoice
+      <.icon :if={!@send_result.loading} name="hero-paper-airplane" /> Send electronic quote
     </.button>
     """
   end
@@ -236,7 +236,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
     ~H"""
     <.button variant="primary" phx-click="auth_electronic_invoice" disabled={@auth_result.loading}>
       <span :if={@auth_result.loading} class="loading loading-spinner loading-md"></span>
-      <.icon :if={!@auth_result.loading} name="hero-check-badge" /> Auth electronic invoice
+      <.icon :if={!@auth_result.loading} name="hero-check-badge" /> Auth electronic quote
     </.button>
     """
   end

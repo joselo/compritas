@@ -1,7 +1,7 @@
 defmodule Billing.InvoicingTest do
   use Billing.DataCase
 
-  import Billing.InvoicesFixtures
+  import Billing.QuotesFixtures
   import Billing.CustomersFixtures
   import Billing.EmissionProfilesFixtures
   import Billing.CompaniesFixtures
@@ -40,7 +40,7 @@ defmodule Billing.InvoicingTest do
         sequence: 1
       })
 
-    invoice =
+    quote =
       invoice_fixture(%{
         customer_id: customer.id,
         emission_profile_id: emission_profile.id,
@@ -52,15 +52,15 @@ defmodule Billing.InvoicingTest do
         payment_method: "cash"
       })
 
-    amount_without_tax = Billing.Invoices.calculate_amount_without_tax(invoice)
-    Billing.Invoices.save_taxes(invoice, amount_without_tax)
+    amount_without_tax = Billing.Quotes.calculate_amount_without_tax(quote)
+    Billing.Quotes.save_taxes(quote, amount_without_tax)
 
-    {:ok, invoice: invoice}
+    {:ok, quote: quote}
   end
 
   describe "build_request_params" do
-    test "creates invoice request params", %{invoice: invoice} do
-      {:ok, params} = Billing.Invoicing.build_request_params(invoice)
+    test "creates quote request params", %{quote: quote} do
+      {:ok, params} = Billing.Invoicing.build_request_params(quote)
 
       assert params[:factura][:info_factura] == %{
                fecha_emision: "2025-08-21",
@@ -106,7 +106,7 @@ defmodule Billing.InvoicingTest do
                clave: %{
                  ruc: "1792146739001",
                  ambiente: 1,
-                 codigo: invoice.id,
+                 codigo: quote.id,
                  estab: 1,
                  fecha_emision: "2025-08-21",
                  pto_emi: 1,
@@ -131,12 +131,12 @@ defmodule Billing.InvoicingTest do
       assert params[:factura][:detalles] == [
                %{
                  cantidad: 1,
-                 codigo_auxiliar: Integer.to_string(invoice.id),
-                 codigo_principal: Integer.to_string(invoice.id),
-                 descripcion: invoice.description,
+                 codigo_auxiliar: Integer.to_string(quote.id),
+                 codigo_principal: Integer.to_string(quote.id),
+                 descripcion: quote.description,
                  descuento: 0.0,
                  detalles_adicionales: [
-                   %{nombre: "informacionAdicional", valor: Integer.to_string(invoice.id)}
+                   %{nombre: "informacionAdicional", valor: Integer.to_string(quote.id)}
                  ],
                  impuestos: [
                    %{

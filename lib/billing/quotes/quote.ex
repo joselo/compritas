@@ -1,14 +1,14 @@
-defmodule Billing.Invoices.Invoice do
+defmodule Billing.Quotes.Quote do
   use Ecto.Schema
   import Ecto.Changeset
 
   @derive {Jason.Encoder, only: [:amount]}
 
-  schema "invoices" do
+  schema "quotes" do
     belongs_to :customer, Billing.Customers.Customer
     belongs_to :emission_profile, Billing.EmissionProfiles.EmissionProfile
 
-    has_many :electronic_invoices, Billing.Invoices.ElectronicInvoice
+    has_many :electronic_invoices, Billing.Quotes.ElectronicInvoice
 
     field :issued_at, :date
     field :description, :string
@@ -22,8 +22,8 @@ defmodule Billing.Invoices.Invoice do
   end
 
   @doc false
-  def changeset(invoice, attrs) do
-    invoice
+  def changeset(quote, attrs) do
+    quote
     |> cast(attrs, [
       :customer_id,
       :emission_profile_id,

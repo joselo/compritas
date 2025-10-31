@@ -1,7 +1,7 @@
 defmodule Billing.ElectronicInvoiceErrors do
   import SweetXml
 
-  alias Billing.Invoices.ElectronicInvoice
+  alias Billing.Quotes.ElectronicInvoice
   alias Billing.InvoiceHandler
 
   @errors [

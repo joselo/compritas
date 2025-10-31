@@ -1,4 +1,4 @@
-defmodule Billing.Invoices.ElectronicInvoice do
+defmodule Billing.Quotes.ElectronicInvoice do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -34,7 +34,7 @@ defmodule Billing.Invoices.ElectronicInvoice do
   }
 
   schema "electronic_invoices" do
-    belongs_to :invoice, Billing.Invoices.Invoice
+    belongs_to :quote, Billing.Quotes.Quote
 
     field :access_key, :string
     field :state, Ecto.Enum, values: @statuses, default: :created
@@ -46,12 +46,12 @@ defmodule Billing.Invoices.ElectronicInvoice do
   def changeset(electronic_invoice, attrs) do
     electronic_invoice
     |> cast(attrs, [
-      :invoice_id,
+      :quote_id,
       :access_key,
       :state
     ])
     |> validate_required([
-      :invoice_id,
+      :quote_id,
       :access_key,
       :state
     ])

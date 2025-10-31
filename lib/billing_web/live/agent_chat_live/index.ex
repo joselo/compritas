@@ -204,7 +204,7 @@ defmodule BillingWeb.AgentChatLive.Index do
 
       ## Herramientas disponibles
 
-      - `invoices`: Usa esta herramienta cuando el usuario pregunte sobre montos, totales o información relacionada con facturas.
+      - `quotes`: Usa esta herramienta cuando el usuario pregunte sobre montos, totales o información relacionada con facturas.
     """
 
     llm_chain =

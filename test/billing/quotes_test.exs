@@ -1,0 +1,101 @@
+defmodule Billing.QuotesTest do
+  use Billing.DataCase
+
+  import Billing.CustomersFixtures
+  import Billing.EmissionProfilesFixtures
+
+  alias Billing.Quotes
+  alias Billing.Repo
+  alias Billing.Quotes.Quote
+
+  setup do
+    customer = customer_fixture()
+    emission_profile = emission_profile_fixture()
+
+    {:ok, customer: customer, emission_profile: emission_profile}
+  end
+
+  describe "quotes" do
+    alias Billing.Quotes.Quote
+
+    import Billing.QuotesFixtures
+
+    @invalid_attrs %{issued_at: nil}
+
+    test "list_quotes/0 returns all quotes" do
+      quote = invoice_fixture()
+
+      quote =
+        Quote
+        |> Repo.get!(quote.id)
+        |> Repo.preload([:customer])
+
+      assert Quotes.list_quotes() == [quote]
+    end
+
+    test "get_quote!/1 returns the quote with given id" do
+      quote = invoice_fixture()
+
+      quote =
+        Quote
+        |> Repo.get!(quote.id)
+        |> Repo.preload([:customer])
+
+      assert Quotes.get_quote!(quote.id) == quote
+    end
+
+    test "create_quote/1 with valid data creates a quote", %{
+      customer: customer,
+      emission_profile: emission_profile
+    } do
+      valid_attrs = %{
+        customer_id: customer.id,
+        emission_profile_id: emission_profile.id,
+        issued_at: ~D[2025-08-28],
+        description: "Quote Test",
+        due_date: ~D[2025-08-28],
+        amount: Decimal.new("10.0"),
+        tax_rate: Decimal.new("15.0"),
+        payment_method: :cash
+      }
+
+      assert {:ok, %Quote{} = quote} = Quotes.create_quote(valid_attrs)
+      assert quote.issued_at == ~D[2025-08-28]
+    end
+
+    test "create_quote/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Quotes.create_quote(@invalid_attrs)
+    end
+
+    test "update_quote/2 with valid data updates the quote" do
+      quote = invoice_fixture()
+      update_attrs = %{issued_at: ~D[2025-08-29]}
+
+      assert {:ok, %Quote{} = quote} = Quotes.update_quote(quote, update_attrs)
+      assert quote.issued_at == ~D[2025-08-29]
+    end
+
+    test "update_quote/2 with invalid data returns error changeset" do
+      quote = invoice_fixture()
+
+      quote =
+        Quote
+        |> Repo.get!(quote.id)
+        |> Repo.preload([:customer])
+
+      assert {:error, %Ecto.Changeset{}} = Quotes.update_quote(quote, @invalid_attrs)
+      assert quote == Quotes.get_quote!(quote.id)
+    end
+
+    test "delete_quote/1 deletes the quote" do
+      quote = invoice_fixture()
+      assert {:ok, %Quote{}} = Quotes.delete_quote(quote)
+      assert_raise Ecto.NoResultsError, fn -> Quotes.get_quote!(quote.id) end
+    end
+
+    test "change_quote/1 returns a quote changeset" do
+      quote = invoice_fixture()
+      assert %Ecto.Changeset{} = Quotes.change_quote(quote)
+    end
+  end
+end

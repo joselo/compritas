@@ -4,10 +4,10 @@ defmodule Billing.ElectronicInvoices do
   import Ecto.Query, warn: false
   alias Billing.Repo
 
-  alias Billing.Invoices.ElectronicInvoice
+  alias Billing.Quotes.ElectronicInvoice
 
-  def create_electronic_invoice(invoice_id, access_key) do
-    attrs = %{invoice_id: invoice_id, access_key: access_key}
+  def create_electronic_invoice(quote_id, access_key) do
+    attrs = %{quote_id: quote_id, access_key: access_key}
 
     %ElectronicInvoice{}
     |> ElectronicInvoice.changeset(attrs)
@@ -22,10 +22,10 @@ defmodule Billing.ElectronicInvoices do
     |> Repo.update()
   end
 
-  def list_electronic_invoices_by_invoice_id(invoice_id) do
+  def list_electronic_invoices_by_invoice_id(quote_id) do
     query =
       from(ei in ElectronicInvoice,
-        where: ei.invoice_id == ^invoice_id,
+        where: ei.quote_id == ^quote_id,
         order_by: [desc: ei.inserted_at]
       )
 
@@ -51,6 +51,6 @@ defmodule Billing.ElectronicInvoices do
   def list_electronic_invoices do
     ElectronicInvoice
     |> Repo.all()
-    |> Repo.preload(invoice: :customer)
+    |> Repo.preload(quote: :customer)
   end
 end
