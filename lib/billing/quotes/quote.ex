@@ -2,6 +2,8 @@ defmodule Billing.Quotes.Quote do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Billing.Quote.QuoteItem
+
   @derive {Jason.Encoder, only: [:amount]}
 
   schema "quotes" do
@@ -9,6 +11,7 @@ defmodule Billing.Quotes.Quote do
     belongs_to :emission_profile, Billing.EmissionProfiles.EmissionProfile
 
     has_many :electronic_invoices, Billing.Quotes.ElectronicInvoice
+    has_many :items, QuoteItem, foreign_key: :quote_id
 
     field :issued_at, :date
     field :description, :string
@@ -44,5 +47,6 @@ defmodule Billing.Quotes.Quote do
       :tax_rate,
       :payment_method
     ])
+    |> cast_assoc(:items)
   end
 end
