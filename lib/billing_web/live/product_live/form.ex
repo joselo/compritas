@@ -16,7 +16,17 @@ defmodule BillingWeb.ProductLive.Form do
       <.form for={@form} id="product-form" phx-change="validate" phx-submit="save">
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:price]} type="number" label="Price" step="any" />
-        <.live_file_input upload={@uploads.files} />
+
+        <div class="fieldset mb-2">
+          <label>
+            <span class="label mb-1">Imagenes</span>
+
+            <div>
+              <.live_file_input upload={@uploads.files} class="file-input" />
+            </div>
+          </label>
+        </div>
+
         <.uploads_section uploads={@uploads} />
 
         <footer>

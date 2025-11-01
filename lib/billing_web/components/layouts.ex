@@ -38,14 +38,18 @@ defmodule BillingWeb.Layouts do
     <div class="drawer lg:drawer-open">
       <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content flex flex-col">
-        <label for="my-drawer-3" class="btn drawer-button lg:hidden">
-          Open drawer
-        </label>
-
         <main class="px-4 py-4 sm:px-6 lg:px-8">
           <div class="mx-auto max-w-2xl space-y-4">
-            <div class="flex justify-end">
-              <.theme_toggle />
+            <div class="flex">
+              <div class="flex-1">
+                <label for="my-drawer-3" class="btn drawer-button lg:hidden">
+                  <.icon name="hero-bars-3" />
+                </label>
+              </div>
+
+              <div class="flex justify-end">
+                <.theme_toggle />
+              </div>
             </div>
 
             <div class="py-20">
