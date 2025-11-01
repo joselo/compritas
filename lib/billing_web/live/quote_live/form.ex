@@ -38,9 +38,19 @@ defmodule BillingWeb.QuoteLive.Form do
         />
 
         <.inputs_for :let={f} field={@form[:items]}>
-          <div class="grid grid-cols-2">
+          <div class="grid grid-cols-3">
             <.input field={f[:name]} type="text" />
             <.input field={f[:amount]} type="text" />
+            <.input field={f[:marked_for_deletion]} type="checkbox" />
+
+            <.button
+              type="button"
+              class="btn btn-neutral"
+              phx-click="remove_item"
+              phx-value-index={f.index}
+            >
+              {gettext("Remove Item")}
+            </.button>
           </div>
         </.inputs_for>
 
@@ -123,18 +133,18 @@ defmodule BillingWeb.QuoteLive.Form do
   end
 
   @impl true
-  def handle_event("validate", %{"quote" => invoice_params}, socket) do
-    changeset = Quotes.change_quote(socket.assigns.quote, invoice_params)
+  def handle_event("validate", %{"quote" => quote_params}, socket) do
+    changeset = Quotes.change_quote(socket.assigns.quote, quote_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
-  def handle_event("save", %{"quote" => invoice_params}, socket) do
-    save_invoice(socket, socket.assigns.live_action, invoice_params)
+  def handle_event("save", %{"quote" => quote_params}, socket) do
+    save_quote(socket, socket.assigns.live_action, quote_params)
   end
 
   def handle_event("add_item", _params, socket) do
     items =
-      Ecto.Changeset.get_change(socket.assigns.form.source, :items, socket.assigns.quote.items)
+      Ecto.Changeset.get_field(socket.assigns.form.source, :items, socket.assigns.quote.items)
 
     items_updated = items ++ [Quotes.change_quote_item(%QuoteItem{})]
     changeset = Ecto.Changeset.put_assoc(socket.assigns.form.source, :items, items_updated)
@@ -142,8 +152,32 @@ defmodule BillingWeb.QuoteLive.Form do
     {:noreply, assign(socket, form: to_form(changeset))}
   end
 
-  defp save_invoice(socket, :edit, invoice_params) do
-    case Quotes.update_quote(socket.assigns.quote, invoice_params) do
+  def handle_event("remove_item", %{"index" => index}, socket) do
+    index = String.to_integer(index)
+
+    items =
+      socket.assigns.form.source
+      |> Ecto.Changeset.get_field(:items)
+      |> Enum.with_index()
+      |> Enum.map(fn {item, item_index} ->
+        if item_index == index do
+          item
+          |> Quotes.change_quote_item()
+          |> Ecto.Changeset.put_change(:marked_for_deletion, true)
+        else
+          item
+        end
+      end)
+
+    changeset = Ecto.Changeset.put_assoc(socket.assigns.form.source, :items, items)
+
+    {:noreply, assign(socket, form: to_form(changeset))}
+  end
+
+  defp save_quote(socket, :edit, quote_params) do
+    quote_params = filtered_items(quote_params)
+
+    case Quotes.update_quote(socket.assigns.quote, quote_params) do
       {:ok, quote} ->
         save_invoice_taxes(quote)
 
@@ -157,8 +191,10 @@ defmodule BillingWeb.QuoteLive.Form do
     end
   end
 
-  defp save_invoice(socket, :new, invoice_params) do
-    case Quotes.create_quote(invoice_params) do
+  defp save_quote(socket, :new, quote_params) do
+    quote_params = filtered_items(quote_params)
+
+    case Quotes.create_quote(quote_params) do
       {:ok, quote} ->
         save_invoice_taxes(quote)
 
@@ -201,38 +237,14 @@ defmodule BillingWeb.QuoteLive.Form do
     assign(socket, :customers, customers)
   end
 
-  # defp build_item(changeset, quote_items) do
-  #   items = Ecto.Changeset.get_field(changeset, :items, [])
-  #
-  #   items =
-  #     Enum.map(
-  #       quote_items,
-  #       &map_item(&1, items)
-  #     )
-  #
-  #   Ecto.Changeset.put_assoc(changeset, :items, items)
-  # end
-  #
-  # defp map_item(quote, items) do
-  #   case Enum.find(items, &item_exist?(&1, quote.id)) do
-  #     %QuoteItem{} = quote_item ->
-  #       QuoteItem.changeset(quote_item, %{})
-  #
-  #     _ ->
-  #       QuoteItem.changeset(%QuoteItem{}, %{quote_id: quote.id})
-  #   end
-  # end
-  #
-  # defp item_exist?(%{quote_id: quote_id}, quote_id), do: true
-  # defp item_exist?(%{quote_id: _quote_id}, _id), do: false
+  defp filtered_items(attrs) do
+    items_map = attrs["items"] || %{}
 
-  # defp build_items(changeset, items) do
-  #   fulfilled_order_items = Enum.map(items, &build_fulfilled_order_item(&1))
-  #
-  #   Ecto.Changeset.put_assoc(changeset, :fulfilled_order_items, fulfilled_order_items)
-  # end
-  #
-  # defp build_fulfilled_order_item(%OrderItem{} = order_item) do
-  #   FulfilledOrderItem.changeset(%FulfilledOrderItem{order_item_id: order_item.id})
-  # end
+    filtered_items =
+      items_map
+      |> Map.values()
+      |> Enum.reject(fn item -> item["marked_for_deletion"] == "true" end)
+
+    Map.put(attrs, "items", filtered_items)
+  end
 end

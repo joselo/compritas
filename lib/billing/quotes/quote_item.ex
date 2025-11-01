@@ -9,6 +9,7 @@ defmodule Billing.Quotes.QuoteItem do
 
     field :name, :string
     field :amount, :decimal
+    field :marked_for_deletion, :boolean, virtual: true, default: false
 
     timestamps(type: :utc_datetime)
   end
@@ -16,7 +17,7 @@ defmodule Billing.Quotes.QuoteItem do
   @doc false
   def changeset(quote_item, attrs) do
     quote_item
-    |> cast(attrs, [:name, :amount])
+    |> cast(attrs, [:name, :amount, :marked_for_deletion])
     |> validate_required([:name, :amount])
   end
 end

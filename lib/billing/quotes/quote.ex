@@ -11,7 +11,7 @@ defmodule Billing.Quotes.Quote do
     belongs_to :emission_profile, Billing.EmissionProfiles.EmissionProfile
 
     has_many :electronic_invoices, Billing.Quotes.ElectronicInvoice
-    has_many :items, QuoteItem, foreign_key: :quote_id
+    has_many :items, QuoteItem, foreign_key: :quote_id, on_replace: :delete
 
     field :issued_at, :date
     field :description, :string
