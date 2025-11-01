@@ -6,6 +6,8 @@ defmodule Billing.Repo.Migrations.CreateQuoteItems do
       add :quote_id, references(:quotes, on_delete: :delete_all)
       add :name, :string, null: false
       add :amount, :decimal, precision: 10, scale: 2, null: false
+      add :tax_rate, :decimal, precision: 10, scale: 2, null: false
+      add :amount_without_tax, :decimal, precision: 10, scale: 2, null: false
 
       timestamps(type: :utc_datetime)
     end
