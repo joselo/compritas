@@ -29,14 +29,27 @@ defmodule BillingWeb.QuoteLive.Show do
       </.header>
 
       <.list>
-        <:item title="Issued at">{@quote.issued_at}</:item>
         <:item title="Customer">{@quote.customer.full_name}</:item>
+        <:item title="Issued at">{@quote.issued_at}</:item>
+        <:item title="Due date">{@quote.due_date}</:item>
+        <:item title="Amount">{@quote.amount}</:item>
       </.list>
 
       <div class="divider"></div>
 
       <h2 class="font-semibold">
-        Electronic Quotes
+        Items
+      </h2>
+
+      <.table id="items" rows={@quote.items}>
+        <:col :let={item} label="Description">{item.description}</:col>
+        <:col :let={item} label="Amount">{item.amount}</:col>
+      </.table>
+
+      <div class="divider"></div>
+
+      <h2 class="font-semibold">
+        Electronic Invoices
       </h2>
 
       <.table

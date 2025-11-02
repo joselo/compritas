@@ -7,6 +7,8 @@ defmodule Billing.Quotes do
   alias Billing.Repo
 
   alias Billing.Quotes.Quote
+  alias Billing.Quotes.QuoteItem
+  alias Ecto.Multi
 
   @doc """
   Returns the list of quotes.
@@ -37,7 +39,7 @@ defmodule Billing.Quotes do
       ** (Ecto.NoResultsError)
 
   """
-  def get_quote!(id), do: Repo.get!(Quote, id) |> Repo.preload(:customer)
+  def get_quote!(id), do: Repo.get!(Quote, id) |> Repo.preload([:customer, :items])
 
   @doc """
   Creates a quote.
@@ -104,15 +106,53 @@ defmodule Billing.Quotes do
     Quote.changeset(quote, attrs)
   end
 
-  def calculate_amount_without_tax(%Quote{} = quote) do
-    tax_rate = Decimal.div(quote.tax_rate, 100)
-
-    Decimal.div(quote.amount, Decimal.add(1, tax_rate))
+  def change_quote_item(%QuoteItem{} = quote_item, attrs \\ %{}) do
+    QuoteItem.changeset(quote_item, attrs)
   end
 
-  def save_taxes(%Quote{} = quote, %Decimal{} = amount_without_tax) do
-    query = from(i in Quote, where: i.id == ^quote.id)
+  def save_quote_amounts(%Quote{} = quote) do
+    query = from qi in QuoteItem, where: qi.quote_id == ^quote.id
+    items = Repo.all(query)
 
-    Repo.update_all(query, set: [amount_without_tax: amount_without_tax])
+    multi =
+      Enum.reduce(items, Multi.new(), fn item, acc ->
+        divisor = Decimal.add(Decimal.new(1), Decimal.div(item.tax_rate, Decimal.new(100)))
+        amount_without_tax = Decimal.div(item.amount, divisor)
+
+        changeset = Ecto.Changeset.change(item, amount_without_tax: amount_without_tax)
+        Multi.update(acc, :"update_item_#{item.id}", changeset)
+      end)
+      |> Multi.run(:calculate_totals, fn _repo, changes ->
+        updated_items =
+          Enum.map(items, fn item ->
+            case Map.get(changes, :"update_item_#{item.id}") do
+              nil -> item
+              updated -> updated
+            end
+          end)
+
+        total_amount =
+          updated_items
+          |> Enum.map(& &1.amount)
+          |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+        total_amount_without_tax =
+          updated_items
+          |> Enum.map(& &1.amount_without_tax)
+          |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+        {:ok, {total_amount, total_amount_without_tax}}
+      end)
+      |> Multi.update(:update_quote, fn %{
+                                          calculate_totals:
+                                            {total_amount, total_amount_without_tax}
+                                        } ->
+        Ecto.Changeset.change(quote,
+          amount: total_amount,
+          amount_without_tax: total_amount_without_tax
+        )
+      end)
+
+    Repo.transaction(multi)
   end
 end

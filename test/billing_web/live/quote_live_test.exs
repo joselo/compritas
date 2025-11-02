@@ -1,25 +1,35 @@
 defmodule BillingWeb.QuoteLiveTest do
   use BillingWeb.ConnCase
 
+  import Ecto.Query, warn: false
+
   import Phoenix.LiveViewTest
   import Billing.QuotesFixtures
   import Billing.CustomersFixtures
   import Billing.EmissionProfilesFixtures
   import Billing.AccountsFixtures
 
+  alias Billing.Repo
+  alias Billing.Quotes.Quote
+
   @create_attrs %{
     issued_at: ~D[2025-08-28],
     description: "Invoice Test",
     due_date: ~D[2025-08-28],
-    amount: Decimal.new("10.0"),
-    tax_rate: Decimal.new("15.0"),
-    payment_method: :cash
+    payment_method: :cash,
+    items: %{
+      "0" => %{
+        description: "Invoice Test",
+        amount: Decimal.new("10.0"),
+        tax_rate: Decimal.new("15.0")
+      }
+    }
   }
 
   @update_attrs %{issued_at: "2025-08-29"}
   @invalid_attrs %{issued_at: nil}
   defp create_invoice(_) do
-    quote = invoice_fixture()
+    quote = quote_fixture()
 
     %{quote: quote}
   end
@@ -60,6 +70,10 @@ defmodule BillingWeb.QuoteLiveTest do
              |> form("#quote-form", quote: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
+      assert form_live
+             |> element("button", "Add Item")
+             |> render_click()
+
       attrs =
         @create_attrs
         |> Map.put(:customer_id, customer.id)
@@ -69,7 +83,7 @@ defmodule BillingWeb.QuoteLiveTest do
                form_live
                |> form("#quote-form", quote: attrs)
                |> render_submit()
-               |> follow_redirect(conn, ~p"/quotes")
+               |> follow_redirect(conn, ~p"/quotes/#{last_quote_id()}")
 
       html = render(index_live)
       assert html =~ "Invoice created successfully"
@@ -141,5 +155,9 @@ defmodule BillingWeb.QuoteLiveTest do
       html = render(show_live)
       assert html =~ "Invoice updated successfully"
     end
+  end
+
+  defp last_quote_id do
+    Repo.one(from(q in Quote, select: q.id, order_by: [desc: q.inserted_at], limit: 1)) + 1
   end
 end

@@ -6,6 +6,7 @@ defmodule BillingWeb.QuoteLive.Form do
   alias Billing.Customers
   alias Billing.Customers.Customer
   alias Billing.Orders
+  alias Billing.Quotes.QuoteItem
 
   @impl true
   def render(assigns) do
@@ -16,7 +17,7 @@ defmodule BillingWeb.QuoteLive.Form do
         <:subtitle>Use this form to manage quote records in your database.</:subtitle>
       </.header>
 
-      <.form for={@form} id="quote-form" phx-change="validate" phx-submit="save">
+      <.form for={@form} id="quote-form" phx-change="validate" phx-submit="save" autocomplete="off">
         <.input field={@form[:customer_id]} type="select" options={@customers} label="Customer" />
         <.input
           field={@form[:emission_profile_id]}
@@ -27,14 +28,47 @@ defmodule BillingWeb.QuoteLive.Form do
         <.input field={@form[:issued_at]} type="date" label="Issued at" />
         <.input field={@form[:due_date]} type="date" label="Due Date" />
         <.input field={@form[:description]} type="textarea" label="Description" />
-        <.input field={@form[:amount]} type="number" label="Amount" />
-        <.input field={@form[:tax_rate]} type="number" label="Tax Rate" />
         <.input
           field={@form[:payment_method]}
           type="select"
           options={@payment_methods}
           label="Payment Method"
         />
+
+        <.inputs_for :let={f} field={@form[:items]}>
+          <div class={[
+            "flex space-x-2",
+            Ecto.Changeset.get_field(f.source, :marked_for_deletion) && "hidden"
+          ]}>
+            <div class="grid grid-cols-3 gap-x-2 flex-1">
+              <.input field={f[:description]} type="textarea" label={gettext("Description")} />
+              <.input field={f[:amount]} type="text" label={gettext("Amount")} />
+              <.input field={f[:tax_rate]} type="text" label={gettext("Tax Rate")} />
+            </div>
+
+            <div class="flex justify-end">
+              <.button
+                type="button"
+                class="btn btn-neutral"
+                phx-click="remove_item"
+                phx-value-index={f.index}
+              >
+                {gettext("Remove")}
+              </.button>
+
+              <.input field={f[:marked_for_deletion]} type="checkbox" class="hidden" />
+            </div>
+          </div>
+        </.inputs_for>
+
+        <.button type="button" class="btn btn-secondary" phx-click="add_item">
+          {gettext("Add Item")}
+        </.button>
+
+        <.error :for={msg <- Enum.map(@form[:items].errors, &translate_error(&1))}>
+          {msg}
+        </.error>
+
         <footer>
           <.button phx-disable-with="Saving..." variant="primary">Save Invoice</.button>
           <.button navigate={return_path(@return_to, @quote)}>Cancel</.button>
@@ -80,25 +114,20 @@ defmodule BillingWeb.QuoteLive.Form do
     order = Orders.get_order!(order_id)
 
     with {:ok, customer} <- find_or_create_customer(order) do
-      acc = %{"description" => "", "amount" => Decimal.new("0.0")}
+      items = Enum.map(order.items, &%{"description" => &1.name, "amount" => &1.price})
+      due_date = DateTime.add(order.inserted_at, 15, :day)
 
-      order_attrs =
-        Enum.reduce(order.items, acc, fn item, acc ->
-          price = Decimal.to_string(item.price)
-
-          acc
-          |> Map.replace(
-            "description",
-            Enum.join([acc["description"], "#{item.name} (#{price})"], " | ")
-          )
-          |> Map.replace("amount", Decimal.add(acc["amount"], item.price))
-        end)
-
-      attrs = Map.merge(order_attrs, %{"customer_id" => customer.id})
+      attrs = %{
+        "customer_id" => customer.id,
+        "description" => "Order #{order.id}",
+        "issued_at" => order.inserted_at,
+        "due_date" => due_date,
+        "items" => items
+      }
 
       socket
       |> assign_customers()
-      |> assign_new_invoice(attrs)
+      |> assign_new_quote(attrs)
     else
       {:error, error} ->
         put_flash(socket, :error, inspect(error))
@@ -106,23 +135,57 @@ defmodule BillingWeb.QuoteLive.Form do
   end
 
   defp apply_action(socket, :new, _params) do
-    assign_new_invoice(socket)
+    assign_new_quote(socket)
   end
 
   @impl true
-  def handle_event("validate", %{"quote" => invoice_params}, socket) do
-    changeset = Quotes.change_quote(socket.assigns.quote, invoice_params)
+  def handle_event("validate", %{"quote" => quote_params}, socket) do
+    changeset = Quotes.change_quote(socket.assigns.quote, quote_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
-  def handle_event("save", %{"quote" => invoice_params}, socket) do
-    save_invoice(socket, socket.assigns.live_action, invoice_params)
+  def handle_event("save", %{"quote" => quote_params}, socket) do
+    save_quote(socket, socket.assigns.live_action, quote_params)
   end
 
-  defp save_invoice(socket, :edit, invoice_params) do
-    case Quotes.update_quote(socket.assigns.quote, invoice_params) do
+  def handle_event("add_item", _params, socket) do
+    items =
+      Ecto.Changeset.get_field(socket.assigns.form.source, :items, socket.assigns.quote.items)
+
+    items_updated = items ++ [Quotes.change_quote_item(%QuoteItem{})]
+    changeset = Ecto.Changeset.put_assoc(socket.assigns.form.source, :items, items_updated)
+
+    {:noreply, assign(socket, form: to_form(changeset))}
+  end
+
+  def handle_event("remove_item", %{"index" => index}, socket) do
+    index = String.to_integer(index)
+
+    items =
+      socket.assigns.form.source
+      |> Ecto.Changeset.get_field(:items)
+      |> Enum.with_index()
+      |> Enum.map(fn {item, item_index} ->
+        if item_index == index do
+          item
+          |> Quotes.change_quote_item()
+          |> Ecto.Changeset.put_change(:marked_for_deletion, true)
+        else
+          item
+        end
+      end)
+
+    changeset = Ecto.Changeset.put_assoc(socket.assigns.form.source, :items, items)
+
+    {:noreply, assign(socket, form: to_form(changeset))}
+  end
+
+  defp save_quote(socket, :edit, quote_params) do
+    quote_params = filtered_items(quote_params)
+
+    case Quotes.update_quote(socket.assigns.quote, quote_params) do
       {:ok, quote} ->
-        save_invoice_taxes(quote)
+        save_quote_amounts(quote)
 
         {:noreply,
          socket
@@ -134,15 +197,17 @@ defmodule BillingWeb.QuoteLive.Form do
     end
   end
 
-  defp save_invoice(socket, :new, invoice_params) do
-    case Quotes.create_quote(invoice_params) do
+  defp save_quote(socket, :new, quote_params) do
+    quote_params = filtered_items(quote_params)
+
+    case Quotes.create_quote(quote_params) do
       {:ok, quote} ->
-        save_invoice_taxes(quote)
+        save_quote_amounts(quote)
 
         {:noreply,
          socket
          |> put_flash(:info, "Invoice created successfully")
-         |> push_navigate(to: return_path(socket.assigns.return_to, quote))}
+         |> push_navigate(to: return_path("show", quote))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -152,9 +217,8 @@ defmodule BillingWeb.QuoteLive.Form do
   defp return_path("index", _invoice), do: ~p"/quotes"
   defp return_path("show", quote), do: ~p"/quotes/#{quote}"
 
-  defp save_invoice_taxes(quote) do
-    amount_without_tax = Quotes.calculate_amount_without_tax(quote)
-    Quotes.save_taxes(quote, amount_without_tax)
+  defp save_quote_amounts(quote) do
+    Quotes.save_quote_amounts(quote)
   end
 
   defp find_or_create_customer(order) do
@@ -163,8 +227,8 @@ defmodule BillingWeb.QuoteLive.Form do
     |> Customers.find_or_create_customer()
   end
 
-  defp assign_new_invoice(socket, params \\ %{}) do
-    quote = %Quote{}
+  defp assign_new_quote(socket, params \\ %{}) do
+    quote = %Quote{items: []}
 
     socket
     |> assign(:page_title, "New Invoice")
@@ -176,5 +240,16 @@ defmodule BillingWeb.QuoteLive.Form do
     customers = Billing.Customers.list_customers() |> Enum.map(&{&1.full_name, &1.id})
 
     assign(socket, :customers, customers)
+  end
+
+  defp filtered_items(attrs) do
+    items_map = attrs["items"] || %{}
+
+    filtered_items =
+      items_map
+      |> Map.values()
+      |> Enum.reject(fn item -> item["marked_for_deletion"] == "true" end)
+
+    Map.put(attrs, "items", filtered_items)
   end
 end

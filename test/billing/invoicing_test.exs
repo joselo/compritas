@@ -7,6 +7,9 @@ defmodule Billing.InvoicingTest do
   import Billing.CompaniesFixtures
   import Billing.CertificatesFixtures
 
+  alias Billing.Repo
+  alias Billing.Quotes.QuoteItem
+
   setup do
     customer =
       customer_fixture(%{
@@ -41,7 +44,7 @@ defmodule Billing.InvoicingTest do
       })
 
     quote =
-      invoice_fixture(%{
+      quote_fixture(%{
         customer_id: customer.id,
         emission_profile_id: emission_profile.id,
         issued_at: ~D[2025-08-21],
@@ -49,17 +52,25 @@ defmodule Billing.InvoicingTest do
         due_date: ~D[2025-09-21],
         amount: 28.46,
         tax_rate: 15.0,
-        payment_method: "cash"
+        payment_method: "cash",
+        items: [
+          %{
+            description: "Invoice Description",
+            amount: 28.46,
+            tax_rate: 15.0
+          }
+        ]
       })
 
-    amount_without_tax = Billing.Quotes.calculate_amount_without_tax(quote)
-    Billing.Quotes.save_taxes(quote, amount_without_tax)
+    quote_item = Repo.get_by!(QuoteItem, %{quote_id: quote.id})
 
-    {:ok, quote: quote}
+    Billing.Quotes.save_quote_amounts(quote)
+
+    {:ok, quote: quote, quote_item: quote_item}
   end
 
   describe "build_request_params" do
-    test "creates quote request params", %{quote: quote} do
+    test "creates quote request params", %{quote: quote, quote_item: quote_item} do
       {:ok, params} = Billing.Invoicing.build_request_params(quote)
 
       assert params[:factura][:info_factura] == %{
@@ -131,12 +142,12 @@ defmodule Billing.InvoicingTest do
       assert params[:factura][:detalles] == [
                %{
                  cantidad: 1,
-                 codigo_auxiliar: Integer.to_string(quote.id),
-                 codigo_principal: Integer.to_string(quote.id),
-                 descripcion: quote.description,
+                 codigo_auxiliar: Integer.to_string(quote_item.id),
+                 codigo_principal: Integer.to_string(quote_item.id),
+                 descripcion: quote_item.description,
                  descuento: 0.0,
                  detalles_adicionales: [
-                   %{nombre: "informacionAdicional", valor: Integer.to_string(quote.id)}
+                   %{nombre: "informacionAdicional", valor: Integer.to_string(quote_item.id)}
                  ],
                  impuestos: [
                    %{

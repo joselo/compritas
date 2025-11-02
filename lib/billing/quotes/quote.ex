@@ -2,6 +2,8 @@ defmodule Billing.Quotes.Quote do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Billing.Quotes.QuoteItem
+
   @derive {Jason.Encoder, only: [:amount]}
 
   schema "quotes" do
@@ -9,6 +11,7 @@ defmodule Billing.Quotes.Quote do
     belongs_to :emission_profile, Billing.EmissionProfiles.EmissionProfile
 
     has_many :electronic_invoices, Billing.Quotes.ElectronicInvoice
+    has_many :items, QuoteItem, foreign_key: :quote_id, on_replace: :delete
 
     field :issued_at, :date
     field :description, :string
@@ -30,8 +33,6 @@ defmodule Billing.Quotes.Quote do
       :issued_at,
       :description,
       :due_date,
-      :amount,
-      :tax_rate,
       :payment_method
     ])
     |> validate_required([
@@ -40,9 +41,27 @@ defmodule Billing.Quotes.Quote do
       :issued_at,
       :description,
       :due_date,
-      :amount,
-      :tax_rate,
       :payment_method
     ])
+    |> cast_assoc(:items)
+    |> validate_has_items()
+  end
+
+  defp validate_has_items(changeset) do
+    items = get_field(changeset, :items, [])
+
+    valid_items =
+      Enum.reject(items, fn item ->
+        case item do
+          %Ecto.Changeset{action: :delete} -> true
+          _ -> false
+        end
+      end)
+
+    if Enum.empty?(valid_items) do
+      add_error(changeset, :items, "debe tener al menos un item")
+    else
+      changeset
+    end
   end
 end
