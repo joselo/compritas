@@ -17,18 +17,23 @@ defmodule BillingWeb.CatalogLive.Index do
         </:actions>
       </.header>
 
-      <.table
-        id="products"
-        rows={@streams.products}
-      >
-        <:col :let={{_id, product}} label="Name">{product.name}</:col>
-        <:col :let={{_id, product}} label="Price">{product.price}</:col>
-        <:action :let={{_id, product}}>
+      <ul id="products" class="list bg-base-100 rounded-box shadow-md" phx-update="stream">
+        <li :for={{dom_id, product} <- @streams.products} class="list-row" id={dom_id}>
+          <div>
+            <img
+              class="size-50 rounded-box"
+              src="https://img.daisyui.com/images/profile/demo/1@94.webp"
+            />
+          </div>
+          <div>
+            <div>{product.name}</div>
+            <div class="uppercase font-semibold opacity-60">{product.price}</div>
+          </div>
           <.button phx-click={JS.push("add_to_cart", value: %{id: product.id})}>
             Add to Cart
           </.button>
-        </:action>
-      </.table>
+        </li>
+      </ul>
     </Layouts.public>
     """
   end

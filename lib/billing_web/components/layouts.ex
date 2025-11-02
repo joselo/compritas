@@ -117,6 +117,11 @@ defmodule BillingWeb.Layouts do
             </.link>
           </li>
           <li>
+            <.link navigate={~p"/"}>
+              <.icon name="hero-globe-americas" /> Public site
+            </.link>
+          </li>
+          <li>
             <.link href={~p"/users/log-out"} method="delete">
               <.icon name="hero-arrow-left-start-on-rectangle" /> Log out
             </.link>
