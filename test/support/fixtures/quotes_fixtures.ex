@@ -10,7 +10,7 @@ defmodule Billing.QuotesFixtures do
   @doc """
   Generate a quote.
   """
-  def invoice_fixture(attrs \\ %{}) do
+  def quote_fixture(attrs \\ %{}) do
     customer = customer_fixture()
     emission_profile = emission_profile_fixture()
 
@@ -24,7 +24,14 @@ defmodule Billing.QuotesFixtures do
         due_date: ~D[2025-08-28],
         amount: Decimal.new("10.0"),
         tax_rate: Decimal.new("15.0"),
-        payment_method: :cash
+        payment_method: :cash,
+        items: [
+          %{
+            description: "Product",
+            amount: Decimal.new("10.0"),
+            tax_rate: Decimal.new("15.0")
+          }
+        ]
       })
       |> Billing.Quotes.create_quote()
 

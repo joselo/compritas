@@ -39,7 +39,7 @@ defmodule BillingWeb.QuoteLive.Form do
 
         <.inputs_for :let={f} field={@form[:items]}>
           <div class="grid grid-cols-3">
-            <.input field={f[:name]} type="text" />
+            <.input field={f[:description]} type="text" />
             <.input field={f[:amount]} type="text" />
             <.input field={f[:marked_for_deletion]} type="checkbox" />
 
@@ -179,7 +179,7 @@ defmodule BillingWeb.QuoteLive.Form do
 
     case Quotes.update_quote(socket.assigns.quote, quote_params) do
       {:ok, quote} ->
-        save_quote_item_amounts(quote)
+        save_quote_amounts(quote)
 
         {:noreply,
          socket
@@ -196,7 +196,7 @@ defmodule BillingWeb.QuoteLive.Form do
 
     case Quotes.create_quote(quote_params) do
       {:ok, quote} ->
-        save_quote_item_amounts(quote)
+        save_quote_amounts(quote)
 
         {:noreply,
          socket
@@ -211,8 +211,8 @@ defmodule BillingWeb.QuoteLive.Form do
   defp return_path("index", _invoice), do: ~p"/quotes"
   defp return_path("show", quote), do: ~p"/quotes/#{quote}"
 
-  defp save_quote_item_amounts(quote) do
-    Quotes.save_quote_item_amounts(quote)
+  defp save_quote_amounts(quote) do
+    Quotes.save_quote_amounts(quote)
   end
 
   defp find_or_create_customer(order) do

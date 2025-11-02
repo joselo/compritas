@@ -7,6 +7,7 @@ defmodule Billing.QuotesTest do
   alias Billing.Quotes
   alias Billing.Repo
   alias Billing.Quotes.Quote
+  alias Billing.Quotes.QuoteItem
 
   setup do
     customer = customer_fixture()
@@ -23,7 +24,7 @@ defmodule Billing.QuotesTest do
     @invalid_attrs %{issued_at: nil}
 
     test "list_quotes/0 returns all quotes" do
-      quote = invoice_fixture()
+      quote = quote_fixture()
 
       quote =
         Quote
@@ -34,7 +35,7 @@ defmodule Billing.QuotesTest do
     end
 
     test "get_quote!/1 returns the quote with given id" do
-      quote = invoice_fixture()
+      quote = quote_fixture()
 
       quote =
         Quote
@@ -42,8 +43,11 @@ defmodule Billing.QuotesTest do
         |> Repo.preload([:customer])
 
       result = Quotes.get_quote!(quote.id)
-      assert result.id == quote.id
-      assert result.items == []
+
+      [item | tail] = result.items
+
+      assert %QuoteItem{} = item
+      assert tail == []
     end
 
     test "create_quote/1 with valid data creates a quote", %{
@@ -70,7 +74,7 @@ defmodule Billing.QuotesTest do
     end
 
     test "update_quote/2 with valid data updates the quote" do
-      quote = invoice_fixture()
+      quote = quote_fixture()
       update_attrs = %{issued_at: ~D[2025-08-29]}
 
       assert {:ok, %Quote{} = quote} = Quotes.update_quote(quote, update_attrs)
@@ -78,7 +82,7 @@ defmodule Billing.QuotesTest do
     end
 
     test "update_quote/2 with invalid data returns error changeset" do
-      quote = invoice_fixture()
+      quote = quote_fixture()
 
       quote =
         Quote
@@ -89,17 +93,21 @@ defmodule Billing.QuotesTest do
 
       result = Quotes.get_quote!(quote.id)
       assert result.id == quote.id
-      assert result.items == []
+
+      [item | tail] = result.items
+
+      assert %QuoteItem{} = item
+      assert tail == []
     end
 
     test "delete_quote/1 deletes the quote" do
-      quote = invoice_fixture()
+      quote = quote_fixture()
       assert {:ok, %Quote{}} = Quotes.delete_quote(quote)
       assert_raise Ecto.NoResultsError, fn -> Quotes.get_quote!(quote.id) end
     end
 
     test "change_quote/1 returns a quote changeset" do
-      quote = invoice_fixture()
+      quote = quote_fixture()
       assert %Ecto.Changeset{} = Quotes.change_quote(quote)
     end
   end

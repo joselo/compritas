@@ -110,7 +110,7 @@ defmodule Billing.Quotes do
     QuoteItem.changeset(quote_item, attrs)
   end
 
-  def save_quote_item_amounts(%Quote{} = quote) do
+  def save_quote_amounts(%Quote{} = quote) do
     query = from qi in QuoteItem, where: qi.quote_id == ^quote.id
     items = Repo.all(query)
 
@@ -120,7 +120,37 @@ defmodule Billing.Quotes do
         amount_without_tax = Decimal.div(item.amount, divisor)
 
         changeset = Ecto.Changeset.change(item, amount_without_tax: amount_without_tax)
-        Multi.update(acc, :"update_#{item.id}", changeset)
+        Multi.update(acc, :"update_item_#{item.id}", changeset)
+      end)
+      |> Multi.run(:calculate_totals, fn _repo, changes ->
+        updated_items =
+          Enum.map(items, fn item ->
+            case Map.get(changes, :"update_item_#{item.id}") do
+              nil -> item
+              updated -> updated
+            end
+          end)
+
+        total_amount =
+          updated_items
+          |> Enum.map(& &1.amount)
+          |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+        total_amount_without_tax =
+          updated_items
+          |> Enum.map(& &1.amount_without_tax)
+          |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+
+        {:ok, {total_amount, total_amount_without_tax}}
+      end)
+      |> Multi.update(:update_quote, fn %{
+                                          calculate_totals:
+                                            {total_amount, total_amount_without_tax}
+                                        } ->
+        Ecto.Changeset.change(quote,
+          amount: total_amount,
+          amount_without_tax: total_amount_without_tax
+        )
       end)
 
     Repo.transaction(multi)

@@ -9,7 +9,7 @@ defmodule Billing.Invoicing do
     query =
       from q in Quote,
         where: q.id == ^quote.id,
-        preload: [:customer, emission_profile: [:company]]
+        preload: [:customer, :items, emission_profile: [:company]]
 
     quote = Repo.one(query)
     invoice_info = build_invoice_info(quote)
@@ -184,33 +184,35 @@ defmodule Billing.Invoicing do
   end
 
   defp build_invoice_details(quote) do
+    Enum.map(quote.items, &build_invoice_item(&1))
+  end
+
+  defp build_invoice_item(quote_item) do
     value =
-      quote.amount
-      |> Decimal.sub(quote.amount_without_tax)
+      quote_item.amount
+      |> Decimal.sub(quote_item.amount_without_tax)
       |> parse_amount()
 
-    [
-      %{
-        cantidad: 1,
-        codigo_auxiliar: Integer.to_string(quote.id),
-        codigo_principal: Integer.to_string(quote.id),
-        descripcion: quote.description,
-        descuento: 0.0,
-        detalles_adicionales: [
-          %{nombre: "informacionAdicional", valor: Integer.to_string(quote.id)}
-        ],
-        impuestos: [
-          %{
-            valor: value,
-            codigo: get_tax_code(:iva),
-            base_imponible: parse_amount(quote.amount),
-            codigo_porcentaje: get_tax_percent_code(:iva),
-            tarifa: parse_amount(quote.tax_rate)
-          }
-        ],
-        precio_total_sin_impuesto: parse_amount(quote.amount_without_tax),
-        precio_unitario: parse_amount(quote.amount_without_tax)
-      }
-    ]
+    %{
+      cantidad: 1,
+      codigo_auxiliar: Integer.to_string(quote_item.id),
+      codigo_principal: Integer.to_string(quote_item.id),
+      descripcion: quote_item.description,
+      descuento: 0.0,
+      detalles_adicionales: [
+        %{nombre: "informacionAdicional", valor: Integer.to_string(quote_item.id)}
+      ],
+      impuestos: [
+        %{
+          valor: value,
+          codigo: get_tax_code(:iva),
+          base_imponible: parse_amount(quote_item.amount),
+          codigo_porcentaje: get_tax_percent_code(:iva),
+          tarifa: parse_amount(quote_item.tax_rate)
+        }
+      ],
+      precio_total_sin_impuesto: parse_amount(quote_item.amount_without_tax),
+      precio_unitario: parse_amount(quote_item.amount_without_tax)
+    }
   end
 end

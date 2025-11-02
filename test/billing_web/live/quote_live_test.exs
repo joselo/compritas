@@ -19,7 +19,7 @@ defmodule BillingWeb.QuoteLiveTest do
   @update_attrs %{issued_at: "2025-08-29"}
   @invalid_attrs %{issued_at: nil}
   defp create_invoice(_) do
-    quote = invoice_fixture()
+    quote = quote_fixture()
 
     %{quote: quote}
   end
