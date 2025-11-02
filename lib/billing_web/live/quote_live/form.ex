@@ -17,7 +17,7 @@ defmodule BillingWeb.QuoteLive.Form do
         <:subtitle>Use this form to manage quote records in your database.</:subtitle>
       </.header>
 
-      <.form for={@form} id="quote-form" phx-change="validate" phx-submit="save">
+      <.form for={@form} id="quote-form" phx-change="validate" phx-submit="save" autocomplete="off">
         <.input field={@form[:customer_id]} type="select" options={@customers} label="Customer" />
         <.input
           field={@form[:emission_profile_id]}
@@ -36,20 +36,28 @@ defmodule BillingWeb.QuoteLive.Form do
         />
 
         <.inputs_for :let={f} field={@form[:items]}>
-          <div class="grid grid-cols-3">
-            <.input field={f[:description]} type="text" />
-            <.input field={f[:amount]} type="text" />
-            <.input field={f[:tax_rate]} type="text" />
-            <.input field={f[:marked_for_deletion]} type="checkbox" />
+          <div class={[
+            "flex space-x-2",
+            Ecto.Changeset.get_field(f.source, :marked_for_deletion) && "hidden"
+          ]}>
+            <div class="grid grid-cols-3 gap-x-2 flex-1">
+              <.input field={f[:description]} type="textarea" label={gettext("Description")} />
+              <.input field={f[:amount]} type="text" label={gettext("Amount")} />
+              <.input field={f[:tax_rate]} type="text" label={gettext("Tax Rate")} />
+            </div>
 
-            <.button
-              type="button"
-              class="btn btn-neutral"
-              phx-click="remove_item"
-              phx-value-index={f.index}
-            >
-              {gettext("Remove Item")}
-            </.button>
+            <div class="flex justify-end">
+              <.button
+                type="button"
+                class="btn btn-neutral"
+                phx-click="remove_item"
+                phx-value-index={f.index}
+              >
+                {gettext("Remove")}
+              </.button>
+
+              <.input field={f[:marked_for_deletion]} type="checkbox" class="hidden" />
+            </div>
           </div>
         </.inputs_for>
 
@@ -106,21 +114,16 @@ defmodule BillingWeb.QuoteLive.Form do
     order = Orders.get_order!(order_id)
 
     with {:ok, customer} <- find_or_create_customer(order) do
-      acc = %{"description" => "", "amount" => Decimal.new("0.0")}
+      items = Enum.map(order.items, &%{"description" => &1.name, "amount" => &1.price})
+      due_date = DateTime.add(order.inserted_at, 15, :day)
 
-      order_attrs =
-        Enum.reduce(order.items, acc, fn item, acc ->
-          price = Decimal.to_string(item.price)
-
-          acc
-          |> Map.replace(
-            "description",
-            Enum.join([acc["description"], "#{item.name} (#{price})"], " | ")
-          )
-          |> Map.replace("amount", Decimal.add(acc["amount"], item.price))
-        end)
-
-      attrs = Map.merge(order_attrs, %{"customer_id" => customer.id})
+      attrs = %{
+        "customer_id" => customer.id,
+        "description" => "Order #{order.id}",
+        "issued_at" => order.inserted_at,
+        "due_date" => due_date,
+        "items" => items
+      }
 
       socket
       |> assign_customers()
@@ -204,7 +207,7 @@ defmodule BillingWeb.QuoteLive.Form do
         {:noreply,
          socket
          |> put_flash(:info, "Invoice created successfully")
-         |> push_navigate(to: return_path(socket.assigns.return_to, quote))}
+         |> push_navigate(to: return_path("show", quote))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}

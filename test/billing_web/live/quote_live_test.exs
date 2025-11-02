@@ -1,11 +1,16 @@
 defmodule BillingWeb.QuoteLiveTest do
   use BillingWeb.ConnCase
 
+  import Ecto.Query, warn: false
+
   import Phoenix.LiveViewTest
   import Billing.QuotesFixtures
   import Billing.CustomersFixtures
   import Billing.EmissionProfilesFixtures
   import Billing.AccountsFixtures
+
+  alias Billing.Repo
+  alias Billing.Quotes.Quote
 
   @create_attrs %{
     issued_at: ~D[2025-08-28],
@@ -78,7 +83,7 @@ defmodule BillingWeb.QuoteLiveTest do
                form_live
                |> form("#quote-form", quote: attrs)
                |> render_submit()
-               |> follow_redirect(conn, ~p"/quotes")
+               |> follow_redirect(conn, ~p"/quotes/#{last_quote_id()}")
 
       html = render(index_live)
       assert html =~ "Invoice created successfully"
@@ -150,5 +155,9 @@ defmodule BillingWeb.QuoteLiveTest do
       html = render(show_live)
       assert html =~ "Invoice updated successfully"
     end
+  end
+
+  defp last_quote_id do
+    Repo.one(from(q in Quote, select: q.id, order_by: [desc: q.inserted_at], limit: 1)) + 1
   end
 end
