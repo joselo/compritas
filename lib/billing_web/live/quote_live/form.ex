@@ -179,7 +179,7 @@ defmodule BillingWeb.QuoteLive.Form do
 
     case Quotes.update_quote(socket.assigns.quote, quote_params) do
       {:ok, quote} ->
-        save_invoice_taxes(quote)
+        save_quote_item_amounts(quote)
 
         {:noreply,
          socket
@@ -196,7 +196,7 @@ defmodule BillingWeb.QuoteLive.Form do
 
     case Quotes.create_quote(quote_params) do
       {:ok, quote} ->
-        save_invoice_taxes(quote)
+        save_quote_item_amounts(quote)
 
         {:noreply,
          socket
@@ -211,9 +211,8 @@ defmodule BillingWeb.QuoteLive.Form do
   defp return_path("index", _invoice), do: ~p"/quotes"
   defp return_path("show", quote), do: ~p"/quotes/#{quote}"
 
-  defp save_invoice_taxes(quote) do
-    amount_without_tax = Quotes.calculate_amount_without_tax(quote)
-    Quotes.save_taxes(quote, amount_without_tax)
+  defp save_quote_item_amounts(quote) do
+    Quotes.save_quote_item_amounts(quote)
   end
 
   defp find_or_create_customer(order) do

@@ -8,6 +8,7 @@ defmodule Billing.Quotes do
 
   alias Billing.Quotes.Quote
   alias Billing.Quotes.QuoteItem
+  alias Ecto.Multi
 
   @doc """
   Returns the list of quotes.
@@ -105,19 +106,23 @@ defmodule Billing.Quotes do
     Quote.changeset(quote, attrs)
   end
 
-  def calculate_amount_without_tax(%Quote{} = quote) do
-    tax_rate = Decimal.div(quote.tax_rate, 100)
-
-    Decimal.div(quote.amount, Decimal.add(1, tax_rate))
-  end
-
-  def save_taxes(%Quote{} = quote, %Decimal{} = amount_without_tax) do
-    query = from(i in Quote, where: i.id == ^quote.id)
-
-    Repo.update_all(query, set: [amount_without_tax: amount_without_tax])
-  end
-
   def change_quote_item(%QuoteItem{} = quote_item, attrs \\ %{}) do
     QuoteItem.changeset(quote_item, attrs)
+  end
+
+  def save_quote_item_amounts(%Quote{} = quote) do
+    query = from qi in QuoteItem, where: qi.quote_id == ^quote.id
+    items = Repo.all(query)
+
+    multi =
+      Enum.reduce(items, Multi.new(), fn item, acc ->
+        divisor = Decimal.add(Decimal.new(1), Decimal.div(item.tax_rate, Decimal.new(100)))
+        amount_without_tax = Decimal.div(item.amount, divisor)
+
+        changeset = Ecto.Changeset.change(item, amount_without_tax: amount_without_tax)
+        Multi.update(acc, :"update_#{item.id}", changeset)
+      end)
+
+    Repo.transaction(multi)
   end
 end
