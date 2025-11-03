@@ -136,15 +136,15 @@ defmodule BillingWeb.ProductLive.Form do
         </button>
 
         <%!-- Phoenix.Component.upload_errors/2 returns a list of error atoms --%>
-        <p :for={err <- upload_errors(@uploads.files, entry)} class="alert alert-danger">
+        <.error :for={err <- upload_errors(@uploads.files, entry)}>
           {error_to_string(err)}
-        </p>
+        </.error>
       </article>
 
       <%!-- Phoenix.Component.upload_errors/1 returns a list of error atoms --%>
-      <p :for={err <- upload_errors(@uploads.files)} class="alert alert-danger">
+      <.error :for={err <- upload_errors(@uploads.files)} class="alert alert-error">
         {error_to_string(err)}
-      </p>
+      </.error>
     </section>
     """
   end
@@ -155,9 +155,12 @@ defmodule BillingWeb.ProductLive.Form do
 
   defp consume_files(socket, params) do
     uploaded_files =
-      consume_uploaded_entries(socket, :files, fn %{path: path}, _entry ->
+      consume_uploaded_entries(socket, :files, fn %{path: path}, entry ->
+        extname = Path.extname(entry.client_name)
+        file_name = entry.uuid <> extname
+
         dest =
-          Path.join(Application.app_dir(:billing, "priv/static/uploads"), Path.basename(path))
+          Path.join(Application.app_dir(:billing, "priv/static/uploads"), file_name)
 
         # You will need to create `priv/static/uploads` for `File.cp!/2` to work.
         File.cp!(path, dest)
