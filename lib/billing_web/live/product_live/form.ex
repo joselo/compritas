@@ -17,6 +17,13 @@ defmodule BillingWeb.ProductLive.Form do
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:price]} type="number" label="Price" step="any" />
 
+        <div id="EditorJSContainer" phx-update="ignore">
+          <div
+            id="editorjs"
+            phx-hook="EditorJS"
+          />
+        </div>
+
         <div class="fieldset mb-2">
           <label>
             <span class="label mb-1">Imagenes</span>
@@ -90,6 +97,7 @@ defmodule BillingWeb.ProductLive.Form do
         {:noreply,
          socket
          |> put_flash(:info, "Product updated successfully")
+         |> push_event("save", %{id: product.id})
          |> push_navigate(to: return_path(socket.assigns.return_to, product))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
