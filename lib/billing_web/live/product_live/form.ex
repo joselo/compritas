@@ -21,6 +21,7 @@ defmodule BillingWeb.ProductLive.Form do
           <div
             id="editorjs"
             phx-hook="EditorJS"
+            data-content={Jason.encode!(@product.content)}
           />
         </div>
 
@@ -58,7 +59,22 @@ defmodule BillingWeb.ProductLive.Form do
   defp return_to(_), do: "index"
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    content = %{
+      "content" => %{
+        "blocks" => [
+          %{
+            "data" => %{"text" => "<b>Test</b>"},
+            "id" => "7WtrDb55sJ",
+            "type" => "paragraph"
+          }
+        ],
+        "time" => 1762393385520,
+        "version" => "2.31.0"
+      }
+    }
+
     product = Products.get_product!(id)
+      |> Map.put(:content, content)
 
     socket
     |> assign(:page_title, "Edit Product")
@@ -89,6 +105,12 @@ defmodule BillingWeb.ProductLive.Form do
     {:noreply, cancel_upload(socket, :files, ref)}
   end
 
+  def handle_event("save-content", params, socket) do
+    IO.inspect(params)
+
+    {:noreply, push_navigate(socket, to: return_path(socket.assigns.return_to, socket.assigns.product))}
+  end
+
   defp save_product(socket, :edit, product_params) do
     params = consume_files(socket, product_params)
 
@@ -96,9 +118,9 @@ defmodule BillingWeb.ProductLive.Form do
       {:ok, product} ->
         {:noreply,
          socket
+         |> assign(:product, product)
          |> put_flash(:info, "Product updated successfully")
-         |> push_event("save", %{id: product.id})
-         |> push_navigate(to: return_path(socket.assigns.return_to, product))}
+         |> push_event("save", %{id: product.id})}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -112,8 +134,9 @@ defmodule BillingWeb.ProductLive.Form do
       {:ok, product} ->
         {:noreply,
          socket
+         |> assign(:product, product)
          |> put_flash(:info, "Product created successfully")
-         |> push_navigate(to: return_path(socket.assigns.return_to, product))}
+         |> push_event("save", %{id: product.id})}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
