@@ -3,32 +3,39 @@ defmodule BillingWeb.CatalogLive.Index do
 
   alias Billing.Products
   alias Billing.Carts
+  alias BillingWeb.ProductComponents
+  alias BillingWeb.SharedComponents
 
   @impl true
   def render(assigns) do
     ~H"""
     <Layouts.public flash={@flash} current_scope={@current_scope}>
+      <SharedComponents.cart_status cart_size={@cart_size} />
+
       <.header>
-        Product Catalog
-        <:actions>
-          <.link :if={@cart_size > 0} navigate={~p"/cart"} class="btn btn-primary">
-            <.icon name="hero-shopping-cart" /> {@cart_size}
-          </.link>
-        </:actions>
+        Welcome
+        <:subtitle>Products</:subtitle>
       </.header>
 
-      <.table
-        id="products"
-        rows={@streams.products}
-      >
-        <:col :let={{_id, product}} label="Name">{product.name}</:col>
-        <:col :let={{_id, product}} label="Price">{product.price}</:col>
-        <:action :let={{_id, product}}>
-          <.button phx-click={JS.push("add_to_cart", value: %{id: product.id})}>
-            Add to Cart
-          </.button>
-        </:action>
-      </.table>
+      <ul id="products" class="list" phx-update="stream">
+        <li :for={{dom_id, product} <- @streams.products} class="list-row" id={dom_id}>
+          <.link navigate={~p"/item/#{product}"}>
+            <ProductComponents.files files={product.files} />
+          </.link>
+
+          <div class="space-y-4">
+            <.link navigate={~p"/item/#{product}"} class="block text-normal link link-hover">
+              {product.name}
+            </.link>
+
+            <div class="uppercase font-semibold text-lg">{product.price}</div>
+
+            <.button phx-click={JS.push("add_to_cart", value: %{id: product.id})}>
+              Add to Cart
+            </.button>
+          </div>
+        </li>
+      </ul>
     </Layouts.public>
     """
   end

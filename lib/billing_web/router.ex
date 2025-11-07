@@ -38,6 +38,7 @@ defmodule BillingWeb.Router do
       on_mount: [{CartSession, :mount_session}, {BillingWeb.UserAuth, :mount_current_scope}] do
       live "/", CatalogLive.Index, :index
       live "/cart", CartLive.Index, :index
+      live "/item/:id", CatalogLive.Show, :index
     end
   end
 
