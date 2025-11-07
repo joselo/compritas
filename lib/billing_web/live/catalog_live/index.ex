@@ -20,7 +20,7 @@ defmodule BillingWeb.CatalogLive.Index do
       <.table
         id="products"
         rows={@streams.products}
-        row_click={fn {_id, product} -> JS.navigate(~p"/#{product}") end}
+        row_click={fn {_id, product} -> JS.navigate(~p"/item/#{product}") end}
       >
         <:col :let={{_id, product}} label="Name">{product.name}</:col>
         <:col :let={{_id, product}} label="Price">{product.price}</:col>

@@ -1,7 +1,8 @@
 let Hooks = {};
 
-Hooks.EditorJS = {
+Hooks.Gallery = {
   mounted() {
+    console.log("gallery")
     // const json = JSON.parse(this.el.dataset.content);
   },
 

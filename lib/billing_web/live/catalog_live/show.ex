@@ -4,29 +4,34 @@ defmodule BillingWeb.CatalogLive.Show do
   alias Billing.Products
   alias Billing.Carts
   alias BillingWeb.SharedComponents
+  alias BillingWeb.ProductComponents
 
   @impl true
   def render(assigns) do
     ~H"""
     <Layouts.public flash={@flash} current_scope={@current_scope}>
       <.header>
-        Product
+        {@product.name}
+        <:subtitle>{@product.price}</:subtitle>
+
         <:actions>
+          <.button navigate={~p"/"}>
+            <.icon name="hero-arrow-left" />
+          </.button>
+
+          <.button phx-click={JS.push("add_to_cart", value: %{id: @product.id})}>
+            <.icon name="hero-plus" /> Add to Cart
+          </.button>
+
           <.link :if={@cart_size > 0} navigate={~p"/cart"} class="btn btn-primary">
             <.icon name="hero-shopping-cart" /> {@cart_size}
           </.link>
         </:actions>
       </.header>
 
-      <.button phx-click={JS.push("add_to_cart", value: %{id: @product.id})}>
-        Add to Cart
-      </.button>
-
       <SharedComponents.markdown text={@product.content} />
 
-      <div>
-        <img :for={file <- @product.files} src={file} alt={@product.name} loading="lazy" />
-      </div>
+      <ProductComponents.gallery title={@product.name} images={@product.files} />
     </Layouts.public>
     """
   end
