@@ -2,6 +2,7 @@ defmodule BillingWeb.ProductLive.Show do
   use BillingWeb, :live_view
 
   alias Billing.Products
+  alias BillingWeb.SharedComponents
 
   @impl true
   def render(assigns) do
@@ -24,6 +25,8 @@ defmodule BillingWeb.ProductLive.Show do
         <:item title="Name">{@product.name}</:item>
         <:item title="Price">{@product.price}</:item>
       </.list>
+
+      <SharedComponents.markdown text={@product.content} />
 
       <div>
         <img :for={file <- @product.files} src={file} />
