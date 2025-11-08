@@ -21,13 +21,11 @@ defmodule BillingWeb.ElectronicInvoiceLive.Index do
           end
         }
       >
-        <:col :let={{_id, electronic_invoice}} label="Invoice">
-          {electronic_invoice.quote.customer.full_name}
-        </:col>
-        <:col :let={{_id, electronic_invoice}} label="Name">{electronic_invoice.access_key}</:col>
         <:col :let={{_id, electronic_invoice}} label="State">
           <ElectronicInvoiceComponents.state electronic_invoice={electronic_invoice} />
         </:col>
+        <:col :let={{_id, electronic_invoice}} label="Date">{electronic_invoice.inserted_at}</:col>
+        <:col :let={{_id, electronic_invoice}} label="Amount">{electronic_invoice.amount}</:col>
       </.table>
     </Layouts.app>
     """

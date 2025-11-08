@@ -50,9 +50,7 @@ defmodule Billing.ElectronicInvoices do
   end
 
   def list_electronic_invoices do
-    ElectronicInvoice
-    |> Repo.all()
-    |> Repo.preload(quote: :customer)
+    Repo.all(ElectronicInvoice)
   end
 
   def chart_data_by_month do

@@ -37,10 +37,12 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
         <:item title="Status">
           <ElectronicInvoiceComponents.state electronic_invoice={@electronic_invoice} />
         </:item>
+        <:item title="Date">{@electronic_invoice.inserted_at}</:item>
+        <:item title="Amount">{@electronic_invoice.amount}</:item>
         <:item title="Access Key">{@electronic_invoice.access_key}</:item>
-        <:item title="Invoice">
+        <:item title="Quote">
           <.link navigate={~p"/quotes/#{@quote.id}"} class="link">
-            {@quote.customer.full_name}
+            {@quote.id}
           </.link>
         </:item>
         <:item :if={ElectronicInvoice.authorized?(@electronic_invoice.state)} title="Documents">

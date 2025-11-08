@@ -33,6 +33,8 @@ defmodule Billing.Quotes.ElectronicInvoice do
     not_found_or_pending: "No encontrada o pendiente"
   }
 
+  @derive {Jason.Encoder, only: [:amount, :state]}
+
   schema "electronic_invoices" do
     belongs_to :quote, Billing.Quotes.Quote
 
