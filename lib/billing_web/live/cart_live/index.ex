@@ -28,6 +28,7 @@ defmodule BillingWeb.CartLive.Index do
           <.button
             phx-click={JS.push("delete", value: %{id: cart.id}) |> hide("##{id}")}
             data-confirm="Are you sure?"
+            class="btn btn-error btn-soft"
           >
             Delete
           </.button>

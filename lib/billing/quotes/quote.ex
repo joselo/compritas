@@ -4,8 +4,6 @@ defmodule Billing.Quotes.Quote do
 
   alias Billing.Quotes.QuoteItem
 
-  @derive {Jason.Encoder, only: [:amount]}
-
   schema "quotes" do
     belongs_to :customer, Billing.Customers.Customer
     belongs_to :emission_profile, Billing.EmissionProfiles.EmissionProfile

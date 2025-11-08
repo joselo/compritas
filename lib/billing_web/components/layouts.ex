@@ -67,6 +67,11 @@ defmodule BillingWeb.Layouts do
             </.link>
           </li>
           <li>
+            <.link navigate={~p"/dashboard"}>
+              <.icon name="hero-presentation-chart-bar" /> Dashboard
+            </.link>
+          </li>
+          <li>
             <.link navigate={~p"/agent_chat"}>
               <.icon name="hero-sparkles" /> AI Chat
             </.link>

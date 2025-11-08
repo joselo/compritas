@@ -37,7 +37,7 @@ defmodule BillingWeb.SharedComponents do
     ~H"""
     <div class={[
       "card w-full shadow-sm",
-      @cart_size == 0 && "bg-base-100",
+      @cart_size == 0 && "bg-neutral text-neutral-content",
       @cart_size > 0 && "bg-primary text-primary-content"
     ]}>
       <div class="card-body">

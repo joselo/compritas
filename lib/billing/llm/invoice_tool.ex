@@ -1,6 +1,6 @@
 defmodule Billing.LLM.InvoiceTool do
   alias LangChain.Function
-  alias Billing.Quotes
+  alias Billing.ElectronicInvoices
 
   def new!() do
     Function.new!(%{
@@ -13,7 +13,7 @@ defmodule Billing.LLM.InvoiceTool do
   end
 
   def execute(_args, _context) do
-    json_invoices = Jason.encode!(Quotes.list_quotes())
+    json_invoices = Jason.encode!(ElectronicInvoices.list_electronic_invoices())
 
     {:ok, json_invoices}
   end

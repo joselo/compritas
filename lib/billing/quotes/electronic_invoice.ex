@@ -33,11 +33,14 @@ defmodule Billing.Quotes.ElectronicInvoice do
     not_found_or_pending: "No encontrada o pendiente"
   }
 
+  @derive {Jason.Encoder, only: [:amount, :state]}
+
   schema "electronic_invoices" do
     belongs_to :quote, Billing.Quotes.Quote
 
     field :access_key, :string
     field :state, Ecto.Enum, values: @statuses, default: :created
+    field :amount, :decimal
 
     timestamps(type: :utc_datetime)
   end
@@ -46,12 +49,10 @@ defmodule Billing.Quotes.ElectronicInvoice do
   def changeset(electronic_invoice, attrs) do
     electronic_invoice
     |> cast(attrs, [
-      :quote_id,
       :access_key,
       :state
     ])
     |> validate_required([
-      :quote_id,
       :access_key,
       :state
     ])

@@ -115,6 +115,8 @@ defmodule BillingWeb.Router do
 
       live "/electronic_invoices", ElectronicInvoiceLive.Index, :index
       live "/electronic_invoices/:id", ElectronicInvoiceLive.Show, :show
+
+      live "/dashboard", DashboardLive.Index, :index
     end
 
     post "/users/update-password", UserSessionController, :update_password

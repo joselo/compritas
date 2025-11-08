@@ -30,8 +30,8 @@ defmodule BillingWeb.CatalogLive.Index do
 
             <div class="uppercase font-semibold text-lg">{product.price}</div>
 
-            <.button phx-click={JS.push("add_to_cart", value: %{id: product.id})}>
-              Add to Cart
+            <.button phx-click={JS.push("add_to_cart", value: %{id: product.id})} variant="primary">
+              <.icon name="hero-plus" /> Add to Cart
             </.button>
           </div>
         </li>

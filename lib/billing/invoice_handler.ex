@@ -24,7 +24,7 @@ defmodule Billing.InvoiceHandler do
          {:ok, invoice_params} <- Invoicing.build_request_params(quote),
 
          # Electronic Invoice :created
-         {:ok, electronic_invoice} <- create_electronic_invoice(quote.id, invoice_params) do
+         {:ok, electronic_invoice} <- create_electronic_invoice(quote, invoice_params) do
       sign_xml(electronic_invoice, certificate)
     else
       {:error, error} ->
@@ -85,10 +85,10 @@ defmodule Billing.InvoiceHandler do
 
   # Electronic Invoice :created
 
-  def create_electronic_invoice(quote_id, invoice_params) do
+  def create_electronic_invoice(quote, invoice_params) do
     with {:ok, body: xml, access_key: access_key} <- TaxiDriver.build_invoice_xml(invoice_params),
          {:ok, _xml_path} <- save_xml(xml, access_key) do
-      ElectronicInvoices.create_electronic_invoice(quote_id, access_key)
+      ElectronicInvoices.create_electronic_invoice(quote, access_key)
     else
       error -> error
     end

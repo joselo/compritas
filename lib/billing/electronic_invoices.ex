@@ -5,11 +5,12 @@ defmodule Billing.ElectronicInvoices do
   alias Billing.Repo
 
   alias Billing.Quotes.ElectronicInvoice
+  alias Billing.Quotes.Quote
 
-  def create_electronic_invoice(quote_id, access_key) do
-    attrs = %{quote_id: quote_id, access_key: access_key}
+  def create_electronic_invoice(%Quote{} = quote, access_key) do
+    attrs = %{access_key: access_key}
 
-    %ElectronicInvoice{}
+    %ElectronicInvoice{quote_id: quote.id, amount: quote.amount}
     |> ElectronicInvoice.changeset(attrs)
     |> Repo.insert()
   end
@@ -49,8 +50,24 @@ defmodule Billing.ElectronicInvoices do
   end
 
   def list_electronic_invoices do
-    ElectronicInvoice
+    Repo.all(ElectronicInvoice)
+  end
+
+  def chart_data_by_month do
+    current_year = DateTime.utc_now().year
+
+    from(ei in ElectronicInvoice,
+      where: ei.state == :authorized,
+      where: fragment("EXTRACT(YEAR FROM ?)", ei.inserted_at) == ^current_year,
+      group_by: fragment("EXTRACT(MONTH FROM ?)::integer", ei.inserted_at),
+      select: %{
+        month:
+          selected_as(type(fragment("EXTRACT(MONTH FROM ?)", ei.inserted_at), :integer), :month),
+        total: sum(ei.amount)
+      },
+      group_by: selected_as(:month),
+      order_by: selected_as(:month)
+    )
     |> Repo.all()
-    |> Repo.preload(quote: :customer)
   end
 end

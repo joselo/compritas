@@ -21,7 +21,7 @@ defmodule BillingWeb.CatalogLive.Show do
             <.icon name="hero-arrow-left" />
           </.button>
 
-          <.button phx-click={JS.push("add_to_cart", value: %{id: @product.id})}>
+          <.button phx-click={JS.push("add_to_cart", value: %{id: @product.id})} variant="primary">
             <.icon name="hero-plus" /> Add to Cart
           </.button>
         </:actions>

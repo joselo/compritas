@@ -9,7 +9,7 @@ defmodule BillingWeb.ProductComponents do
     assigns = assign_new(assigns, :images_with_index, fn -> Enum.with_index(assigns.images) end)
 
     ~H"""
-    <div id="ProductGallery" phx-hook="Gallery">
+    <div>
       <ul class="space-y-4">
         <li :for={{image, _index} <- @images_with_index} class="">
           <img src={image} alt={@title} loading="lazy" class="rounded" />
