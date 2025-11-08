@@ -54,4 +54,22 @@ defmodule Billing.ElectronicInvoices do
     |> Repo.all()
     |> Repo.preload(quote: :customer)
   end
+
+  def chart_data_by_month do
+    current_year = DateTime.utc_now().year
+
+    from(ei in ElectronicInvoice,
+      where: ei.state == :authorized,
+      where: fragment("EXTRACT(YEAR FROM ?)", ei.inserted_at) == ^current_year,
+      group_by: fragment("EXTRACT(MONTH FROM ?)::integer", ei.inserted_at),
+      select: %{
+        month:
+          selected_as(type(fragment("EXTRACT(MONTH FROM ?)", ei.inserted_at), :integer), :month),
+        total: sum(ei.amount)
+      },
+      group_by: selected_as(:month),
+      order_by: selected_as(:month)
+    )
+    |> Repo.all()
+  end
 end
