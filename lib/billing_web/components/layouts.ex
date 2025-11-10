@@ -166,25 +166,43 @@ defmodule BillingWeb.Layouts do
 
   def public(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
+    <header class="navbar mx-auto max-w-2xl">
       <div class="flex-1">
         <.link navigate={~p"/"} class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
+          <img src={~p"/images/logo.svg"} width="48" />
         </.link>
       </div>
       <div class="flex justify-end items-center space-x-2">
-        <%= if @current_scope do %>
-          <.link navigate={~p"/dashboard"} class="btn btn-ghost">
-            <.icon name="hero-cog-6-tooth" /> {gettext("Manager")}
-          </.link>
-          <.link href={~p"/users/log-out"} method="delete" class="btn btn-ghost">
-            <.icon name="hero-arrow-left-start-on-rectangle" /> {gettext("Log out")}
-          </.link>
-        <% else %>
-          <.link href={~p"/users/log-in"} class="btn btn-ghost">
-            <.icon name="hero-arrow-right-start-on-rectangle" /> {gettext("Log in")}
-          </.link>
-        <% end %>
+        <ul class="menu menu-horizontal">
+          <%= if @current_scope do %>
+            <li>
+              <.link navigate={~p"/dashboard"} class="rounded-full">
+                <.icon name="hero-inbox-arrow-down" /> {gettext("Manager")}
+              </.link>
+            </li>
+
+            <li>
+              <.link
+                href={~p"/users/log-out"}
+                method="delete"
+                class="tooltip tooltip-bottom rounded-full"
+                data-tip={gettext("Log out")}
+              >
+                <.icon name="hero-arrow-left-start-on-rectangle" />
+              </.link>
+            </li>
+          <% else %>
+            <li>
+              <.link
+                href={~p"/users/log-in"}
+                class="tooltip tooltip-bottom rounded-full"
+                data-tip={gettext("Log in")}
+              >
+                <.icon name="hero-power" />
+              </.link>
+            </li>
+          <% end %>
+        </ul>
 
         <div class="flex justify-end">
           <.theme_toggle />

@@ -12,17 +12,17 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: lib/billing_web/live/catalog_live/index.ex:68
-#: lib/billing_web/live/catalog_live/show.ex:63
+#: lib/billing_web/live/catalog_live/show.ex:59
 #, elixir-autogen, elixir-format
 msgid "%{product_name} added to your cart"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:76
+#: lib/billing_web/components/layouts.ex:82
 #, elixir-autogen, elixir-format
 msgid "AI Chat"
 msgstr ""
 
-#: lib/billing_web/live/electronic_invoice_live/show.ex:44
+#: lib/billing_web/live/electronic_invoice_live/show.ex:40
 #, elixir-autogen, elixir-format
 msgid "Access Key"
 msgstr ""
@@ -38,31 +38,31 @@ msgid "Add Item"
 msgstr ""
 
 #: lib/billing_web/live/catalog_live/index.ex:33
-#: lib/billing_web/live/catalog_live/show.ex:25
+#: lib/billing_web/live/catalog_live/show.ex:21
 #, elixir-autogen, elixir-format
 msgid "Add to Cart"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:52
+#: lib/billing_web/live/cart_live/index.ex:47
 #: lib/billing_web/live/company_live/form.ex:21
 #: lib/billing_web/live/company_live/index.ex:28
-#: lib/billing_web/live/company_live/show.ex:25
+#: lib/billing_web/live/company_live/show.ex:22
 #: lib/billing_web/live/customer_live/form.ex:29
 #, elixir-autogen, elixir-format
 msgid "Address"
 msgstr ""
 
 #: lib/billing_web/live/electronic_invoice_live/index.ex:31
-#: lib/billing_web/live/electronic_invoice_live/show.ex:43
+#: lib/billing_web/live/electronic_invoice_live/show.ex:39
 #: lib/billing_web/live/order_live/index.ex:22
-#: lib/billing_web/live/order_live/show.ex:26
-#: lib/billing_web/live/order_live/show.ex:38
+#: lib/billing_web/live/order_live/show.ex:23
+#: lib/billing_web/live/order_live/show.ex:35
 #: lib/billing_web/live/quote_live/index.ex:28
 #, elixir-autogen, elixir-format
 msgid "Amount"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:30
+#: lib/billing_web/live/cart_live/index.ex:25
 #: lib/billing_web/live/certificate_live/index.ex:35
 #: lib/billing_web/live/company_live/index.ex:39
 #: lib/billing_web/live/customer_live/index.ex:36
@@ -73,8 +73,8 @@ msgstr ""
 msgid "Are you sure?"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:221
 #: lib/billing_web/components/layouts.ex:233
+#: lib/billing_web/components/layouts.ex:245
 #, elixir-autogen, elixir-format
 msgid "Attempting to reconnect"
 msgstr ""
@@ -104,7 +104,7 @@ msgstr ""
 msgid "Certificate"
 msgstr ""
 
-#: lib/billing_web/live/certificate_live/show.ex:38
+#: lib/billing_web/live/certificate_live/show.ex:35
 #, elixir-autogen, elixir-format
 msgid "Certificate #%{certificate_id}"
 msgstr ""
@@ -119,7 +119,7 @@ msgstr ""
 msgid "Certificate updated successfully"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:106
+#: lib/billing_web/components/layouts.ex:112
 #: lib/billing_web/live/certificate_live/index.ex:11
 #: lib/billing_web/live/certificate_live/index.ex:49
 #, elixir-autogen, elixir-format
@@ -131,7 +131,7 @@ msgstr ""
 msgid "Certificates #%{certificate_id}"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:111
+#: lib/billing_web/components/layouts.ex:117
 #: lib/billing_web/live/company_live/index.ex:11
 #: lib/billing_web/live/company_live/index.ex:53
 #, elixir-autogen, elixir-format
@@ -144,7 +144,7 @@ msgid "Company"
 msgstr ""
 
 #: lib/billing_web/live/company_live/show.ex:11
-#: lib/billing_web/live/company_live/show.ex:36
+#: lib/billing_web/live/company_live/show.ex:33
 #, elixir-autogen, elixir-format
 msgid "Company #%{company_id}"
 msgstr ""
@@ -159,7 +159,7 @@ msgstr ""
 msgid "Company updated successfully"
 msgstr ""
 
-#: lib/billing_web/live/quote_live/show.ex:153
+#: lib/billing_web/live/quote_live/show.ex:150
 #, elixir-autogen, elixir-format
 msgid "Create E-Invoice"
 msgstr ""
@@ -170,14 +170,14 @@ msgid "Credit Card"
 msgstr ""
 
 #: lib/billing_web/live/order_live/index.ex:21
-#: lib/billing_web/live/order_live/show.ex:24
+#: lib/billing_web/live/order_live/show.ex:21
 #: lib/billing_web/live/quote_live/index.ex:27
 #, elixir-autogen, elixir-format
 msgid "Customer"
 msgstr ""
 
 #: lib/billing_web/live/customer_live/show.ex:11
-#: lib/billing_web/live/customer_live/show.ex:35
+#: lib/billing_web/live/customer_live/show.ex:32
 #, elixir-autogen, elixir-format
 msgid "Customer #%{customer_id}"
 msgstr ""
@@ -192,20 +192,20 @@ msgstr ""
 msgid "Customer updated successfully"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:101
+#: lib/billing_web/components/layouts.ex:107
 #: lib/billing_web/live/customer_live/index.ex:11
 #: lib/billing_web/live/customer_live/index.ex:50
 #, elixir-autogen, elixir-format
 msgid "Customers"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:71
+#: lib/billing_web/components/layouts.ex:77
 #, elixir-autogen, elixir-format
 msgid "Dashboard"
 msgstr ""
 
 #: lib/billing_web/live/electronic_invoice_live/index.ex:28
-#: lib/billing_web/live/electronic_invoice_live/show.ex:42
+#: lib/billing_web/live/electronic_invoice_live/show.ex:38
 #: lib/billing_web/live/order_live/index.ex:20
 #, elixir-autogen, elixir-format
 msgid "Date"
@@ -228,7 +228,7 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: lib/billing_web/live/electronic_invoice_live/show.ex:52
+#: lib/billing_web/live/electronic_invoice_live/show.ex:48
 #, elixir-autogen, elixir-format
 msgid "Documents"
 msgstr ""
@@ -243,7 +243,7 @@ msgstr ""
 msgid "Due date"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:91
+#: lib/billing_web/components/layouts.ex:97
 #, elixir-autogen, elixir-format
 msgid "E-Invoices"
 msgstr ""
@@ -278,38 +278,38 @@ msgstr ""
 msgid "Edit Product"
 msgstr ""
 
-#: lib/billing_web/live/certificate_live/show.ex:18
+#: lib/billing_web/live/certificate_live/show.ex:15
 #, elixir-autogen, elixir-format
 msgid "Edit certificate"
 msgstr ""
 
-#: lib/billing_web/live/company_live/show.ex:18
+#: lib/billing_web/live/company_live/show.ex:15
 #, elixir-autogen, elixir-format
 msgid "Edit company"
 msgstr ""
 
-#: lib/billing_web/live/customer_live/show.ex:18
+#: lib/billing_web/live/customer_live/show.ex:15
 #, elixir-autogen, elixir-format
 msgid "Edit customer"
 msgstr ""
 
-#: lib/billing_web/live/emission_profile_live/show.ex:23
+#: lib/billing_web/live/emission_profile_live/show.ex:20
 #, elixir-autogen, elixir-format
 msgid "Edit emission profile"
 msgstr ""
 
-#: lib/billing_web/live/product_live/show.ex:19
+#: lib/billing_web/live/product_live/show.ex:16
 #, elixir-autogen, elixir-format
 msgid "Edit product"
 msgstr ""
 
-#: lib/billing_web/live/quote_live/show.ex:23
+#: lib/billing_web/live/quote_live/show.ex:20
 #, elixir-autogen, elixir-format
 msgid "Edit quote"
 msgstr ""
 
 #: lib/billing_web/live/electronic_invoice_live/show.ex:19
-#: lib/billing_web/live/electronic_invoice_live/show.ex:77
+#: lib/billing_web/live/electronic_invoice_live/show.ex:73
 #, elixir-autogen, elixir-format
 msgid "Electronic Invoice %{electronic_invoice_id}"
 msgstr ""
@@ -320,10 +320,10 @@ msgstr ""
 msgid "Electronic Invoices"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:40
+#: lib/billing_web/live/cart_live/index.ex:35
 #: lib/billing_web/live/customer_live/form.ex:17
 #: lib/billing_web/live/customer_live/index.ex:26
-#: lib/billing_web/live/customer_live/show.ex:25
+#: lib/billing_web/live/customer_live/show.ex:22
 #: lib/billing_web/live/user_live/login.ex:43
 #: lib/billing_web/live/user_live/login.ex:67
 #, elixir-autogen, elixir-format
@@ -335,7 +335,7 @@ msgstr ""
 msgid "Emission Profile"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:116
+#: lib/billing_web/components/layouts.ex:122
 #, elixir-autogen, elixir-format
 msgid "Emission Profiles"
 msgstr ""
@@ -356,8 +356,7 @@ msgstr ""
 msgid "Emission profiles"
 msgstr ""
 
-#: lib/billing_web/live/emission_profile_live/show.ex:11
-#: lib/billing_web/live/emission_profile_live/show.ex:41
+#: lib/billing_web/live/emission_profile_live/show.ex:38
 #, elixir-autogen, elixir-format
 msgid "Emission profiles #%{emission_profile_id}"
 msgstr ""
@@ -368,16 +367,16 @@ msgstr ""
 msgid "Error saving certificate"
 msgstr ""
 
-#: lib/billing_web/live/quote_live/show.ex:116
-#: lib/billing_web/live/quote_live/show.ex:124
+#: lib/billing_web/live/quote_live/show.ex:113
+#: lib/billing_web/live/quote_live/show.ex:121
 #, elixir-autogen, elixir-format
 msgid "Error: %{error}"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:39
+#: lib/billing_web/live/cart_live/index.ex:34
 #: lib/billing_web/live/customer_live/form.ex:16
 #: lib/billing_web/live/customer_live/index.ex:25
-#: lib/billing_web/live/customer_live/show.ex:24
+#: lib/billing_web/live/customer_live/show.ex:21
 #, elixir-autogen, elixir-format
 msgid "Full name"
 msgstr ""
@@ -394,13 +393,13 @@ msgstr ""
 msgid "Id"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:50
+#: lib/billing_web/live/cart_live/index.ex:45
 #: lib/billing_web/live/customer_live/form.ex:27
 #, elixir-autogen, elixir-format
 msgid "Identification Number"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:44
+#: lib/billing_web/live/cart_live/index.ex:39
 #: lib/billing_web/live/customer_live/form.ex:21
 #, elixir-autogen, elixir-format
 msgid "Identification Type"
@@ -408,7 +407,7 @@ msgstr ""
 
 #: lib/billing_web/live/company_live/form.ex:19
 #: lib/billing_web/live/company_live/index.ex:25
-#: lib/billing_web/live/company_live/show.ex:24
+#: lib/billing_web/live/company_live/show.ex:21
 #, elixir-autogen, elixir-format
 msgid "Identification number"
 msgstr ""
@@ -419,7 +418,7 @@ msgstr ""
 msgid "Issued at"
 msgstr ""
 
-#: lib/billing_web/live/order_live/show.ex:29
+#: lib/billing_web/live/order_live/show.ex:26
 #: lib/billing_web/live/quote_live/form.ex:45
 #, elixir-autogen, elixir-format
 msgid "Items"
@@ -430,8 +429,8 @@ msgstr ""
 msgid "Listing Products"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:126
-#: lib/billing_web/components/layouts.ex:173
+#: lib/billing_web/components/layouts.ex:132
+#: lib/billing_web/components/layouts.ex:181
 #, elixir-autogen, elixir-format
 msgid "Log out"
 msgstr ""
@@ -440,13 +439,13 @@ msgstr ""
 #: lib/billing_web/live/certificate_live/index.ex:25
 #: lib/billing_web/live/company_live/form.ex:22
 #: lib/billing_web/live/company_live/index.ex:29
-#: lib/billing_web/live/company_live/show.ex:26
+#: lib/billing_web/live/company_live/show.ex:23
 #: lib/billing_web/live/emission_profile_live/form.ex:16
 #: lib/billing_web/live/emission_profile_live/index.ex:27
-#: lib/billing_web/live/emission_profile_live/show.ex:29
+#: lib/billing_web/live/emission_profile_live/show.ex:26
 #: lib/billing_web/live/product_live/form.ex:16
 #: lib/billing_web/live/product_live/index.ex:25
-#: lib/billing_web/live/product_live/show.ex:25
+#: lib/billing_web/live/product_live/show.ex:22
 #, elixir-autogen, elixir-format
 msgid "Name"
 msgstr ""
@@ -480,7 +479,7 @@ msgstr ""
 msgid "New Product"
 msgstr ""
 
-#: lib/billing_web/live/order_live/show.ex:18
+#: lib/billing_web/live/order_live/show.ex:15
 #: lib/billing_web/live/quote_live/index.ex:14
 #, elixir-autogen, elixir-format
 msgid "New Quote"
@@ -498,12 +497,12 @@ msgstr[1] ""
 msgid "Order #%{order_id}"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:126
+#: lib/billing_web/live/cart_live/index.ex:121
 #, elixir-autogen, elixir-format
 msgid "Order created successfully"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:81
+#: lib/billing_web/components/layouts.ex:87
 #: lib/billing_web/live/order_live/index.ex:11
 #, elixir-autogen, elixir-format
 msgid "Orders"
@@ -524,7 +523,7 @@ msgstr ""
 msgid "Payment Method"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:53
+#: lib/billing_web/live/cart_live/index.ex:48
 #: lib/billing_web/live/customer_live/form.ex:30
 #, elixir-autogen, elixir-format
 msgid "Phone Number"
@@ -535,30 +534,30 @@ msgstr ""
 msgid "Pictures"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:56
+#: lib/billing_web/live/cart_live/index.ex:51
 #, elixir-autogen, elixir-format
 msgid "Place order"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:26
-#: lib/billing_web/live/order_live/show.ex:25
-#: lib/billing_web/live/order_live/show.ex:36
+#: lib/billing_web/live/cart_live/index.ex:21
+#: lib/billing_web/live/order_live/show.ex:22
+#: lib/billing_web/live/order_live/show.ex:33
 #: lib/billing_web/live/product_live/form.ex:17
 #: lib/billing_web/live/product_live/index.ex:26
-#: lib/billing_web/live/product_live/show.ex:26
+#: lib/billing_web/live/product_live/show.ex:23
 #: lib/billing_web/live/quote_live/form.ex:55
 #, elixir-autogen, elixir-format
 msgid "Price"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:25
-#: lib/billing_web/live/order_live/show.ex:35
+#: lib/billing_web/live/cart_live/index.ex:20
+#: lib/billing_web/live/order_live/show.ex:32
 #, elixir-autogen, elixir-format
 msgid "Product"
 msgstr ""
 
 #: lib/billing_web/live/product_live/show.ex:12
-#: lib/billing_web/live/product_live/show.ex:42
+#: lib/billing_web/live/product_live/show.ex:39
 #, elixir-autogen, elixir-format
 msgid "Product #%{product_id}"
 msgstr ""
@@ -573,13 +572,13 @@ msgstr ""
 msgid "Product updated successfully"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:96
+#: lib/billing_web/components/layouts.ex:102
 #: lib/billing_web/live/product_live/index.ex:11
 #, elixir-autogen, elixir-format
 msgid "Products"
 msgstr ""
 
-#: lib/billing_web/live/order_live/show.ex:37
+#: lib/billing_web/live/order_live/show.ex:34
 #, elixir-autogen, elixir-format
 msgid "Quantity"
 msgstr ""
@@ -589,7 +588,7 @@ msgstr ""
 msgid "Quote #%{quote_id}"
 msgstr ""
 
-#: lib/billing_web/live/electronic_invoice_live/show.ex:45
+#: lib/billing_web/live/electronic_invoice_live/show.ex:41
 #, elixir-autogen, elixir-format
 msgid "Quote Id"
 msgstr ""
@@ -604,14 +603,14 @@ msgstr ""
 msgid "Quote updated successfully"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:86
+#: lib/billing_web/components/layouts.ex:92
 #: lib/billing_web/live/quote_live/index.ex:11
 #: lib/billing_web/live/quote_live/index.ex:52
 #, elixir-autogen, elixir-format
 msgid "Quotes"
 msgstr ""
 
-#: lib/billing_web/live/cart_live/index.ex:33
+#: lib/billing_web/live/cart_live/index.ex:28
 #: lib/billing_web/live/quote_live/form.ex:66
 #, elixir-autogen, elixir-format
 msgid "Remove"
@@ -662,7 +661,7 @@ msgstr ""
 msgid "Show"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:228
+#: lib/billing_web/components/layouts.ex:240
 #, elixir-autogen, elixir-format
 msgid "Something went wrong!"
 msgstr ""
@@ -687,7 +686,7 @@ msgstr ""
 msgid "View Cart"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:216
+#: lib/billing_web/components/layouts.ex:228
 #, elixir-autogen, elixir-format
 msgid "We can't find the internet"
 msgstr ""
@@ -702,13 +701,13 @@ msgstr ""
 msgid "You have selected an unacceptable file type"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:121
+#: lib/billing_web/components/layouts.ex:127
 #, elixir-autogen, elixir-format
 msgid "Your Account"
 msgstr ""
 
 #: lib/billing_web/live/cart_live/index.ex:13
-#: lib/billing_web/live/cart_live/index.ex:80
+#: lib/billing_web/live/cart_live/index.ex:75
 #, elixir-autogen, elixir-format
 msgid "Your Cart"
 msgstr ""
@@ -723,13 +722,13 @@ msgstr ""
 msgid "close"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:177
+#: lib/billing_web/components/layouts.ex:185
 #: lib/billing_web/live/user_live/login.ex:13
 #, elixir-autogen, elixir-format
 msgid "Log in"
 msgstr ""
 
-#: lib/billing_web/components/layouts.ex:170
+#: lib/billing_web/components/layouts.ex:178
 #, elixir-autogen, elixir-format
 msgid "Manager"
 msgstr ""
@@ -767,4 +766,9 @@ msgstr ""
 #: lib/billing_web/live/user_live/login.ex:74
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Password"
+msgstr ""
+
+#: lib/billing_web/live/emission_profile_live/show.ex:11
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Emission profile #%{emission_profile_id}"
 msgstr ""
