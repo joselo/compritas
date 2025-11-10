@@ -30,7 +30,7 @@ defmodule BillingWeb.EmissionProfileLiveTest do
     test "lists all emission_profiles", %{conn: conn, emission_profile: emission_profile} do
       {:ok, _index_live, html} = live(conn, ~p"/emission_profiles")
 
-      assert html =~ "Listing Emission profiles"
+      assert html =~ "Emission profiles"
       assert html =~ emission_profile.name
     end
 
@@ -108,7 +108,7 @@ defmodule BillingWeb.EmissionProfileLiveTest do
     test "displays emission_profile", %{conn: conn, emission_profile: emission_profile} do
       {:ok, _show_live, html} = live(conn, ~p"/emission_profiles/#{emission_profile}")
 
-      assert html =~ "Show Emission profile"
+      assert html =~ "Emission profile ##{emission_profile.id}"
       assert html =~ emission_profile.name
     end
 

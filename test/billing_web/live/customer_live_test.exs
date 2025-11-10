@@ -37,7 +37,7 @@ defmodule BillingWeb.CustomerLiveTest do
     test "lists all customers", %{conn: conn, customer: customer} do
       {:ok, _index_live, html} = live(conn, ~p"/customers")
 
-      assert html =~ "Listing Customers"
+      assert html =~ "Customers"
       assert html =~ customer.full_name
     end
 
@@ -107,7 +107,7 @@ defmodule BillingWeb.CustomerLiveTest do
     test "displays customer", %{conn: conn, customer: customer} do
       {:ok, _show_live, html} = live(conn, ~p"/customers/#{customer}")
 
-      assert html =~ "Show Customer"
+      assert html =~ "Customer ##{customer.id}"
       assert html =~ customer.full_name
     end
 

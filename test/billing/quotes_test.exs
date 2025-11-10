@@ -66,6 +66,7 @@ defmodule Billing.QuotesTest do
         items: [
           %{
             description: "Invoice Test",
+            price: Decimal.new("10.0"),
             amount: Decimal.new("10.0"),
             tax_rate: Decimal.new("15.0")
           }

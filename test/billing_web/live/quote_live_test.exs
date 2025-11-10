@@ -20,7 +20,7 @@ defmodule BillingWeb.QuoteLiveTest do
     items: %{
       "0" => %{
         description: "Invoice Test",
-        amount: Decimal.new("10.0"),
+        price: Decimal.new("10.0"),
         tax_rate: Decimal.new("15.0")
       }
     }
@@ -48,7 +48,7 @@ defmodule BillingWeb.QuoteLiveTest do
     test "lists all quotes", %{conn: conn} do
       {:ok, _index_live, html} = live(conn, ~p"/quotes")
 
-      assert html =~ "Listado de Facturas"
+      assert html =~ "Quotes"
     end
 
     test "saves new quote", %{
@@ -60,11 +60,11 @@ defmodule BillingWeb.QuoteLiveTest do
 
       assert {:ok, form_live, _} =
                index_live
-               |> element("a", "New Invoice")
+               |> element("a", "New Quote")
                |> render_click()
                |> follow_redirect(conn, ~p"/quotes/new")
 
-      assert render(form_live) =~ "New Invoice"
+      assert render(form_live) =~ "New Quote"
 
       assert form_live
              |> form("#quote-form", quote: @invalid_attrs)
@@ -86,7 +86,7 @@ defmodule BillingWeb.QuoteLiveTest do
                |> follow_redirect(conn, ~p"/quotes/#{last_quote_id()}")
 
       html = render(index_live)
-      assert html =~ "Invoice created successfully"
+      assert html =~ "Quote created successfully"
     end
 
     test "updates quote in listing", %{conn: conn, quote: quote} do
@@ -98,7 +98,7 @@ defmodule BillingWeb.QuoteLiveTest do
                |> render_click()
                |> follow_redirect(conn, ~p"/quotes/#{quote}/edit")
 
-      assert render(form_live) =~ "Edit Invoice"
+      assert render(form_live) =~ "Edit Quote"
 
       assert form_live
              |> form("#quote-form", quote: @invalid_attrs)
@@ -111,7 +111,7 @@ defmodule BillingWeb.QuoteLiveTest do
                |> follow_redirect(conn, ~p"/quotes")
 
       html = render(index_live)
-      assert html =~ "Invoice updated successfully"
+      assert html =~ "Quote updated successfully"
     end
 
     test "deletes quote in listing", %{conn: conn, quote: quote} do
@@ -140,7 +140,7 @@ defmodule BillingWeb.QuoteLiveTest do
                |> render_click()
                |> follow_redirect(conn, ~p"/quotes/#{quote}/edit?return_to=show")
 
-      assert render(form_live) =~ "Edit Invoice"
+      assert render(form_live) =~ "Edit Quote"
 
       assert form_live
              |> form("#quote-form", quote: @invalid_attrs)
@@ -153,7 +153,7 @@ defmodule BillingWeb.QuoteLiveTest do
                |> follow_redirect(conn, ~p"/quotes/#{quote}")
 
       html = render(show_live)
-      assert html =~ "Invoice updated successfully"
+      assert html =~ "Quote updated successfully"
     end
   end
 

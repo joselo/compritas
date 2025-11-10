@@ -95,7 +95,7 @@ defmodule BillingWeb.ProductLiveTest do
     test "displays product", %{conn: conn, product: product} do
       {:ok, _show_live, html} = live(conn, ~p"/products/#{product}")
 
-      assert html =~ "Show Product"
+      assert html =~ "Product ##{product.id}"
       assert html =~ product.name
     end
 

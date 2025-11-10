@@ -28,6 +28,7 @@ defmodule Billing.QuotesFixtures do
         items: [
           %{
             description: "Product",
+            price: Decimal.new("10.0"),
             amount: Decimal.new("10.0"),
             tax_rate: Decimal.new("15.0")
           }

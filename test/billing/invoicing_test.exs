@@ -56,6 +56,7 @@ defmodule Billing.InvoicingTest do
         items: [
           %{
             description: "Invoice Description",
+            price: 28.46,
             amount: 28.46,
             tax_rate: 15.0
           }

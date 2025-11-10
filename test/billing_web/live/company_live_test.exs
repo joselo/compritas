@@ -33,7 +33,7 @@ defmodule BillingWeb.CompanyLiveTest do
     test "lists all companies", %{conn: conn, company: company} do
       {:ok, _index_live, html} = live(conn, ~p"/companies")
 
-      assert html =~ "Listing Companies"
+      assert html =~ "Companies"
       assert html =~ company.identification_number
     end
 
@@ -103,7 +103,7 @@ defmodule BillingWeb.CompanyLiveTest do
     test "displays company", %{conn: conn, company: company} do
       {:ok, _show_live, html} = live(conn, ~p"/companies/#{company}")
 
-      assert html =~ "Show Company"
+      assert html =~ "Company ##{company.id}"
       assert html =~ company.identification_number
     end
 

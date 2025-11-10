@@ -8,7 +8,7 @@ defmodule BillingWeb.EmissionProfileLive.Show do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope} return_to={~p"/emission_profiles"}>
       <.header>
-        {gettext("Emission profiles #%{emission_profile_id}",
+        {gettext("Emission profile #%{emission_profile_id}",
           emission_profile_id: @emission_profile.id
         )}
         <:subtitle>{@emission_profile.inserted_at}</:subtitle>

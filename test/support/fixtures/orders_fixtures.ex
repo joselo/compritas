@@ -18,7 +18,7 @@ defmodule Billing.OrdersFixtures do
         address: "Arena",
         phone_number: "123456789",
         items: [
-          %{name: "Product", price: Decimal.new("5.00")}
+          %{name: "Product", price: Decimal.new("5.00"), quantity: Decimal.new("1.00")}
         ]
       })
       |> Billing.Orders.create_order()

@@ -18,7 +18,7 @@ defmodule Billing.Orders.OrderItem do
   @doc false
   def changeset(order_item, attrs) do
     order_item
-    |> cast(attrs, [:name, :price])
-    |> validate_required([:name, :price])
+    |> cast(attrs, [:name, :price, :quantity])
+    |> validate_required([:name, :price, :quantity])
   end
 end

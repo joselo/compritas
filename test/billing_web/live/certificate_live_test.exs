@@ -47,8 +47,8 @@ defmodule BillingWeb.CertificateLiveTest do
     test "lists all certificates", %{conn: conn, certificate: certificate} do
       {:ok, _index_live, html} = live(conn, ~p"/certificates")
 
-      assert html =~ "Listing Certificates"
-      assert html =~ certificate.file
+      assert html =~ "Certificates"
+      assert html =~ certificate.name
     end
 
     test "saves new certificate", %{conn: conn, certificate_file: certificate_file} do
@@ -78,7 +78,6 @@ defmodule BillingWeb.CertificateLiveTest do
 
       html = render(index_live)
       assert html =~ "Certificate created successfully"
-      assert html =~ "file.p12"
     end
 
     test "updates certificate in listing", %{conn: conn, certificate: certificate} do
@@ -124,8 +123,8 @@ defmodule BillingWeb.CertificateLiveTest do
     test "displays certificate", %{conn: conn, certificate: certificate} do
       {:ok, _show_live, html} = live(conn, ~p"/certificates/#{certificate}")
 
-      assert html =~ "Show Certificate"
-      assert html =~ certificate.file
+      assert html =~ "Certificate ##{certificate.id}"
+      assert html =~ certificate.name
     end
 
     test "updates certificate and returns to show", %{conn: conn, certificate: certificate} do
