@@ -10,16 +10,10 @@ defmodule BillingWeb.UserLive.Login do
       <div class="mx-auto max-w-sm space-y-4">
         <div class="text-center">
           <.header>
-            <p>Log in</p>
+            <p>{gettext("Log in")}</p>
             <:subtitle>
               <%= if @current_scope do %>
                 You need to reauthenticate to perform sensitive actions on your account.
-              <% else %>
-                Don't have an account? <.link
-                  navigate={~p"/users/register"}
-                  class="font-semibold text-brand hover:underline"
-                  phx-no-format
-                >Sign up</.link> for an account now.
               <% end %>
             </:subtitle>
           </.header>
@@ -28,9 +22,9 @@ defmodule BillingWeb.UserLive.Login do
         <div :if={local_mail_adapter?()} class="alert alert-info">
           <.icon name="hero-information-circle" class="size-6 shrink-0" />
           <div>
-            <p>You are running the local mail adapter.</p>
+            <p>{gettext("You are running the local mail adapter.")}</p>
             <p>
-              To see sent emails, visit <.link href="/dev/mailbox" class="underline">the mailbox page</.link>.
+              {gettext("To see sent emails, visit")} <.link href="/dev/mailbox" class="underline">{gettext("the mailbox page")}</.link>.
             </p>
           </div>
         </div>
@@ -46,13 +40,13 @@ defmodule BillingWeb.UserLive.Login do
             readonly={!!@current_scope}
             field={f[:email]}
             type="email"
-            label="Email"
+            label={gettext("Email")}
             autocomplete="username"
             required
             phx-mounted={JS.focus()}
           />
           <.button class="btn btn-primary w-full">
-            Log in with email <span aria-hidden="true">→</span>
+            {gettext("Log in with email")} <span aria-hidden="true">→</span>
           </.button>
         </.form>
 
@@ -70,21 +64,21 @@ defmodule BillingWeb.UserLive.Login do
             readonly={!!@current_scope}
             field={f[:email]}
             type="email"
-            label="Email"
+            label={gettext("Email")}
             autocomplete="username"
             required
           />
           <.input
             field={@form[:password]}
             type="password"
-            label="Password"
+            label={gettext("Password")}
             autocomplete="current-password"
           />
           <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
-            Log in and stay logged in <span aria-hidden="true">→</span>
+            {gettext("Log in and stay logged in")} <span aria-hidden="true">→</span>
           </.button>
           <.button class="btn btn-primary btn-soft w-full mt-2">
-            Log in only this time
+            {gettext("Log in only this time")}
           </.button>
         </.form>
       </div>

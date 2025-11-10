@@ -167,14 +167,14 @@ defmodule BillingWeb.Layouts do
       <div class="flex justify-end items-center space-x-2">
         <%= if @current_scope do %>
           <.link navigate={~p"/quotes"} class="btn btn-ghost">
-            <.icon name="hero-cog-6-tooth" /> Manager
+            <.icon name="hero-cog-6-tooth" /> {gettext("Manager")}
           </.link>
           <.link href={~p"/users/log-out"} method="delete" class="btn btn-ghost">
-            <.icon name="hero-arrow-left-start-on-rectangle" /> Log out
+            <.icon name="hero-arrow-left-start-on-rectangle" /> {gettext("Log out")}
           </.link>
         <% else %>
           <.link href={~p"/users/log-in"} class="btn btn-ghost">
-            <.icon name="hero-arrow-right-start-on-rectangle" /> Log in
+            <.icon name="hero-arrow-right-start-on-rectangle" /> {gettext("Log in")}
           </.link>
         <% end %>
 
