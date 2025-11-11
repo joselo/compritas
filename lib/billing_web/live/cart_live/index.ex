@@ -74,7 +74,7 @@ defmodule BillingWeb.CartLive.Index do
      socket
      |> assign(:page_title, gettext("Your Cart"))
      |> assign(:order, order)
-     |> assign(:form, to_form(Orders.change_order(order)))
+     |> assign(:form, to_form(Orders.change_order(order, socket.assigns.current_scope)))
      |> assign(:identification_types, identification_types)
      |> stream(:carts, list_carts(socket.assigns.cart_uuid))}
   end
@@ -111,7 +111,7 @@ defmodule BillingWeb.CartLive.Index do
 
     params = Map.put(order_params, "items", items)
 
-    case Orders.create_order(params) do
+    case Orders.create_order(socket.assigns.current_scope, params) do
       {:ok, order} ->
         Carts.clean_cart(socket.assigns.cart_uuid)
         Orders.save_order_amounts(order)

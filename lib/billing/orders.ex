@@ -9,18 +9,19 @@ defmodule Billing.Orders do
   alias Billing.Orders.Order
   alias Billing.Orders.OrderItem
   alias Ecto.Multi
+  alias Billing.Accounts.Scope
 
   @doc """
   Returns the list of orders.
 
   ## Examples
 
-      iex> list_orders()
+      iex> list_orders(scope)
       [%Order{}, ...]
 
   """
-  def list_orders do
-    Repo.all(Order)
+  def list_orders(%Scope{} = scope) do
+    Repo.all_by(Certificate, user_id: scope.user.id)
   end
 
   @doc """
@@ -30,30 +31,32 @@ defmodule Billing.Orders do
 
   ## Examples
 
-      iex> get_order!(123)
+      iex> get_order!(scope, 123)
       %Order{}
 
-      iex> get_order!(456)
+      iex> get_order!(scope, 456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_order!(id), do: Repo.get!(Order, id) |> Repo.preload(:items)
+  def get_order!(%Scope{} = scope, id) do
+    Repo.get_by!(Order, id: id, user_id: scope.user.id) |> Repo.preload(:items)
+  end
 
   @doc """
   Creates a order.
 
   ## Examples
 
-      iex> create_order(%{field: value})
+      iex> create_order(scope, %{field: value})
       {:ok, %Order{}}
 
-      iex> create_order(%{field: bad_value})
+      iex> create_order(scope, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_order(attrs) do
+  def create_order(%Scope{} = scope, attrs) do
     %Order{}
-    |> Order.changeset(attrs)
+    |> Order.changeset(attrs, scope)
     |> Repo.insert()
   end
 
@@ -62,16 +65,18 @@ defmodule Billing.Orders do
 
   ## Examples
 
-      iex> update_order(order, %{field: new_value})
+      iex> update_order(scope, order, %{field: new_value})
       {:ok, %Order{}}
 
-      iex> update_order(order, %{field: bad_value})
+      iex> update_order(scope, order, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_order(%Order{} = order, attrs) do
+  def update_order(%Scope{} = scope, %Order{} = order, attrs) do
+    true = order.user_id == scope.user.id
+
     order
-    |> Order.changeset(attrs)
+    |> Order.changeset(attrs, scope)
     |> Repo.update()
   end
 
@@ -80,14 +85,16 @@ defmodule Billing.Orders do
 
   ## Examples
 
-      iex> delete_order(order)
+      iex> delete_order(scope, order)
       {:ok, %Order{}}
 
-      iex> delete_order(order)
+      iex> delete_order(scope, order)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_order(%Order{} = order) do
+  def delete_order(%Scope{} = scope, %Order{} = order) do
+    true = order.user_id == scope.user.id
+
     Repo.delete(order)
   end
 
@@ -96,11 +103,13 @@ defmodule Billing.Orders do
 
   ## Examples
 
-      iex> change_order(order)
+      iex> change_order(scope, order)
       %Ecto.Changeset{data: %Order{}}
 
   """
-  def change_order(%Order{} = order, attrs \\ %{}) do
+  def change_order(%Scope{} = scope, %Order{} = order, attrs \\ %{}) do
+    true = order.user_id == scope.user.id
+
     Order.changeset(order, attrs)
   end
 

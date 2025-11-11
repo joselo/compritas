@@ -212,9 +212,13 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
 
   defp assign_electronic_invoice(socket, electronic_invoice_id) do
     electronic_invoice =
-      ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
+      ElectronicInvoices.get_electronic_invoice!(
+        socket.assigns.current_scope,
+        electronic_invoice_id
+      )
 
-    electronic_invoice_errors = ElectronicInvoiceErrors.list_errors(electronic_invoice)
+    electronic_invoice_errors =
+      ElectronicInvoiceErrors.list_errors(electronic_invoice)
 
     socket
     |> assign(:electronic_invoice, electronic_invoice)
@@ -222,7 +226,11 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
   end
 
   defp assign_invoice(socket) do
-    assign(socket, :quote, Quotes.get_quote!(socket.assigns.electronic_invoice.quote_id))
+    assign(
+      socket,
+      :quote,
+      Quotes.get_quote!(socket.assigns.current_scope, socket.assigns.electronic_invoice.quote_id)
+    )
   end
 
   attr :send_result, AsyncResult, required: true

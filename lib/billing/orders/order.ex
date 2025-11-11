@@ -12,6 +12,7 @@ defmodule Billing.Orders.Order do
     field :address, :string
     field :phone_number, :string
     field :amount, :decimal
+    field :user_id, :id
 
     timestamps(type: :utc_datetime)
 
@@ -19,7 +20,7 @@ defmodule Billing.Orders.Order do
   end
 
   @doc false
-  def changeset(order, attrs) do
+  def changeset(order, attrs, user_scope) do
     order
     |> cast(attrs, [
       :full_name,
@@ -38,5 +39,6 @@ defmodule Billing.Orders.Order do
       :phone_number
     ])
     |> cast_assoc(:items)
+    |> put_change(:user_id, user_scope.user.id)
   end
 end

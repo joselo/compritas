@@ -11,18 +11,20 @@ defmodule Billing.ChatMessages.ChatMessage do
     field :content, :string
     field :tool_calls, {:array, :map}, default: []
     field :tool_results, {:array, :map}, default: []
+    field :user_id, :id
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(chat_message, attrs \\ %{}) do
+  def changeset(chat_message, attrs, user_scope) do
     chat_message
     |> cast(attrs, [:role, :hidden, :content, :tool_calls, :tool_results])
     |> validate_required([:role, :hidden])
     |> validate_required_content()
     |> serialize_tool_calls()
     |> serialize_tool_results()
+    |> put_change(:user_id, user_scope.user.id)
   end
 
   defp validate_required_content(changeset) do

@@ -48,13 +48,13 @@ defmodule BillingWeb.CustomerLive.Index do
     {:ok,
      socket
      |> assign(:page_title, gettext("Customers"))
-     |> stream(:customers, Customers.list_customers())}
+     |> stream(:customers, Customers.list_customers(socket.assigns.current_scope))}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    customer = Customers.get_customer!(id)
-    {:ok, _} = Customers.delete_customer(customer)
+    customer = Customers.get_customer!(socket.assigns.current_scope, id)
+    {:ok, _} = Customers.delete_customer(socket.assigns.current_scope, customer)
 
     {:noreply, stream_delete(socket, :customers, customer)}
   end

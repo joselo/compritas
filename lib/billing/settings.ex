@@ -7,6 +7,7 @@ defmodule Billing.Settings do
   alias Billing.Repo
 
   alias Billing.Settings.Setting
+  alias Billing.Accounts.Scope
 
   @doc """
   Gets a single setting.
@@ -15,15 +16,15 @@ defmodule Billing.Settings do
 
   ## Examples
 
-      iex> get_setting!()
+      iex> get_setting!(scope)
       %Setting{}
 
-      iex> get_setting!()
+      iex> get_setting!(scope)
       ** (Ecto.NoResultsError)
 
   """
-  def get_setting() do
-    if setting = Setting |> first() |> Repo.one() do
+  def get_setting(%Scope{} = scope) do
+    if setting = Repo.get_by!(Setting, user_id: scope.user.id) do
       setting
     else
       %Setting{}
@@ -42,9 +43,9 @@ defmodule Billing.Settings do
       {:error, %Ecto.Changeset{}}
 
   """
-  def save_setting(%Setting{} = setting, attrs) do
+  def save_setting(%Scope{} = scope, %Setting{} = setting, attrs) do
     setting
-    |> Setting.changeset(attrs)
+    |> Setting.changeset(attrs, scope)
     |> Repo.insert_or_update()
   end
 
@@ -53,11 +54,11 @@ defmodule Billing.Settings do
 
   ## Examples
 
-      iex> change_setting(setting)
+      iex> change_setting(scope, setting)
       %Ecto.Changeset{data: %Setting{}}
 
   """
-  def change_setting(%Setting{} = setting, attrs \\ %{}) do
-    Setting.changeset(setting, attrs)
+  def change_setting(%Scope{} = scope, %Setting{} = setting, attrs \\ %{}) do
+    Setting.changeset(scope, setting, attrs)
   end
 end

@@ -73,7 +73,7 @@ defmodule BillingWeb.QuoteLive.Show do
   def mount(%{"id" => id}, _session, socket) do
     PubSub.subscribe(Billing.PubSub, "quote:#{id}")
 
-    socket = assign(socket, :quote, Quotes.get_quote!(id))
+    socket = assign(socket, :quote, Quotes.get_quote!(id, socket.assigns.current_scope))
 
     {:ok,
      socket
@@ -156,7 +156,10 @@ defmodule BillingWeb.QuoteLive.Show do
     stream(
       socket,
       :electronic_invoices,
-      ElectronicInvoices.list_electronic_invoices_by_invoice_id(socket.assigns.quote.id)
+      ElectronicInvoices.list_electronic_invoices_by_invoice_id(
+        socket.assigns.current_scope,
+        socket.assigns.quote.id
+      )
     )
   end
 end

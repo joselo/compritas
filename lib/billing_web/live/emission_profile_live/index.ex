@@ -49,13 +49,18 @@ defmodule BillingWeb.EmissionProfileLive.Index do
     {:ok,
      socket
      |> assign(:page_title, gettext("Emission profiles"))
-     |> stream(:emission_profiles, EmissionProfiles.list_emission_profiles())}
+     |> stream(
+       :emission_profiles,
+       EmissionProfiles.list_emission_profiles(socket.assigns.current_scope)
+     )}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    emission_profile = EmissionProfiles.get_emission_profile!(id)
-    {:ok, _} = EmissionProfiles.delete_emission_profile(emission_profile)
+    emission_profile = EmissionProfiles.get_emission_profile!(socket.assigns.current_scope, id)
+
+    {:ok, _} =
+      EmissionProfiles.delete_emission_profile(socket.assigns.current_scope, emission_profile)
 
     {:noreply, stream_delete(socket, :emission_profiles, emission_profile)}
   end

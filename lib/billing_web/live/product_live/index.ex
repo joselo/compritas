@@ -48,18 +48,18 @@ defmodule BillingWeb.ProductLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Listing Products")
-     |> stream(:products, list_products())}
+     |> stream(:products, list_products(socket.assigns.current_scope))}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    product = Products.get_product!(id)
-    {:ok, _} = Products.delete_product(product)
+    product = Products.get_product!(socket.assigns.current_scope, id)
+    {:ok, _} = Products.delete_product(socket.assigns.current_scope, product)
 
     {:noreply, stream_delete(socket, :products, product)}
   end
 
-  defp list_products() do
-    Products.list_products()
+  defp list_products(current_scope) do
+    Products.list_products(current_scope)
   end
 end

@@ -35,10 +35,10 @@ defmodule BillingWeb.OrderLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Listing Orders")
-     |> stream(:orders, list_orders())}
+     |> stream(:orders, list_orders(socket.assigns.current_scope))}
   end
 
-  defp list_orders() do
-    Orders.list_orders()
+  defp list_orders(current_scope) do
+    Orders.list_orders(current_scope)
   end
 end
