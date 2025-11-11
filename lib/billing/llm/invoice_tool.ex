@@ -12,8 +12,8 @@ defmodule Billing.LLM.InvoiceTool do
     })
   end
 
-  def execute(_args, _context) do
-    json_invoices = Jason.encode!(ElectronicInvoices.list_electronic_invoices())
+  def execute(_args, %{current_scope: current_scope} = _context) do
+    json_invoices = Jason.encode!(ElectronicInvoices.list_electronic_invoices(current_scope))
 
     {:ok, json_invoices}
   end

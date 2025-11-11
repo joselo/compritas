@@ -92,7 +92,8 @@ defmodule BillingWeb.QuoteLive.Form do
   @impl true
   def mount(params, _session, socket) do
     emission_profiles =
-      Billing.EmissionProfiles.list_emission_profiles() |> Enum.map(&{&1.name, &1.id})
+      Billing.EmissionProfiles.list_emission_profiles(socket.assigns.current_scope)
+      |> Enum.map(&{&1.name, &1.id})
 
     payment_methods = [
       {gettext("Credit Card"), :credit_card},
@@ -113,18 +114,18 @@ defmodule BillingWeb.QuoteLive.Form do
   defp return_to(_), do: "index"
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    quote = Quotes.get_quote!(id)
+    quote = Quotes.get_quote!(socket.assigns.current_scope, id)
 
     socket
     |> assign(:page_title, "Edit Quote")
     |> assign(:quote, quote)
-    |> assign(:form, to_form(Quotes.change_quote(quote)))
+    |> assign(:form, to_form(Quotes.change_quote(socket.assigns.current_scope, quote)))
   end
 
   defp apply_action(socket, :new, %{"order_id" => order_id}) do
-    order = Orders.get_order!(order_id)
+    order = Orders.get_order!(socket.assigns.current_scope, order_id)
 
-    with {:ok, customer} <- find_or_create_customer(order) do
+    with {:ok, customer} <- find_or_create_customer(socket.assigns.current_scope, order) do
       items = Enum.map(order.items, &%{"description" => &1.name, "price" => &1.price})
       due_date = DateTime.add(order.inserted_at, 15, :day)
 
@@ -151,7 +152,9 @@ defmodule BillingWeb.QuoteLive.Form do
 
   @impl true
   def handle_event("validate", %{"quote" => quote_params}, socket) do
-    changeset = Quotes.change_quote(socket.assigns.quote, quote_params)
+    changeset =
+      Quotes.change_quote(socket.assigns.current_scope, socket.assigns.quote, quote_params)
+
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -163,7 +166,11 @@ defmodule BillingWeb.QuoteLive.Form do
     items =
       Ecto.Changeset.get_field(socket.assigns.form.source, :items, socket.assigns.quote.items)
 
-    items_updated = items ++ [Quotes.change_quote_item(%QuoteItem{})]
+    item = %QuoteItem{user_id: socket.assigns.current_scope.user.id}
+
+    items_updated =
+      items ++ [Quotes.change_quote_item(socket.assigns.current_scope, item)]
+
     changeset = Ecto.Changeset.put_assoc(socket.assigns.form.source, :items, items_updated)
 
     {:noreply, assign(socket, form: to_form(changeset))}
@@ -178,8 +185,8 @@ defmodule BillingWeb.QuoteLive.Form do
       |> Enum.with_index()
       |> Enum.map(fn {item, item_index} ->
         if item_index == index do
-          item
-          |> Quotes.change_quote_item()
+          socket.assigns.current_scope
+          |> Quotes.change_quote_item(item)
           |> Ecto.Changeset.put_change(:marked_for_deletion, true)
         else
           item
@@ -194,7 +201,7 @@ defmodule BillingWeb.QuoteLive.Form do
   defp save_quote(socket, :edit, quote_params) do
     quote_params = filtered_items(quote_params)
 
-    case Quotes.update_quote(socket.assigns.quote, quote_params) do
+    case Quotes.update_quote(socket.assigns.current_scope, socket.assigns.quote, quote_params) do
       {:ok, quote} ->
         save_quote_amounts(quote)
 
@@ -211,7 +218,7 @@ defmodule BillingWeb.QuoteLive.Form do
   defp save_quote(socket, :new, quote_params) do
     quote_params = filtered_items(quote_params)
 
-    case Quotes.create_quote(quote_params) do
+    case Quotes.create_quote(socket.assigns.current_scope, quote_params) do
       {:ok, quote} ->
         save_quote_amounts(quote)
 
@@ -232,23 +239,25 @@ defmodule BillingWeb.QuoteLive.Form do
     Quotes.save_quote_amounts(quote)
   end
 
-  defp find_or_create_customer(order) do
-    order
-    |> Map.take(Customer.list_required_fields())
-    |> Customers.find_or_create_customer()
+  defp find_or_create_customer(current_scope, order) do
+    attrs = Map.take(order, Customer.list_required_fields())
+
+    Customers.find_or_create_customer(current_scope, attrs)
   end
 
   defp assign_new_quote(socket, params \\ %{}) do
-    quote = %Quote{items: []}
+    quote = %Quote{user_id: socket.assigns.current_scope.user.id, items: []}
 
     socket
     |> assign(:page_title, "New Quote")
     |> assign(:quote, quote)
-    |> assign(:form, to_form(Quotes.change_quote(quote, params)))
+    |> assign(:form, to_form(Quotes.change_quote(socket.assigns.current_scope, quote, params)))
   end
 
   defp assign_customers(socket) do
-    customers = Billing.Customers.list_customers() |> Enum.map(&{&1.full_name, &1.id})
+    customers =
+      Billing.Customers.list_customers(socket.assigns.current_scope)
+      |> Enum.map(&{&1.full_name, &1.id})
 
     assign(socket, :customers, customers)
   end

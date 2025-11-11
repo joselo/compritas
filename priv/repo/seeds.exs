@@ -74,8 +74,7 @@ Enum.each(1..20, fn _ ->
     }
     |> Repo.insert!()
 
-  amount_without_tax = Quotes.calculate_amount_without_tax(quote)
-  Quotes.save_taxes(quote, amount_without_tax)
+  Quotes.save_quote_amounts(quote)
 end)
 
 %Product{

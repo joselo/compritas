@@ -7,8 +7,8 @@ defmodule Billing.CustomersFixtures do
   @doc """
   Generate a customer.
   """
-  def customer_fixture(attrs \\ %{}) do
-    {:ok, customer} =
+  def customer_fixture(scope, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         full_name: "Sub Zero",
@@ -18,7 +18,8 @@ defmodule Billing.CustomersFixtures do
         address: "Arena",
         phone_number: "123456789"
       })
-      |> Billing.Customers.create_customer()
+
+    {:ok, customer} = Billing.Customers.create_customer(scope, attrs)
 
     customer
   end

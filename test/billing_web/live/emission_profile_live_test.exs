@@ -5,23 +5,24 @@ defmodule BillingWeb.EmissionProfileLiveTest do
   import Billing.EmissionProfilesFixtures
   import Billing.CertificatesFixtures
   import Billing.CompaniesFixtures
-  import Billing.AccountsFixtures
 
   @create_attrs %{name: "some name", sequence: 1}
   @update_attrs %{name: "some updated name"}
   @invalid_attrs %{name: nil}
-  defp create_emission_profile(_) do
-    emission_profile = emission_profile_fixture()
+
+  setup :register_and_log_in_user
+
+  defp create_emission_profile(%{scope: scope}) do
+    emission_profile = emission_profile_fixture(scope)
 
     %{emission_profile: emission_profile}
   end
 
-  setup %{conn: conn} do
-    certificate = certificate_fixture()
-    company = company_fixture()
-    user = user_fixture()
+  setup %{scope: scope} do
+    certificate = certificate_fixture(scope)
+    company = company_fixture(scope)
 
-    %{conn: log_in_user(conn, user), certificate: certificate, company: company}
+    %{certificate: certificate, company: company}
   end
 
   describe "Index" do

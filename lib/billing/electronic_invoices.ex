@@ -6,35 +6,43 @@ defmodule Billing.ElectronicInvoices do
 
   alias Billing.Quotes.ElectronicInvoice
   alias Billing.Quotes.Quote
+  alias Billing.Accounts.Scope
 
-  def create_electronic_invoice(%Quote{} = quote, access_key) do
+  def create_electronic_invoice(%Scope{} = scope, %Quote{} = quote, access_key) do
     attrs = %{access_key: access_key}
 
     %ElectronicInvoice{quote_id: quote.id, amount: quote.amount}
-    |> ElectronicInvoice.changeset(attrs)
+    |> ElectronicInvoice.changeset(attrs, scope)
     |> Repo.insert()
   end
 
-  def update_electronic_invoice(%ElectronicInvoice{} = electronic_invoice, state) do
+  def update_electronic_invoice(
+        %Scope{} = scope,
+        %ElectronicInvoice{} = electronic_invoice,
+        state
+      ) do
+    true = electronic_invoice.user_id == scope.user.id
+
     attrs = %{state: state}
 
     electronic_invoice
-    |> ElectronicInvoice.changeset(attrs)
+    |> ElectronicInvoice.changeset(attrs, scope)
     |> Repo.update()
   end
 
-  def list_electronic_invoices_by_invoice_id(quote_id) do
+  def list_electronic_invoices_by_invoice_id(%Scope{} = scope, quote_id) do
     query =
       from(ei in ElectronicInvoice,
         where: ei.quote_id == ^quote_id,
+        where: ei.user_id == ^scope.user.id,
         order_by: [desc: ei.inserted_at]
       )
 
     Repo.all(query)
   end
 
-  def get_electronic_invoice!(id) do
-    Repo.get!(ElectronicInvoice, id)
+  def get_electronic_invoice!(%Scope{} = scope, id) do
+    Repo.get_by!(ElectronicInvoice, id: id, user_id: scope.user.id)
   end
 
   def list_pending_electronic_invoices do
@@ -49,8 +57,8 @@ defmodule Billing.ElectronicInvoices do
     Repo.all(query)
   end
 
-  def list_electronic_invoices do
-    Repo.all(ElectronicInvoice)
+  def list_electronic_invoices(%Scope{} = scope) do
+    Repo.all_by(ElectronicInvoice, user_id: scope.user.id)
   end
 
   def chart_data_by_month do

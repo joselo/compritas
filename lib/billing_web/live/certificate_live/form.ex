@@ -73,26 +73,38 @@ defmodule BillingWeb.CertificateLive.Form do
   defp return_to(_), do: "index"
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    certificate = Certificates.get_certificate!(id)
+    certificate = Certificates.get_certificate!(socket.assigns.current_scope, id)
 
     socket
     |> assign(:page_title, gettext("Edit Certificate"))
     |> assign(:certificate, certificate)
-    |> assign(:form, to_form(Certificates.change_certificate(certificate)))
+    |> assign(
+      :form,
+      to_form(Certificates.change_certificate(socket.assigns.current_scope, certificate))
+    )
   end
 
   defp apply_action(socket, :new, _params) do
-    certificate = %Certificate{}
+    certificate = %Certificate{user_id: socket.assigns.current_scope.user.id}
 
     socket
     |> assign(:page_title, gettext("New Certificate"))
     |> assign(:certificate, certificate)
-    |> assign(:form, to_form(Certificates.change_certificate(certificate)))
+    |> assign(
+      :form,
+      to_form(Certificates.change_certificate(socket.assigns.current_scope, certificate))
+    )
   end
 
   @impl true
   def handle_event("validate", %{"certificate" => certificate_params}, socket) do
-    changeset = Certificates.change_certificate(socket.assigns.certificate, certificate_params)
+    changeset =
+      Certificates.change_certificate(
+        socket.assigns.current_scope,
+        socket.assigns.certificate,
+        certificate_params
+      )
+
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -115,7 +127,11 @@ defmodule BillingWeb.CertificateLive.Form do
     password = certificate_params["password"]
 
     with {:ok, certificate} <-
-           Certificates.update_certificate(socket.assigns.certificate, certificate_params),
+           Certificates.update_certificate(
+             socket.assigns.current_scope,
+             socket.assigns.certificate,
+             certificate_params
+           ),
          {:ok, certificate} <- Certificates.update_certificate_password(certificate, password) do
       {:noreply,
        socket
@@ -134,7 +150,8 @@ defmodule BillingWeb.CertificateLive.Form do
     certificate_params = set_uploads_to_params(socket, certificate_params)
     password = certificate_params["password"]
 
-    with {:ok, certificate} <- Certificates.create_certificate(certificate_params),
+    with {:ok, certificate} <-
+           Certificates.create_certificate(socket.assigns.current_scope, certificate_params),
          {:ok, certificate} <- Certificates.update_certificate_password(certificate, password) do
       {:noreply,
        socket

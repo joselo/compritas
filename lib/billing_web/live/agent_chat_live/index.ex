@@ -77,8 +77,8 @@ defmodule BillingWeb.AgentChatLive.Index do
   @impl true
   def handle_event("validate", %{"chat_message" => params}, socket) do
     changeset =
-      %ChatMessage{}
-      |> ChatMessages.change_chat_message(params)
+      socket.assigns.current_scope
+      |> ChatMessages.change_chat_message(%ChatMessage{}, params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
@@ -86,7 +86,7 @@ defmodule BillingWeb.AgentChatLive.Index do
 
   @impl true
   def handle_event("save", %{"chat_message" => params}, socket) do
-    case ChatMessages.create_chat_message(params) do
+    case ChatMessages.create_chat_message(socket.assigns.current_scope, params) do
       {:ok, chat_message} ->
         {:noreply,
          socket
@@ -156,7 +156,7 @@ defmodule BillingWeb.AgentChatLive.Index do
       tool_results: last_message.tool_results
     }
 
-    case ChatMessages.create_chat_message(chat_message_attrs) do
+    case ChatMessages.create_chat_message(socket.assigns.current_scope, chat_message_attrs) do
       {:ok, chat_message} ->
         {:noreply,
          socket
@@ -208,7 +208,7 @@ defmodule BillingWeb.AgentChatLive.Index do
     """
 
     llm_chain =
-      %{llm: llm}
+      %{llm: llm, custom_context: %{current_scope: socket.assigns.current_scope}}
       |> LLMChain.new!()
       |> LLMChain.add_callback(handlers)
       |> LLMChain.add_tools(InvoiceTool.new!())
@@ -276,7 +276,7 @@ El usuario dice:
   end
 
   defp reset_message_form(socket) do
-    changeset = ChatMessages.change_chat_message(%ChatMessage{})
+    changeset = ChatMessages.change_chat_message(socket.assigns.current_scope, %ChatMessage{})
     assign_form(socket, changeset)
   end
 
@@ -294,6 +294,10 @@ El usuario dice:
       }
     ]
 
-    assign(socket, :display_messages, welcome_message ++ ChatMessages.list_chat_messages())
+    assign(
+      socket,
+      :display_messages,
+      welcome_message ++ ChatMessages.list_chat_messages(socket.assigns.current_scope)
+    )
   end
 end

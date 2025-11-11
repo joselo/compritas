@@ -7,15 +7,16 @@ defmodule Billing.CompaniesFixtures do
   @doc """
   Generate a company.
   """
-  def company_fixture(attrs \\ %{}) do
-    {:ok, company} =
+  def company_fixture(scope, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         address: "some address",
         identification_number: "some identification_number",
         name: "some name"
       })
-      |> Billing.Companies.create_company()
+
+    {:ok, company} = Billing.Companies.create_company(scope, attrs)
 
     company
   end

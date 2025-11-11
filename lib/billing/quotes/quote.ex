@@ -18,12 +18,13 @@ defmodule Billing.Quotes.Quote do
     field :tax_rate, :decimal, default: 15.0
     field :amount_without_tax, :decimal
     field :payment_method, Ecto.Enum, values: [:cash, :credit_card, :bank_transfer]
+    field :user_id, :id
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(quote, attrs) do
+  def changeset(quote, attrs, user_scope) do
     quote
     |> cast(attrs, [
       :customer_id,
@@ -41,8 +42,9 @@ defmodule Billing.Quotes.Quote do
       :due_date,
       :payment_method
     ])
-    |> cast_assoc(:items)
+    |> cast_assoc(:items, with: &QuoteItem.changeset(&1, &2, user_scope))
     |> validate_has_items()
+    |> put_change(:user_id, user_scope.user.id)
   end
 
   defp validate_has_items(changeset) do

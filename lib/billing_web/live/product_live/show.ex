@@ -37,6 +37,6 @@ defmodule BillingWeb.ProductLive.Show do
     {:ok,
      socket
      |> assign(:page_title, gettext("Product #%{product_id}", product_id: id))
-     |> assign(:product, Products.get_product!(id))}
+     |> assign(:product, Products.get_product!(socket.assigns.current_scope, id))}
   end
 end

@@ -3,20 +3,17 @@ defmodule BillingWeb.ProductLiveTest do
 
   import Phoenix.LiveViewTest
   import Billing.ProductsFixtures
-  import Billing.AccountsFixtures
 
   @create_attrs %{name: "some name", price: "120.5"}
   @update_attrs %{name: "some updated name", price: "456.7"}
   @invalid_attrs %{name: nil, price: nil}
-  defp create_product(_) do
-    product = product_fixture()
+
+  setup :register_and_log_in_user
+
+  defp create_product(%{scope: scope}) do
+    product = product_fixture(scope)
 
     %{product: product}
-  end
-
-  setup %{conn: conn} do
-    user = user_fixture()
-    %{conn: log_in_user(conn, user), user: user}
   end
 
   describe "Index" do

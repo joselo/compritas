@@ -10,22 +10,23 @@ defmodule Billing.InvoiceHandler do
   alias Billing.ElectronicInvoicePdfWorker
   alias Billing.InvoicingWorker
 
-  def sign_electronic_invoice(quote_id) do
-    quote = Quotes.get_quote!(quote_id)
+  def sign_electronic_invoice(current_scope, quote_id) do
+    quote = Quotes.get_quote!(current_scope, quote_id)
     certificate = Billing.Invoicing.fetch_certificate(quote)
 
     with {:ok, _p12_path} <- p12_file_exists?(certificate.file),
 
          # Increment the emoission profile sequence
          {:ok, _emission_profile} <-
-           increment_emission_profile_sequence(quote.emission_profile_id),
+           increment_emission_profile_sequence(current_scope, quote.emission_profile_id),
 
          # Build Invoice params
          {:ok, invoice_params} <- Invoicing.build_request_params(quote),
 
          # Electronic Invoice :created
-         {:ok, electronic_invoice} <- create_electronic_invoice(quote, invoice_params) do
-      sign_xml(electronic_invoice, certificate)
+         {:ok, electronic_invoice} <-
+           create_electronic_invoice(current_scope, quote, invoice_params) do
+      sign_xml(current_scope, electronic_invoice, certificate)
     else
       {:error, error} ->
         {:error, error}
@@ -33,16 +34,17 @@ defmodule Billing.InvoiceHandler do
   end
 
   # Electronic Invoice :send | :back | :error
-  def send_electronic_invoice(electronic_invoice_id) do
-    electronic_invoice = ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
+  def send_electronic_invoice(current_scope, electronic_invoice_id) do
+    electronic_invoice =
+      ElectronicInvoices.get_electronic_invoice!(current_scope, electronic_invoice_id)
 
     # Electronic Invoice :send | :back | :error
 
-    with {:ok, electronic_invoice} <- send_invoice(electronic_invoice),
+    with {:ok, electronic_invoice} <- send_invoice(current_scope, electronic_invoice),
          {:ok, _electronic_invoice_id} <- broadcast_success(electronic_invoice),
 
          # Run authorization checker using oban worker
-         {:ok, _oban_job} <- start_authorization_checker(electronic_invoice) do
+         {:ok, _oban_job} <- start_authorization_checker(current_scope, electronic_invoice) do
       {:ok, electronic_invoice}
     else
       {:error, error} ->
@@ -52,14 +54,15 @@ defmodule Billing.InvoiceHandler do
     end
   end
 
-  def auth_electronic_invoice(electronic_invoice_id) do
-    electronic_invoice = ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
+  def auth_electronic_invoice(current_scope, electronic_invoice_id) do
+    electronic_invoice =
+      ElectronicInvoices.get_electronic_invoice!(current_scope, electronic_invoice_id)
 
     # Electronic Invoice :authorized | :unauthorized | :error | :not_found_or_pending
 
-    with {:ok, electronic_invoice} <- verify_authorization(electronic_invoice),
+    with {:ok, electronic_invoice} <- verify_authorization(current_scope, electronic_invoice),
          {:ok, _invoice_id} <- broadcast_success(electronic_invoice),
-         {:ok, _oban_job} <- run_pdf_worker(electronic_invoice) do
+         {:ok, _oban_job} <- run_pdf_worker(current_scope, electronic_invoice) do
       {:ok, electronic_invoice}
     else
       {:error, error} ->
@@ -69,8 +72,9 @@ defmodule Billing.InvoiceHandler do
     end
   end
 
-  def handle_electronic_invoice_pdf(electronic_invoice_id) do
-    electronic_invoice = ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
+  def handle_electronic_invoice_pdf(current_scope, electronic_invoice_id) do
+    electronic_invoice =
+      ElectronicInvoices.get_electronic_invoice!(current_scope, electronic_invoice_id)
 
     case create_pdf(electronic_invoice) do
       {:ok, pdf_file_path} ->
@@ -85,10 +89,10 @@ defmodule Billing.InvoiceHandler do
 
   # Electronic Invoice :created
 
-  def create_electronic_invoice(quote, invoice_params) do
+  def create_electronic_invoice(current_scope, quote, invoice_params) do
     with {:ok, body: xml, access_key: access_key} <- TaxiDriver.build_invoice_xml(invoice_params),
          {:ok, _xml_path} <- save_xml(xml, access_key) do
-      ElectronicInvoices.create_electronic_invoice(quote, access_key)
+      ElectronicInvoices.create_electronic_invoice(current_scope, quote, access_key)
     else
       error -> error
     end
@@ -96,12 +100,20 @@ defmodule Billing.InvoiceHandler do
 
   # Electronic Invoice :signed
 
-  def sign_xml(%ElectronicInvoice{state: :created} = electronic_invoice, certificate) do
+  def sign_xml(
+        current_scope,
+        %ElectronicInvoice{state: :created} = electronic_invoice,
+        certificate
+      ) do
     xml_path = xml_path(electronic_invoice.access_key)
 
     with {:ok, signed_xml} <- TaxiDriver.sign_invoice_xml(xml_path, certificate),
          {:ok, electronic_invoice} <-
-           ElectronicInvoices.update_electronic_invoice(electronic_invoice, :signed),
+           ElectronicInvoices.update_electronic_invoice(
+             current_scope,
+             electronic_invoice,
+             :signed
+           ),
          {:ok, _signed_xml_path} <- save_signed_xml(signed_xml, electronic_invoice.access_key) do
       {:ok, electronic_invoice}
     else
@@ -115,13 +127,14 @@ defmodule Billing.InvoiceHandler do
 
   # Electronic Invoice :send | :back | :error
 
-  defp send_invoice(%ElectronicInvoice{state: :signed} = electronic_invoice) do
+  defp send_invoice(current_scope, %ElectronicInvoice{state: :signed} = electronic_invoice) do
     xml_signed_path = xml_signed_path(electronic_invoice.access_key)
 
     with {:ok, body: response_xml, sri_status: sri_status} <-
            TaxiDriver.send_invoice_xml(xml_signed_path),
          {:ok, electronic_invoice} <-
            ElectronicInvoices.update_electronic_invoice(
+             current_scope,
              electronic_invoice,
              ElectronicInvoice.determinate_status(sri_status)
            ),
@@ -133,18 +146,19 @@ defmodule Billing.InvoiceHandler do
     end
   end
 
-  defp send_invoice(_electronic_invoice) do
+  defp send_invoice(_current_scope, _electronic_invoice) do
     {:error, "Factura no firmada"}
   end
 
   # Electronic Invoice :authorized | :unauthorized | :error | :not_found_or_pending
 
-  defp verify_authorization(%ElectronicInvoice{state: state} = electronic_invoice)
+  defp verify_authorization(current_scope, %ElectronicInvoice{state: state} = electronic_invoice)
        when state in [:sent, :not_found_or_pending] do
     with {:ok, body: auth_xml, sri_status: sri_status} <-
            TaxiDriver.auth_invoice(electronic_invoice.access_key),
          {:ok, electronic_invoice} <-
            ElectronicInvoices.update_electronic_invoice(
+             current_scope,
              electronic_invoice,
              ElectronicInvoice.determinate_status(sri_status)
            ),
@@ -155,22 +169,27 @@ defmodule Billing.InvoiceHandler do
     end
   end
 
-  defp verify_authorization(%ElectronicInvoice{state: :authorized} = _electronic_invoice) do
+  defp verify_authorization(
+         _current_scope,
+         %ElectronicInvoice{state: :authorized} = _electronic_invoice
+       ) do
     {:error, "La Factura ya fue autorizada"}
   end
 
-  defp verify_authorization(_electronic_invoice) do
+  defp verify_authorization(_current_scope, _electronic_invoice) do
     {:error, "Factura no autorizada"}
   end
 
   # Update Emission profile sequence
 
-  defp increment_emission_profile_sequence(emission_profile_id) do
-    emission_profile = EmissionProfiles.get_emission_profile!(emission_profile_id)
+  defp increment_emission_profile_sequence(current_scope, emission_profile_id) do
+    emission_profile = EmissionProfiles.get_emission_profile!(current_scope, emission_profile_id)
 
     new_sequence = emission_profile.sequence + 1
 
-    EmissionProfiles.update_emission_profile(emission_profile, %{sequence: new_sequence})
+    EmissionProfiles.update_emission_profile(current_scope, emission_profile, %{
+      sequence: new_sequence
+    })
   end
 
   # Electronic Invoice: PDF
@@ -288,33 +307,36 @@ defmodule Billing.InvoiceHandler do
 
   # Workers
 
-  def start_authorization_checker(%ElectronicInvoice{state: :sent} = electronic_invoice) do
-    %{"electronic_invoice_id" => electronic_invoice.id}
+  def start_authorization_checker(
+        current_scope,
+        %ElectronicInvoice{state: :sent} = electronic_invoice
+      ) do
+    %{"user_id" => current_scope.user.id, "electronic_invoice_id" => electronic_invoice.id}
     |> ElectronicInvoiceCheckerWorker.new()
     |> Oban.insert()
   end
 
-  def start_authorization_checker(%ElectronicInvoice{state: _state}) do
+  def start_authorization_checker(_current_scope, %ElectronicInvoice{state: _state}) do
     {:ok, nil}
   end
 
-  def start_send_worker(%ElectronicInvoice{state: :signed} = electronic_invoice) do
-    %{"electronic_invoice_id" => electronic_invoice.id}
+  def start_send_worker(current_scope, %ElectronicInvoice{state: :signed} = electronic_invoice) do
+    %{"user_id" => current_scope.user.id, "electronic_invoice_id" => electronic_invoice.id}
     |> InvoicingWorker.new()
     |> Oban.insert()
   end
 
-  def start_send_worker(%ElectronicInvoice{state: _state}) do
+  def start_send_worker(_current_scope, %ElectronicInvoice{state: _state}) do
     {:ok, nil}
   end
 
-  def run_pdf_worker(%ElectronicInvoice{state: :authorized} = electronic_invoice) do
-    %{"electronic_invoice_id" => electronic_invoice.id}
+  def run_pdf_worker(current_scope, %ElectronicInvoice{state: :authorized} = electronic_invoice) do
+    %{"user_id" => current_scope.user.id, "electronic_invoice_id" => electronic_invoice.id}
     |> ElectronicInvoicePdfWorker.new()
     |> Oban.insert()
   end
 
-  def run_pdf_worker(%ElectronicInvoice{state: _state}) do
+  def run_pdf_worker(_current_scope, %ElectronicInvoice{state: _state}) do
     {:ok, nil}
   end
 

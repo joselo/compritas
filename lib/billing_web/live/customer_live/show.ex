@@ -30,6 +30,6 @@ defmodule BillingWeb.CustomerLive.Show do
     {:ok,
      socket
      |> assign(:page_title, gettext("Customer #%{customer_id}", customer_id: id))
-     |> assign(:customer, Customers.get_customer!(id))}
+     |> assign(:customer, Customers.get_customer!(socket.assigns.current_scope, id))}
   end
 end

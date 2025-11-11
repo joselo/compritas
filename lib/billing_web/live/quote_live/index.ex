@@ -50,13 +50,13 @@ defmodule BillingWeb.QuoteLive.Index do
     {:ok,
      socket
      |> assign(:page_title, gettext("Quotes"))
-     |> stream(:quotes, Quotes.list_quotes())}
+     |> stream(:quotes, Quotes.list_quotes(socket.assigns.current_scope))}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    quote = Quotes.get_quote!(id)
-    {:ok, _} = Quotes.delete_quote(quote)
+    quote = Quotes.get_quote!(socket.assigns.current_scope, id)
+    {:ok, _} = Quotes.delete_quote(socket.assigns.current_scope, quote)
 
     {:noreply, stream_delete(socket, :quotes, quote)}
   end

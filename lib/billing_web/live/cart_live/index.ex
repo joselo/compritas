@@ -67,14 +67,14 @@ defmodule BillingWeb.CartLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    order = %Order{}
+    order = %Order{user_id: socket.assigns.user_scope.user.id}
     identification_types = [{"Cedula", :cedula}, {"Ruc", :ruc}]
 
     {:ok,
      socket
      |> assign(:page_title, gettext("Your Cart"))
      |> assign(:order, order)
-     |> assign(:form, to_form(Orders.change_order(order)))
+     |> assign(:form, to_form(Orders.change_order(socket.assigns.user_scope, order)))
      |> assign(:identification_types, identification_types)
      |> stream(:carts, list_carts(socket.assigns.cart_uuid))}
   end
@@ -89,7 +89,7 @@ defmodule BillingWeb.CartLive.Index do
 
   @impl true
   def handle_event("validate", %{"order" => order_params}, socket) do
-    changeset = Orders.change_order(socket.assigns.order, order_params)
+    changeset = Orders.change_order(socket.assigns.user_scope, socket.assigns.order, order_params)
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -111,7 +111,7 @@ defmodule BillingWeb.CartLive.Index do
 
     params = Map.put(order_params, "items", items)
 
-    case Orders.create_order(params) do
+    case Orders.create_order(socket.assigns.user_scope, params) do
       {:ok, order} ->
         Carts.clean_cart(socket.assigns.cart_uuid)
         Orders.save_order_amounts(order)

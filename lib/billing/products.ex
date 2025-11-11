@@ -7,18 +7,19 @@ defmodule Billing.Products do
   alias Billing.Repo
 
   alias Billing.Products.Product
+  alias Billing.Accounts.Scope
 
   @doc """
   Returns the list of products.
 
   ## Examples
 
-      iex> list_products()
+      iex> list_products(scope)
       [%Product{}, ...]
 
   """
-  def list_products do
-    Repo.all(Product)
+  def list_products(%Scope{} = scope) do
+    Repo.all_by(Product, user_id: scope.user.id)
   end
 
   @doc """
@@ -28,30 +29,32 @@ defmodule Billing.Products do
 
   ## Examples
 
-      iex> get_product!(123)
+      iex> get_product!(scope, 123)
       %Product{}
 
-      iex> get_product!(456)
+      iex> get_product!(scope, 456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_product!(id), do: Repo.get!(Product, id)
+  def get_product!(%Scope{} = scope, id) do
+    Repo.get_by!(Product, id: id, user_id: scope.user.id)
+  end
 
   @doc """
   Creates a product.
 
   ## Examples
 
-      iex> create_product(%{field: value})
+      iex> create_product(scope, %{field: value})
       {:ok, %Product{}}
 
-      iex> create_product(%{field: bad_value})
+      iex> create_product(scope, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_product(attrs) do
+  def create_product(%Scope{} = scope, attrs) do
     %Product{}
-    |> Product.changeset(attrs)
+    |> Product.changeset(attrs, scope)
     |> Repo.insert()
   end
 
@@ -60,16 +63,18 @@ defmodule Billing.Products do
 
   ## Examples
 
-      iex> update_product(product, %{field: new_value})
+      iex> update_product(scope, product, %{field: new_value})
       {:ok, %Product{}}
 
-      iex> update_product(product, %{field: bad_value})
+      iex> update_product(scope, product, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_product(%Product{} = product, attrs) do
+  def update_product(%Scope{} = scope, %Product{} = product, attrs) do
+    true = product.user_id == scope.user.id
+
     product
-    |> Product.changeset(attrs)
+    |> Product.changeset(attrs, scope)
     |> Repo.update()
   end
 
@@ -78,14 +83,16 @@ defmodule Billing.Products do
 
   ## Examples
 
-      iex> delete_product(product)
+      iex> delete_product(scope, product)
       {:ok, %Product{}}
 
-      iex> delete_product(product)
+      iex> delete_product(scope, product)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_product(%Product{} = product) do
+  def delete_product(%Scope{} = scope, %Product{} = product) do
+    true = product.user_id == scope.user.id
+
     Repo.delete(product)
   end
 
@@ -94,11 +101,13 @@ defmodule Billing.Products do
 
   ## Examples
 
-      iex> change_product(product)
+      iex> change_product(scope, product)
       %Ecto.Changeset{data: %Product{}}
 
   """
-  def change_product(%Product{} = product, attrs \\ %{}) do
-    Product.changeset(product, attrs)
+  def change_product(%Scope{} = scope, %Product{} = product, attrs \\ %{}) do
+    true = product.user_id == scope.user.id
+
+    Product.changeset(product, attrs, scope)
   end
 end

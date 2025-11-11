@@ -1,6 +1,7 @@
 defmodule Billing.QuotesTest do
   use Billing.DataCase
 
+  import Billing.AccountsFixtures, only: [user_scope_fixture: 0]
   import Billing.CustomersFixtures
   import Billing.EmissionProfilesFixtures
 
@@ -10,8 +11,9 @@ defmodule Billing.QuotesTest do
   alias Billing.Quotes.QuoteItem
 
   setup do
-    customer = customer_fixture()
-    emission_profile = emission_profile_fixture()
+    scope = user_scope_fixture()
+    customer = customer_fixture(scope)
+    emission_profile = emission_profile_fixture(scope)
 
     {:ok, customer: customer, emission_profile: emission_profile}
   end
@@ -24,25 +26,27 @@ defmodule Billing.QuotesTest do
     @invalid_attrs %{issued_at: nil}
 
     test "list_quotes/0 returns all quotes" do
-      quote = quote_fixture()
+      scope = user_scope_fixture()
+      quote = quote_fixture(scope)
 
       quote =
         Quote
         |> Repo.get!(quote.id)
         |> Repo.preload([:customer])
 
-      assert Quotes.list_quotes() == [quote]
+      assert Quotes.list_quotes(scope) == [quote]
     end
 
     test "get_quote!/1 returns the quote with given id" do
-      quote = quote_fixture()
+      scope = user_scope_fixture()
+      quote = quote_fixture(scope)
 
       quote =
         Quote
         |> Repo.get!(quote.id)
         |> Repo.preload([:customer])
 
-      result = Quotes.get_quote!(quote.id)
+      result = Quotes.get_quote!(scope, quote.id)
 
       [item | tail] = result.items
 
@@ -54,6 +58,8 @@ defmodule Billing.QuotesTest do
       customer: customer,
       emission_profile: emission_profile
     } do
+      scope = user_scope_fixture()
+
       valid_attrs = %{
         customer_id: customer.id,
         emission_profile_id: emission_profile.id,
@@ -73,33 +79,37 @@ defmodule Billing.QuotesTest do
         ]
       }
 
-      assert {:ok, %Quote{} = quote} = Quotes.create_quote(valid_attrs)
+      assert {:ok, %Quote{} = quote} = Quotes.create_quote(scope, valid_attrs)
       assert quote.issued_at == ~D[2025-08-28]
     end
 
     test "create_quote/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Quotes.create_quote(@invalid_attrs)
+      scope = user_scope_fixture()
+
+      assert {:error, %Ecto.Changeset{}} = Quotes.create_quote(scope, @invalid_attrs)
     end
 
     test "update_quote/2 with valid data updates the quote" do
-      quote = quote_fixture()
+      scope = user_scope_fixture()
+      quote = quote_fixture(scope)
       update_attrs = %{issued_at: ~D[2025-08-29]}
 
-      assert {:ok, %Quote{} = quote} = Quotes.update_quote(quote, update_attrs)
+      assert {:ok, %Quote{} = quote} = Quotes.update_quote(scope, quote, update_attrs)
       assert quote.issued_at == ~D[2025-08-29]
     end
 
     test "update_quote/2 with invalid data returns error changeset" do
-      quote = quote_fixture()
+      scope = user_scope_fixture()
+      quote = quote_fixture(scope)
 
       quote =
         Quote
         |> Repo.get!(quote.id)
         |> Repo.preload([:customer, :items])
 
-      assert {:error, %Ecto.Changeset{}} = Quotes.update_quote(quote, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Quotes.update_quote(scope, quote, @invalid_attrs)
 
-      result = Quotes.get_quote!(quote.id)
+      result = Quotes.get_quote!(scope, quote.id)
       assert result.id == quote.id
 
       [item | tail] = result.items
@@ -109,14 +119,18 @@ defmodule Billing.QuotesTest do
     end
 
     test "delete_quote/1 deletes the quote" do
-      quote = quote_fixture()
-      assert {:ok, %Quote{}} = Quotes.delete_quote(quote)
-      assert_raise Ecto.NoResultsError, fn -> Quotes.get_quote!(quote.id) end
+      scope = user_scope_fixture()
+      quote = quote_fixture(scope)
+
+      assert {:ok, %Quote{}} = Quotes.delete_quote(scope, quote)
+      assert_raise Ecto.NoResultsError, fn -> Quotes.get_quote!(scope, quote.id) end
     end
 
     test "change_quote/1 returns a quote changeset" do
-      quote = quote_fixture()
-      assert %Ecto.Changeset{} = Quotes.change_quote(quote)
+      scope = user_scope_fixture()
+      quote = quote_fixture(scope)
+
+      assert %Ecto.Changeset{} = Quotes.change_quote(scope, quote)
     end
   end
 end

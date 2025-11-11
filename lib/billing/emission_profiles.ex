@@ -7,18 +7,19 @@ defmodule Billing.EmissionProfiles do
   alias Billing.Repo
 
   alias Billing.EmissionProfiles.EmissionProfile
+  alias Billing.Accounts.Scope
 
   @doc """
   Returns the list of emission_profiles.
 
   ## Examples
 
-      iex> list_emission_profiles()
+      iex> list_emission_profiles(scope)
       [%EmissionProfile{}, ...]
 
   """
-  def list_emission_profiles do
-    Repo.all(EmissionProfile)
+  def list_emission_profiles(%Scope{} = scope) do
+    Repo.all_by(EmissionProfile, user_id: scope.user.id)
   end
 
   @doc """
@@ -28,30 +29,32 @@ defmodule Billing.EmissionProfiles do
 
   ## Examples
 
-      iex> get_emission_profile!(123)
+      iex> get_emission_profile!(scope,  123)
       %EmissionProfile{}
 
-      iex> get_emission_profile!(456)
+      iex> get_emission_profile!(scope, 456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_emission_profile!(id), do: Repo.get!(EmissionProfile, id)
+  def get_emission_profile!(%Scope{} = scope, id) do
+    Repo.get_by!(EmissionProfile, id: id, user_id: scope.user.id)
+  end
 
   @doc """
   Creates a emission_profile.
 
   ## Examples
 
-      iex> create_emission_profile(%{field: value})
+      iex> create_emission_profile(scope, %{field: value})
       {:ok, %EmissionProfile{}}
 
-      iex> create_emission_profile(%{field: bad_value})
+      iex> create_emission_profile(scope, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_emission_profile(attrs) do
+  def create_emission_profile(%Scope{} = scope, attrs) do
     %EmissionProfile{}
-    |> EmissionProfile.changeset(attrs)
+    |> EmissionProfile.changeset(attrs, scope)
     |> Repo.insert()
   end
 
@@ -60,16 +63,18 @@ defmodule Billing.EmissionProfiles do
 
   ## Examples
 
-      iex> update_emission_profile(emission_profile, %{field: new_value})
+      iex> update_emission_profile(scope, emission_profile, %{field: new_value})
       {:ok, %EmissionProfile{}}
 
-      iex> update_emission_profile(emission_profile, %{field: bad_value})
+      iex> update_emission_profile(scope, emission_profile, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_emission_profile(%EmissionProfile{} = emission_profile, attrs) do
+  def update_emission_profile(%Scope{} = scope, %EmissionProfile{} = emission_profile, attrs) do
+    true = emission_profile.user_id == scope.user.id
+
     emission_profile
-    |> EmissionProfile.changeset(attrs)
+    |> EmissionProfile.changeset(attrs, scope)
     |> Repo.update()
   end
 
@@ -78,14 +83,16 @@ defmodule Billing.EmissionProfiles do
 
   ## Examples
 
-      iex> delete_emission_profile(emission_profile)
+      iex> delete_emission_profile(scope, emission_profile)
       {:ok, %EmissionProfile{}}
 
-      iex> delete_emission_profile(emission_profile)
+      iex> delete_emission_profile(scope, emission_profile)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_emission_profile(%EmissionProfile{} = emission_profile) do
+  def delete_emission_profile(%Scope{} = scope, %EmissionProfile{} = emission_profile) do
+    true = emission_profile.user_id == scope.user.id
+
     Repo.delete(emission_profile)
   end
 
@@ -94,11 +101,17 @@ defmodule Billing.EmissionProfiles do
 
   ## Examples
 
-      iex> change_emission_profile(emission_profile)
+      iex> change_emission_profile(scope, emission_profile)
       %Ecto.Changeset{data: %EmissionProfile{}}
 
   """
-  def change_emission_profile(%EmissionProfile{} = emission_profile, attrs \\ %{}) do
-    EmissionProfile.changeset(emission_profile, attrs)
+  def change_emission_profile(
+        %Scope{} = scope,
+        %EmissionProfile{} = emission_profile,
+        attrs \\ %{}
+      ) do
+    true = emission_profile.user_id == scope.user.id
+
+    EmissionProfile.changeset(emission_profile, attrs, scope)
   end
 end

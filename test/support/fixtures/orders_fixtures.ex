@@ -7,8 +7,8 @@ defmodule Billing.OrdersFixtures do
   @doc """
   Generate a order.
   """
-  def order_fixture(attrs \\ %{}) do
-    {:ok, order} =
+  def order_fixture(scope, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         full_name: "Sub Zero",
@@ -21,7 +21,8 @@ defmodule Billing.OrdersFixtures do
           %{name: "Product", price: Decimal.new("5.00"), quantity: Decimal.new("1.00")}
         ]
       })
-      |> Billing.Orders.create_order()
+
+    {:ok, order} = Billing.Orders.create_order(scope, attrs)
 
     order
   end

@@ -80,24 +80,26 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
   @impl true
   def handle_event("send_electronic_invoice", _params, socket) do
     electronic_invoice_id = socket.assigns.electronic_invoice.id
+    current_scope = socket.assigns.current_scope
 
     {:noreply,
      socket
      |> assign(:send_result, AsyncResult.loading())
      |> start_async(:send_electronic_invoice, fn ->
-       InvoiceHandler.send_electronic_invoice(electronic_invoice_id)
+       InvoiceHandler.send_electronic_invoice(current_scope, electronic_invoice_id)
      end)}
   end
 
   @impl true
   def handle_event("auth_electronic_invoice", _params, socket) do
     electronic_invoice_id = socket.assigns.electronic_invoice.id
+    current_scope = socket.assigns.current_scope
 
     {:noreply,
      socket
      |> assign(:auth_result, AsyncResult.loading())
      |> start_async(:auth_electronic_invoice, fn ->
-       InvoiceHandler.auth_electronic_invoice(electronic_invoice_id)
+       InvoiceHandler.auth_electronic_invoice(current_scope, electronic_invoice_id)
      end)}
   end
 
@@ -212,9 +214,13 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
 
   defp assign_electronic_invoice(socket, electronic_invoice_id) do
     electronic_invoice =
-      ElectronicInvoices.get_electronic_invoice!(electronic_invoice_id)
+      ElectronicInvoices.get_electronic_invoice!(
+        socket.assigns.current_scope,
+        electronic_invoice_id
+      )
 
-    electronic_invoice_errors = ElectronicInvoiceErrors.list_errors(electronic_invoice)
+    electronic_invoice_errors =
+      ElectronicInvoiceErrors.list_errors(electronic_invoice)
 
     socket
     |> assign(:electronic_invoice, electronic_invoice)
@@ -222,7 +228,11 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
   end
 
   defp assign_invoice(socket) do
-    assign(socket, :quote, Quotes.get_quote!(socket.assigns.electronic_invoice.quote_id))
+    assign(
+      socket,
+      :quote,
+      Quotes.get_quote!(socket.assigns.current_scope, socket.assigns.electronic_invoice.quote_id)
+    )
   end
 
   attr :send_result, AsyncResult, required: true

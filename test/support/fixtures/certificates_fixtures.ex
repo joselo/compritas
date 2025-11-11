@@ -9,15 +9,16 @@ defmodule Billing.CertificatesFixtures do
   @doc """
   Generate a certificate.
   """
-  def certificate_fixture(attrs \\ %{}) do
-    {:ok, certificate} =
+  def certificate_fixture(scope, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         name: "My P12 file",
         file: "file.p12",
         password: "fake-password"
       })
-      |> Billing.Certificates.create_certificate()
+
+    {:ok, certificate} = Billing.Certificates.create_certificate(scope, attrs)
 
     {:ok, certificate} =
       Certificates.update_certificate_password(certificate, "fake-password")

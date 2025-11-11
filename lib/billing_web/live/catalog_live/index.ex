@@ -45,12 +45,12 @@ defmodule BillingWeb.CatalogLive.Index do
      socket
      |> assign(:page_title, gettext("Listing Products"))
      |> assign(:cart_size, cart_size(socket.assigns.cart_uuid))
-     |> stream(:products, list_products())}
+     |> stream(:products, list_products(socket.assigns.user_scope))}
   end
 
   @impl true
   def handle_event("add_to_cart", %{"id" => id}, socket) do
-    product = Products.get_product!(id)
+    product = Products.get_product!(socket.assigns.user_scope, id)
 
     attrs = %{
       cart_uuid: socket.assigns.cart_uuid,
@@ -73,8 +73,8 @@ defmodule BillingWeb.CatalogLive.Index do
     end
   end
 
-  defp list_products() do
-    Products.list_products()
+  defp list_products(current_scope) do
+    Products.list_products(current_scope)
   end
 
   defp cart_size(cart_uuid) do

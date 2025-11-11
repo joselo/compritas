@@ -7,18 +7,19 @@ defmodule Billing.Companies do
   alias Billing.Repo
 
   alias Billing.Companies.Company
+  alias Billing.Accounts.Scope
 
   @doc """
   Returns the list of companies.
 
   ## Examples
 
-      iex> list_companies()
+      iex> list_companies(scope)
       [%Company{}, ...]
 
   """
-  def list_companies do
-    Repo.all(Company)
+  def list_companies(%Scope{} = scope) do
+    Repo.all_by(Company, user_id: scope.user.id)
   end
 
   @doc """
@@ -28,30 +29,32 @@ defmodule Billing.Companies do
 
   ## Examples
 
-      iex> get_company!(123)
+      iex> get_company!(scope, 123)
       %Company{}
 
-      iex> get_company!(456)
+      iex> get_company!(scope, 456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_company!(id), do: Repo.get!(Company, id)
+  def get_company!(%Scope{} = scope, id) do
+    Repo.get_by!(Company, id: id, user_id: scope.user.id)
+  end
 
   @doc """
   Creates a company.
 
   ## Examples
 
-      iex> create_company(%{field: value})
+      iex> create_company(scope, %{field: value})
       {:ok, %Company{}}
 
-      iex> create_company(%{field: bad_value})
+      iex> create_company(scope, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_company(attrs) do
+  def create_company(%Scope{} = scope, attrs) do
     %Company{}
-    |> Company.changeset(attrs)
+    |> Company.changeset(attrs, scope)
     |> Repo.insert()
   end
 
@@ -60,16 +63,18 @@ defmodule Billing.Companies do
 
   ## Examples
 
-      iex> update_company(company, %{field: new_value})
+      iex> update_company(scope, company, %{field: new_value})
       {:ok, %Company{}}
 
-      iex> update_company(company, %{field: bad_value})
+      iex> update_company(scope, company, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_company(%Company{} = company, attrs) do
+  def update_company(%Scope{} = scope, %Company{} = company, attrs) do
+    true = company.user_id == scope.user.id
+
     company
-    |> Company.changeset(attrs)
+    |> Company.changeset(attrs, scope)
     |> Repo.update()
   end
 
@@ -78,14 +83,16 @@ defmodule Billing.Companies do
 
   ## Examples
 
-      iex> delete_company(company)
+      iex> delete_company(scope, company)
       {:ok, %Company{}}
 
-      iex> delete_company(company)
+      iex> delete_company(scope, company)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_company(%Company{} = company) do
+  def delete_company(%Scope{} = scope, %Company{} = company) do
+    true = company.user_id == scope.user.id
+
     Repo.delete(company)
   end
 
@@ -94,11 +101,13 @@ defmodule Billing.Companies do
 
   ## Examples
 
-      iex> change_company(company)
+      iex> change_company(scope, company)
       %Ecto.Changeset{data: %Company{}}
 
   """
-  def change_company(%Company{} = company, attrs \\ %{}) do
-    Company.changeset(company, attrs)
+  def change_company(%Scope{} = scope, %Company{} = company, attrs \\ %{}) do
+    true = company.user_id == scope.user.id
+
+    Company.changeset(company, attrs, scope)
   end
 end

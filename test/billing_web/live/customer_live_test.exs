@@ -3,7 +3,6 @@ defmodule BillingWeb.CustomerLiveTest do
 
   import Phoenix.LiveViewTest
   import Billing.CustomersFixtures
-  import Billing.AccountsFixtures
 
   @create_attrs %{
     full_name: "Raiden",
@@ -20,15 +19,13 @@ defmodule BillingWeb.CustomerLiveTest do
   }
 
   @invalid_attrs %{full_name: nil, email: nil}
-  defp create_customer(_) do
-    customer = customer_fixture()
+
+  setup :register_and_log_in_user
+
+  defp create_customer(%{scope: scope}) do
+    customer = customer_fixture(scope)
 
     %{customer: customer}
-  end
-
-  setup %{conn: conn} do
-    user = user_fixture()
-    %{conn: log_in_user(conn, user), user: user}
   end
 
   describe "Index" do

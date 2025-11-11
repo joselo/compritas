@@ -41,10 +41,10 @@ defmodule BillingWeb.ElectronicInvoiceLive.Index do
     {:ok,
      socket
      |> assign(:page_title, gettext("Electronic Invoices"))
-     |> stream(:electronic_invoices, list_electronic_invoices())}
+     |> stream(:electronic_invoices, list_electronic_invoices(socket.assigns.current_scope))}
   end
 
-  defp list_electronic_invoices() do
-    ElectronicInvoices.list_electronic_invoices()
+  defp list_electronic_invoices(current_scope) do
+    ElectronicInvoices.list_electronic_invoices(current_scope)
   end
 end

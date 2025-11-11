@@ -5,7 +5,8 @@ defmodule BillingWeb.ElectronicInvoiceController do
   alias Billing.InvoiceHandler
 
   def pdf(conn, %{"id" => id}) do
-    electronic_invoice = ElectronicInvoices.get_electronic_invoice!(id)
+    electronic_invoice =
+      ElectronicInvoices.get_electronic_invoice!(conn.assigns.current_scope, id)
 
     pdf =
       electronic_invoice.access_key
@@ -22,7 +23,8 @@ defmodule BillingWeb.ElectronicInvoiceController do
   end
 
   def xml(conn, %{"id" => id}) do
-    electronic_invoice = ElectronicInvoices.get_electronic_invoice!(id)
+    electronic_invoice =
+      ElectronicInvoices.get_electronic_invoice!(conn.assigns.current_scope, id)
 
     xml =
       electronic_invoice.access_key

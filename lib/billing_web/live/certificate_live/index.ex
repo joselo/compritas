@@ -47,13 +47,13 @@ defmodule BillingWeb.CertificateLive.Index do
     {:ok,
      socket
      |> assign(:page_title, gettext("Certificates"))
-     |> stream(:certificates, Certificates.list_certificates())}
+     |> stream(:certificates, Certificates.list_certificates(socket.assigns.current_scope))}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    certificate = Certificates.get_certificate!(id)
-    {:ok, _} = Certificates.delete_certificate(certificate)
+    certificate = Certificates.get_certificate!(socket.assigns.current_scope, id)
+    {:ok, _} = Certificates.delete_certificate(socket.assigns.current_scope, certificate)
 
     {:noreply, stream_delete(socket, :certificates, certificate)}
   end

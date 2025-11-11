@@ -73,7 +73,7 @@ defmodule BillingWeb.QuoteLive.Show do
   def mount(%{"id" => id}, _session, socket) do
     PubSub.subscribe(Billing.PubSub, "quote:#{id}")
 
-    socket = assign(socket, :quote, Quotes.get_quote!(id))
+    socket = assign(socket, :quote, Quotes.get_quote!(socket.assigns.current_scope, id))
 
     {:ok,
      socket
@@ -85,18 +85,19 @@ defmodule BillingWeb.QuoteLive.Show do
   @impl true
   def handle_event("sign_electronic_invoice", _params, socket) do
     quote_id = socket.assigns.quote.id
+    current_scope = socket.assigns.current_scope
 
     {:noreply,
      socket
      |> assign(:sign_result, AsyncResult.loading())
      |> start_async(:sign_electronic_invoice, fn ->
-       InvoiceHandler.sign_electronic_invoice(quote_id)
+       InvoiceHandler.sign_electronic_invoice(current_scope, quote_id)
      end)}
   end
 
   @impl true
   def handle_async(:sign_electronic_invoice, {:ok, {:ok, electronic_invoice}}, socket) do
-    InvoiceHandler.start_send_worker(electronic_invoice)
+    InvoiceHandler.start_send_worker(socket.assigns.current_scope, electronic_invoice)
 
     {:noreply,
      socket
@@ -110,7 +111,7 @@ defmodule BillingWeb.QuoteLive.Show do
      socket
      |> assign(:sign_result, AsyncResult.failed(%AsyncResult{}, {:error, error}))
      |> assign_electronic_invoices()
-     |> put_flash(:error, gettext("Error: %{error}", inspect(error)))}
+     |> put_flash(:error, gettext("Error: %{error}", error: inspect(error)))}
   end
 
   def handle_async(:sign_electronic_invoice, {:exit, reason}, socket) do
@@ -156,7 +157,10 @@ defmodule BillingWeb.QuoteLive.Show do
     stream(
       socket,
       :electronic_invoices,
-      ElectronicInvoices.list_electronic_invoices_by_invoice_id(socket.assigns.quote.id)
+      ElectronicInvoices.list_electronic_invoices_by_invoice_id(
+        socket.assigns.current_scope,
+        socket.assigns.quote.id
+      )
     )
   end
 end

@@ -102,8 +102,8 @@ defmodule BillingWeb.UserLive.Settings do
     user = socket.assigns.current_scope.user
     email_changeset = Accounts.change_user_email(user, %{}, validate_unique: false)
     password_changeset = Accounts.change_user_password(user, %{}, hash_password: false)
-    setting = Settings.get_setting()
-    setting_changeset = Settings.change_setting(setting)
+    setting = Settings.get_setting(socket.assigns.current_scope)
+    setting_changeset = Settings.change_setting(socket.assigns.current_scope, setting)
 
     socket =
       socket
@@ -180,8 +180,8 @@ defmodule BillingWeb.UserLive.Settings do
   @impl true
   def handle_event("validate_setting", %{"setting" => setting_params}, socket) do
     setting_form =
-      socket.assigns.setting
-      |> Settings.change_setting(setting_params)
+      socket.assigns.current_scope
+      |> Settings.change_setting(socket.assigns.setting, setting_params)
       |> Map.put(:action, :validate)
       |> to_form()
 
@@ -192,7 +192,11 @@ defmodule BillingWeb.UserLive.Settings do
     user = socket.assigns.current_scope.user
     true = Accounts.sudo_mode?(user)
 
-    case Settings.save_setting(socket.assigns.setting, setting_params) do
+    case Settings.save_setting(
+           socket.assigns.current_scope,
+           socket.assigns.setting,
+           setting_params
+         ) do
       {:ok, _setting} ->
         info = gettext("Settings saved")
         {:noreply, socket |> put_flash(:info, info)}

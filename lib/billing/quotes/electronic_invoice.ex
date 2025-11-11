@@ -41,12 +41,13 @@ defmodule Billing.Quotes.ElectronicInvoice do
     field :access_key, :string
     field :state, Ecto.Enum, values: @statuses, default: :created
     field :amount, :decimal
+    field :user_id, :id
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(electronic_invoice, attrs) do
+  def changeset(electronic_invoice, attrs, user_scope) do
     electronic_invoice
     |> cast(attrs, [
       :access_key,
@@ -56,6 +57,7 @@ defmodule Billing.Quotes.ElectronicInvoice do
       :access_key,
       :state
     ])
+    |> put_change(:user_id, user_scope.user.id)
   end
 
   def determinate_status(sri_status) do

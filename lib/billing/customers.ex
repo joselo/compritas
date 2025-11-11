@@ -7,18 +7,19 @@ defmodule Billing.Customers do
   alias Billing.Repo
 
   alias Billing.Customers.Customer
+  alias Billing.Accounts.Scope
 
   @doc """
   Returns the list of customers.
 
   ## Examples
 
-      iex> list_customers()
+      iex> list_customers(scope)
       [%Customer{}, ...]
 
   """
-  def list_customers do
-    Repo.all(Customer)
+  def list_customers(%Scope{} = scope) do
+    Repo.all_by(Customer, user_id: scope.user.id)
   end
 
   @doc """
@@ -28,30 +29,32 @@ defmodule Billing.Customers do
 
   ## Examples
 
-      iex> get_customer!(123)
+      iex> get_customer!(scope, 123)
       %Customer{}
 
-      iex> get_customer!(456)
+      iex> get_customer!(scope, 456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_customer!(id), do: Repo.get!(Customer, id)
+  def get_customer!(%Scope{} = scope, id) do
+    Repo.get_by!(Customer, id: id, user_id: scope.user.id)
+  end
 
   @doc """
   Creates a customer.
 
   ## Examples
 
-      iex> create_customer(%{field: value})
+      iex> create_customer(scope, %{field: value})
       {:ok, %Customer{}}
 
-      iex> create_customer(%{field: bad_value})
+      iex> create_customer(scope, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_customer(attrs) do
+  def create_customer(%Scope{} = scope, attrs) do
     %Customer{}
-    |> Customer.changeset(attrs)
+    |> Customer.changeset(attrs, scope)
     |> Repo.insert()
   end
 
@@ -60,16 +63,18 @@ defmodule Billing.Customers do
 
   ## Examples
 
-      iex> update_customer(customer, %{field: new_value})
+      iex> update_customer(scope, customer, %{field: new_value})
       {:ok, %Customer{}}
 
-      iex> update_customer(customer, %{field: bad_value})
+      iex> update_customer(scope, customer, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_customer(%Customer{} = customer, attrs) do
+  def update_customer(%Scope{} = scope, %Customer{} = customer, attrs) do
+    true = customer.user_id == scope.user.id
+
     customer
-    |> Customer.changeset(attrs)
+    |> Customer.changeset(attrs, scope)
     |> Repo.update()
   end
 
@@ -78,14 +83,16 @@ defmodule Billing.Customers do
 
   ## Examples
 
-      iex> delete_customer(customer)
+      iex> delete_customer(scope, customer)
       {:ok, %Customer{}}
 
-      iex> delete_customer(customer)
+      iex> delete_customer(scope, customer)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_customer(%Customer{} = customer) do
+  def delete_customer(%Scope{} = scope, %Customer{} = customer) do
+    true = customer.user_id == scope.user.id
+
     Repo.delete(customer)
   end
 
@@ -94,19 +101,28 @@ defmodule Billing.Customers do
 
   ## Examples
 
-      iex> change_customer(customer)
+      iex> change_customer(scope, customer)
       %Ecto.Changeset{data: %Customer{}}
 
   """
-  def change_customer(%Customer{} = customer, attrs \\ %{}) do
-    Customer.changeset(customer, attrs)
+  def change_customer(%Scope{} = scope, %Customer{} = customer, attrs \\ %{}) do
+    true = customer.user_id == scope.user.id
+
+    Customer.changeset(customer, attrs, scope)
   end
 
-  def find_or_create_customer(%{identification_number: identification_number} = attrs) do
-    if user = Repo.get_by(Customer, %{identification_number: identification_number}) do
+  def find_or_create_customer(
+        %Scope{} = scope,
+        %{identification_number: identification_number} = attrs
+      ) do
+    if user =
+         Repo.get_by(Customer, %{
+           identification_number: identification_number,
+           user_id: scope.user.id
+         }) do
       {:ok, user}
     else
-      create_customer(attrs)
+      create_customer(scope, attrs)
     end
   end
 end

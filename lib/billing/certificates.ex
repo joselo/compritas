@@ -8,18 +8,19 @@ defmodule Billing.Certificates do
 
   alias Billing.Certificates.Certificate
   alias Billing.Util.Crypto
+  alias Billing.Accounts.Scope
 
   @doc """
   Returns the list of certificates.
 
   ## Examples
 
-      iex> list_certificates()
+      iex> list_certificates(scope)
       [%Certificate{}, ...]
 
   """
-  def list_certificates do
-    Repo.all(Certificate)
+  def list_certificates(%Scope{} = scope) do
+    Repo.all_by(Certificate, user_id: scope.user.id)
   end
 
   @doc """
@@ -36,7 +37,9 @@ defmodule Billing.Certificates do
       ** (Ecto.NoResultsError)
 
   """
-  def get_certificate!(id), do: Repo.get!(Certificate, id)
+  def get_certificate!(%Scope{} = scope, id) do
+    Repo.get_by!(Certificate, id: id, user_id: scope.user.id)
+  end
 
   @doc """
   Creates a certificate.
@@ -50,9 +53,9 @@ defmodule Billing.Certificates do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_certificate(attrs) do
+  def create_certificate(%Scope{} = scope, attrs) do
     %Certificate{}
-    |> Certificate.changeset(attrs)
+    |> Certificate.changeset(attrs, scope)
     |> Repo.insert()
   end
 
@@ -68,9 +71,11 @@ defmodule Billing.Certificates do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_certificate(%Certificate{} = certificate, attrs) do
+  def update_certificate(%Scope{} = scope, %Certificate{} = certificate, attrs) do
+    true = certificate.user_id == scope.user.id
+
     certificate
-    |> Certificate.changeset(attrs)
+    |> Certificate.changeset(attrs, scope)
     |> Repo.update()
   end
 
@@ -86,7 +91,9 @@ defmodule Billing.Certificates do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_certificate(%Certificate{} = certificate) do
+  def delete_certificate(%Scope{} = scope, %Certificate{} = certificate) do
+    true = certificate.user_id == scope.user.id
+
     Repo.delete(certificate)
   end
 
@@ -99,8 +106,10 @@ defmodule Billing.Certificates do
       %Ecto.Changeset{data: %Certificate{}}
 
   """
-  def change_certificate(%Certificate{} = certificate, attrs \\ %{}) do
-    Certificate.changeset(certificate, attrs)
+  def change_certificate(%Scope{} = scope, %Certificate{} = certificate, attrs \\ %{}) do
+    true = certificate.user_id == scope.user.id
+
+    Certificate.changeset(certificate, attrs, scope)
   end
 
   def update_certificate_password(%Certificate{} = certificate, new_password) do

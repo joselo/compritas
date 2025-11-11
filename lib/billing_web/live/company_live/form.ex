@@ -41,26 +41,32 @@ defmodule BillingWeb.CompanyLive.Form do
   defp return_to(_), do: "index"
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    company = Companies.get_company!(id)
+    company = Companies.get_company!(socket.assigns.current_scope, id)
 
     socket
     |> assign(:page_title, gettext("Edit Company"))
     |> assign(:company, company)
-    |> assign(:form, to_form(Companies.change_company(company)))
+    |> assign(:form, to_form(Companies.change_company(socket.assigns.current_scope, company)))
   end
 
   defp apply_action(socket, :new, _params) do
-    company = %Company{}
+    company = %Company{user_id: socket.assigns.current_scope.user.id}
 
     socket
     |> assign(:page_title, gettext("New Company"))
     |> assign(:company, company)
-    |> assign(:form, to_form(Companies.change_company(company)))
+    |> assign(:form, to_form(Companies.change_company(socket.assigns.current_scope, company)))
   end
 
   @impl true
   def handle_event("validate", %{"company" => company_params}, socket) do
-    changeset = Companies.change_company(socket.assigns.company, company_params)
+    changeset =
+      Companies.change_company(
+        socket.assigns.current_scope,
+        socket.assigns.company,
+        company_params
+      )
+
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -69,7 +75,11 @@ defmodule BillingWeb.CompanyLive.Form do
   end
 
   defp save_company(socket, :edit, company_params) do
-    case Companies.update_company(socket.assigns.company, company_params) do
+    case Companies.update_company(
+           socket.assigns.current_scope,
+           socket.assigns.company,
+           company_params
+         ) do
       {:ok, company} ->
         {:noreply,
          socket
@@ -82,7 +92,7 @@ defmodule BillingWeb.CompanyLive.Form do
   end
 
   defp save_company(socket, :new, company_params) do
-    case Companies.create_company(company_params) do
+    case Companies.create_company(socket.assigns.current_scope, company_params) do
       {:ok, company} ->
         {:noreply,
          socket

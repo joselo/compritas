@@ -31,6 +31,6 @@ defmodule BillingWeb.CompanyLive.Show do
     {:ok,
      socket
      |> assign(:page_title, gettext("Company #%{company_id}", company_id: id))
-     |> assign(:company, Companies.get_company!(id))}
+     |> assign(:company, Companies.get_company!(socket.assigns.current_scope, id))}
   end
 end

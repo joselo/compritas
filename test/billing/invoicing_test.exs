@@ -1,6 +1,7 @@
 defmodule Billing.InvoicingTest do
   use Billing.DataCase
 
+  import Billing.AccountsFixtures, only: [user_scope_fixture: 0]
   import Billing.QuotesFixtures
   import Billing.CustomersFixtures
   import Billing.EmissionProfilesFixtures
@@ -11,8 +12,10 @@ defmodule Billing.InvoicingTest do
   alias Billing.Quotes.QuoteItem
 
   setup do
+    scope = user_scope_fixture()
+
     customer =
-      customer_fixture(%{
+      customer_fixture(scope, %{
         full_name: "Henry Case",
         email: "cliente@ejemplo.com",
         identification_number: "1713328506",
@@ -22,21 +25,21 @@ defmodule Billing.InvoicingTest do
       })
 
     company =
-      company_fixture(%{
+      company_fixture(scope, %{
         identification_number: "1792146739001",
         address: "Ciudadela: XYZ Calle: XYZ Número: XYZ Intersección: XYZ",
         name: "Henry Case"
       })
 
     certificate =
-      certificate_fixture(%{
+      certificate_fixture(scope, %{
         name: "Certificate Name",
         file: "certificate_file.p12",
         password: "certificate_password"
       })
 
     emission_profile =
-      emission_profile_fixture(%{
+      emission_profile_fixture(scope, %{
         company_id: company.id,
         certificate_id: certificate.id,
         name: "Emission Profile Name",
@@ -44,7 +47,7 @@ defmodule Billing.InvoicingTest do
       })
 
     quote =
-      quote_fixture(%{
+      quote_fixture(scope, %{
         customer_id: customer.id,
         emission_profile_id: emission_profile.id,
         issued_at: ~D[2025-08-21],

@@ -10,11 +10,11 @@ defmodule Billing.QuotesFixtures do
   @doc """
   Generate a quote.
   """
-  def quote_fixture(attrs \\ %{}) do
-    customer = customer_fixture()
-    emission_profile = emission_profile_fixture()
+  def quote_fixture(scope, attrs \\ %{}) do
+    customer = customer_fixture(scope)
+    emission_profile = emission_profile_fixture(scope)
 
-    {:ok, quote} =
+    attrs =
       attrs
       |> Enum.into(%{
         customer_id: customer.id,
@@ -34,7 +34,8 @@ defmodule Billing.QuotesFixtures do
           }
         ]
       })
-      |> Billing.Quotes.create_quote()
+
+    {:ok, quote} = Billing.Quotes.create_quote(scope, attrs)
 
     quote
   end

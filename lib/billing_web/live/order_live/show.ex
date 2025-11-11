@@ -43,6 +43,6 @@ defmodule BillingWeb.OrderLive.Show do
     {:ok,
      socket
      |> assign(:page_title, "Show Order")
-     |> assign(:order, Orders.get_order!(id))}
+     |> assign(:order, Orders.get_order!(socket.assigns.current_scope, id))}
   end
 end

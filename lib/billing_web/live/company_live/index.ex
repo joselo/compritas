@@ -51,13 +51,13 @@ defmodule BillingWeb.CompanyLive.Index do
     {:ok,
      socket
      |> assign(:page_title, gettext("Companies"))
-     |> stream(:companies, Companies.list_companies())}
+     |> stream(:companies, Companies.list_companies(socket.assigns.current_scope))}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    company = Companies.get_company!(id)
-    {:ok, _} = Companies.delete_company(company)
+    company = Companies.get_company!(socket.assigns.current_scope, id)
+    {:ok, _} = Companies.delete_company(socket.assigns.current_scope, company)
 
     {:noreply, stream_delete(socket, :companies, company)}
   end

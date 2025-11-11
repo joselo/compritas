@@ -52,26 +52,32 @@ defmodule BillingWeb.CustomerLive.Form do
   defp return_to(_), do: "index"
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    customer = Customers.get_customer!(id)
+    customer = Customers.get_customer!(socket.assigns.current_scope, id)
 
     socket
     |> assign(:page_title, "Edit Customer")
     |> assign(:customer, customer)
-    |> assign(:form, to_form(Customers.change_customer(customer)))
+    |> assign(:form, to_form(Customers.change_customer(socket.assigns.current_scope, customer)))
   end
 
   defp apply_action(socket, :new, _params) do
-    customer = %Customer{}
+    customer = %Customer{user_id: socket.assigns.current_scope.user.id}
 
     socket
     |> assign(:page_title, "New Customer")
     |> assign(:customer, customer)
-    |> assign(:form, to_form(Customers.change_customer(customer)))
+    |> assign(:form, to_form(Customers.change_customer(socket.assigns.current_scope, customer)))
   end
 
   @impl true
   def handle_event("validate", %{"customer" => customer_params}, socket) do
-    changeset = Customers.change_customer(socket.assigns.customer, customer_params)
+    changeset =
+      Customers.change_customer(
+        socket.assigns.current_scope,
+        socket.assigns.customer,
+        customer_params
+      )
+
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -80,7 +86,11 @@ defmodule BillingWeb.CustomerLive.Form do
   end
 
   defp save_customer(socket, :edit, customer_params) do
-    case Customers.update_customer(socket.assigns.customer, customer_params) do
+    case Customers.update_customer(
+           socket.assigns.current_scope,
+           socket.assigns.customer,
+           customer_params
+         ) do
       {:ok, customer} ->
         {:noreply,
          socket
@@ -93,7 +103,7 @@ defmodule BillingWeb.CustomerLive.Form do
   end
 
   defp save_customer(socket, :new, customer_params) do
-    case Customers.create_customer(customer_params) do
+    case Customers.create_customer(socket.assigns.current_scope, customer_params) do
       {:ok, customer} ->
         {:noreply,
          socket

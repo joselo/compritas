@@ -3,28 +3,27 @@ defmodule BillingWeb.CompanyLiveTest do
 
   import Phoenix.LiveViewTest
   import Billing.CompaniesFixtures
-  import Billing.AccountsFixtures
 
   @create_attrs %{
     name: "some name",
     address: "some address",
     identification_number: "some identification_number"
   }
+
   @update_attrs %{
     name: "some updated name",
     address: "some updated address",
     identification_number: "some updated identification_number"
   }
+
   @invalid_attrs %{name: nil, address: nil, identification_number: nil}
-  defp create_company(_) do
-    company = company_fixture()
+
+  setup :register_and_log_in_user
+
+  defp create_company(%{scope: scope}) do
+    company = company_fixture(scope)
 
     %{company: company}
-  end
-
-  setup %{conn: conn} do
-    user = user_fixture()
-    %{conn: log_in_user(conn, user), user: user}
   end
 
   describe "Index" do

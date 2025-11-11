@@ -37,6 +37,9 @@ defmodule BillingWeb.EmissionProfileLive.Show do
        :page_title,
        gettext("Emission profiles #%{emission_profile_id}", emission_profile_id: id)
      )
-     |> assign(:emission_profile, EmissionProfiles.get_emission_profile!(id))}
+     |> assign(
+       :emission_profile,
+       EmissionProfiles.get_emission_profile!(socket.assigns.current_scope, id)
+     )}
   end
 end

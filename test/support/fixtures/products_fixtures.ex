@@ -7,14 +7,15 @@ defmodule Billing.ProductsFixtures do
   @doc """
   Generate a product.
   """
-  def product_fixture(attrs \\ %{}) do
-    {:ok, product} =
+  def product_fixture(scope, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         name: "some name",
         price: "120.50"
       })
-      |> Billing.Products.create_product()
+
+    {:ok, product} = Billing.Products.create_product(scope, attrs)
 
     product
   end

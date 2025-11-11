@@ -7,7 +7,6 @@ defmodule BillingWeb.QuoteLiveTest do
   import Billing.QuotesFixtures
   import Billing.CustomersFixtures
   import Billing.EmissionProfilesFixtures
-  import Billing.AccountsFixtures
 
   alias Billing.Repo
   alias Billing.Quotes.Quote
@@ -28,18 +27,20 @@ defmodule BillingWeb.QuoteLiveTest do
 
   @update_attrs %{issued_at: "2025-08-29"}
   @invalid_attrs %{issued_at: nil}
-  defp create_invoice(_) do
-    quote = quote_fixture()
+
+  setup :register_and_log_in_user
+
+  defp create_invoice(%{scope: scope}) do
+    quote = quote_fixture(scope)
 
     %{quote: quote}
   end
 
-  setup %{conn: conn} do
-    customer = customer_fixture()
-    emission_profile = emission_profile_fixture()
-    user = user_fixture()
+  setup %{scope: scope} do
+    customer = customer_fixture(scope)
+    emission_profile = emission_profile_fixture(scope)
 
-    %{conn: log_in_user(conn, user), customer: customer, emission_profile: emission_profile}
+    %{customer: customer, emission_profile: emission_profile}
   end
 
   describe "Index" do

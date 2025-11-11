@@ -40,8 +40,13 @@ defmodule BillingWeb.EmissionProfileLive.Form do
 
   @impl true
   def mount(params, _session, socket) do
-    companies = Billing.Companies.list_companies() |> Enum.map(&{&1.name, &1.id})
-    certificates = Billing.Certificates.list_certificates() |> Enum.map(&{&1.name, &1.id})
+    companies =
+      Billing.Companies.list_companies(socket.assigns.current_scope)
+      |> Enum.map(&{&1.name, &1.id})
+
+    certificates =
+      Billing.Certificates.list_certificates(socket.assigns.current_scope)
+      |> Enum.map(&{&1.name, &1.id})
 
     {:ok,
      socket
@@ -55,27 +60,38 @@ defmodule BillingWeb.EmissionProfileLive.Form do
   defp return_to(_), do: "index"
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    emission_profile = EmissionProfiles.get_emission_profile!(id)
+    emission_profile = EmissionProfiles.get_emission_profile!(socket.assigns.current_scope, id)
 
     socket
     |> assign(:page_title, gettext("Edit Emission profile"))
     |> assign(:emission_profile, emission_profile)
-    |> assign(:form, to_form(EmissionProfiles.change_emission_profile(emission_profile)))
+    |> assign(
+      :form,
+      to_form(
+        EmissionProfiles.change_emission_profile(socket.assigns.current_scope, emission_profile)
+      )
+    )
   end
 
   defp apply_action(socket, :new, _params) do
-    emission_profile = %EmissionProfile{}
+    emission_profile = %EmissionProfile{user_id: socket.assigns.current_scope.user.id}
 
     socket
     |> assign(:page_title, gettext("New Emission profile"))
     |> assign(:emission_profile, emission_profile)
-    |> assign(:form, to_form(EmissionProfiles.change_emission_profile(emission_profile)))
+    |> assign(
+      :form,
+      to_form(
+        EmissionProfiles.change_emission_profile(socket.assigns.current_scope, emission_profile)
+      )
+    )
   end
 
   @impl true
   def handle_event("validate", %{"emission_profile" => emission_profile_params}, socket) do
     changeset =
       EmissionProfiles.change_emission_profile(
+        socket.assigns.current_scope,
         socket.assigns.emission_profile,
         emission_profile_params
       )
@@ -89,6 +105,7 @@ defmodule BillingWeb.EmissionProfileLive.Form do
 
   defp save_emission_profile(socket, :edit, emission_profile_params) do
     case EmissionProfiles.update_emission_profile(
+           socket.assigns.current_scope,
            socket.assigns.emission_profile,
            emission_profile_params
          ) do
@@ -104,7 +121,10 @@ defmodule BillingWeb.EmissionProfileLive.Form do
   end
 
   defp save_emission_profile(socket, :new, emission_profile_params) do
-    case EmissionProfiles.create_emission_profile(emission_profile_params) do
+    case EmissionProfiles.create_emission_profile(
+           socket.assigns.current_scope,
+           emission_profile_params
+         ) do
       {:ok, emission_profile} ->
         {:noreply,
          socket

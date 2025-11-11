@@ -33,6 +33,6 @@ defmodule BillingWeb.CertificateLive.Show do
     {:ok,
      socket
      |> assign(:page_title, gettext("Certificate #%{certificate_id}", certificate_id: id))
-     |> assign(:certificate, Certificates.get_certificate!(id))}
+     |> assign(:certificate, Certificates.get_certificate!(socket.assigns.current_scope, id))}
   end
 end

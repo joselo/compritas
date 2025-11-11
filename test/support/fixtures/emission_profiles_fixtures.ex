@@ -10,11 +10,11 @@ defmodule Billing.EmissionProfilesFixtures do
   @doc """
   Generate a emission_profile.
   """
-  def emission_profile_fixture(attrs \\ %{}) do
-    certificate = certificate_fixture()
-    company = company_fixture()
+  def emission_profile_fixture(scope, attrs \\ %{}) do
+    certificate = certificate_fixture(scope)
+    company = company_fixture(scope)
 
-    {:ok, emission_profile} =
+    attrs =
       attrs
       |> Enum.into(%{
         name: "Matrix",
@@ -22,7 +22,8 @@ defmodule Billing.EmissionProfilesFixtures do
         company_id: company.id,
         sequence: 1
       })
-      |> Billing.EmissionProfiles.create_emission_profile()
+
+    {:ok, emission_profile} = Billing.EmissionProfiles.create_emission_profile(scope, attrs)
 
     emission_profile
   end

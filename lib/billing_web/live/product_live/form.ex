@@ -51,26 +51,32 @@ defmodule BillingWeb.ProductLive.Form do
   defp return_to(_), do: "index"
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    product = Products.get_product!(id)
+    product = Products.get_product!(socket.assigns.current_scope, id)
 
     socket
     |> assign(:page_title, gettext("Edit Product"))
     |> assign(:product, product)
-    |> assign(:form, to_form(Products.change_product(product)))
+    |> assign(:form, to_form(Products.change_product(socket.assigns.current_scope, product)))
   end
 
   defp apply_action(socket, :new, _params) do
-    product = %Product{}
+    product = %Product{user_id: socket.assigns.current_scope.user.id}
 
     socket
     |> assign(:page_title, gettext("New Product"))
     |> assign(:product, product)
-    |> assign(:form, to_form(Products.change_product(product)))
+    |> assign(:form, to_form(Products.change_product(socket.assigns.current_scope, product)))
   end
 
   @impl true
   def handle_event("validate", %{"product" => product_params}, socket) do
-    changeset = Products.change_product(socket.assigns.product, product_params)
+    changeset =
+      Products.change_product(
+        socket.assigns.current_scope,
+        socket.assigns.product,
+        product_params
+      )
+
     {:noreply, assign(socket, form: to_form(changeset, action: :validate))}
   end
 
@@ -85,7 +91,7 @@ defmodule BillingWeb.ProductLive.Form do
   defp save_product(socket, :edit, product_params) do
     params = consume_files(socket, product_params)
 
-    case Products.update_product(socket.assigns.product, params) do
+    case Products.update_product(socket.assigns.current_scope, socket.assigns.product, params) do
       {:ok, product} ->
         {:noreply,
          socket
@@ -100,7 +106,7 @@ defmodule BillingWeb.ProductLive.Form do
   defp save_product(socket, :new, product_params) do
     params = consume_files(socket, product_params)
 
-    case Products.create_product(params) do
+    case Products.create_product(socket.assigns.current_scope, params) do
       {:ok, product} ->
         {:noreply,
          socket

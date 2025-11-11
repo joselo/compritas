@@ -13,6 +13,7 @@ defmodule Billing.Quotes.QuoteItem do
     field :price, :decimal
     field :quantity, :decimal, default: 1.0
     field :amount_without_tax, :decimal
+    field :user_id, :id
 
     field :marked_for_deletion, :boolean, virtual: true, default: false
 
@@ -20,9 +21,10 @@ defmodule Billing.Quotes.QuoteItem do
   end
 
   @doc false
-  def changeset(quote_item, attrs) do
+  def changeset(quote_item, attrs, user_scope) do
     quote_item
     |> cast(attrs, [:description, :price, :quantity, :tax_rate, :marked_for_deletion])
     |> validate_required([:description, :price, :quantity, :tax_rate])
+    |> put_change(:user_id, user_scope.user.id)
   end
 end
