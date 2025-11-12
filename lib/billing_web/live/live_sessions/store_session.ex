@@ -1,33 +1,50 @@
 defmodule BillingWeb.LiveSessions.StoreSession do
   import Phoenix.Component
+  import Ecto.Query, warn: false
 
-  alias Billing.Accounts
   alias Billing.Accounts.User
+  alias Billing.Settings.Setting
   alias Billing.Repo
-  alias Ecto.Query
   alias Billing.Accounts.Scope
 
-  def on_mount(:mount_store_scope, _params, %{"cart_uuid" => cart_uuid} = session, socket) do
-    new_socket =
-      socket
-      |> assign_new(:cart_uuid, fn -> cart_uuid end)
-      |> assign_new(:store_scope, fn -> get_user_scope(session["user_id"]) end)
-
-    {:cont, new_socket}
+  defmodule StoreNotFoundError do
+    defexception message: "Tienda no disponible", plug_status: 404
   end
 
-  defp get_user_scope(nil) do
+  def on_mount(:mount_store_scope, _params, %{"cart_uuid" => cart_uuid} = session, socket) do
+    socket
+    |> assign_new(:cart_uuid, fn -> cart_uuid end)
+    |> assign_new(:store_scope, fn -> get_store_scope(session["subdomain"]) end)
+    |> handle_store_scope()
+  end
+
+  defp get_store_scope(nil) do
     user =
       User
-      |> Query.first()
+      |> first()
       |> Repo.one()
 
     Scope.for_user(user)
   end
 
-  defp get_user_scope(user_id) do
-    user = Accounts.get_user!(user_id)
+  defp get_store_scope(subdomain) do
+    query =
+      from(u in User,
+        join: s in Setting,
+        on: u.id == s.user_id,
+        where: s.subdomain == ^subdomain
+      )
+
+    user = Repo.one(query)
 
     Scope.for_user(user)
+  end
+
+  def handle_store_scope(%{assigns: %{store_scope: %Scope{user: %User{}}}} = socket) do
+    {:cont, socket}
+  end
+
+  def handle_store_scope(_socket) do
+    raise StoreNotFoundError
   end
 end

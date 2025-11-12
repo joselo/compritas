@@ -6,6 +6,7 @@ defmodule Billing.Settings.Setting do
     field :title, :string
     field :avatar, :string
     field :user_id, :id
+    field :subdomain, :string
 
     timestamps(type: :utc_datetime)
   end

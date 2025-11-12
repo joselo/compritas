@@ -54,6 +54,5 @@ defmodule BillingWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-  plug BillingWeb.Plugs.StoreSlugPlug
   plug BillingWeb.Router
 end
