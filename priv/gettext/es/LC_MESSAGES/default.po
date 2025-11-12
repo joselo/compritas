@@ -776,62 +776,87 @@ msgid "Emission profile #%{emission_profile_id}"
 msgstr "Perfiles de emisión #%{emission_profile_id}"
 
 #: lib/billing_web/live/user_live/registration.ex:63
+#, elixir-autogen, elixir-format
 msgid "An email was sent to %{user_email}, please access it to confirm your account."
 msgstr "Se ha enviado un correo electrónico a %{user_email}, por favor accede a él para confirmar tu cuenta."
 
 #: lib/billing_web/live/user_live/confirmation.ex:34
+#, elixir-autogen, elixir-format
 msgid "Confirm and log in only this time"
 msgstr "Confirmar e iniciar sesión solo esta vez"
 
 #: lib/billing_web/live/user_live/confirmation.ex:31
+#, elixir-autogen, elixir-format
 msgid "Confirm and stay logged in"
 msgstr "Confirmar y mantener la sesión iniciada"
 
 #: lib/billing_web/live/user_live/confirmation.ex:28
+#, elixir-autogen, elixir-format
 msgid "Confirming..."
 msgstr "Confirmando..."
 
 #: lib/billing_web/live/user_live/registration.ex:29
+#, elixir-autogen, elixir-format
 msgid "Create an account"
 msgstr "Crear una cuenta"
 
 #: lib/billing_web/live/user_live/registration.ex:28
+#, elixir-autogen, elixir-format
 msgid "Creating account..."
 msgstr "Creando cuenta..."
 
 #: lib/billing_web/live/user_live/confirmation.ex:59
+#, elixir-autogen, elixir-format
 msgid "Keep me logged in on this device"
 msgstr "Mantenerme conectado en este dispositivo"
 
+#: lib/billing_web/live/user_live/confirmation.ex:65
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Log me in only this time"
+msgstr "Inicia sesión solo esta vez"
+
 #: lib/billing_web/live/user_live/confirmation.ex:56
 #: lib/billing_web/live/user_live/confirmation.ex:62
+#, elixir-autogen, elixir-format
 msgid "Logging in..."
 msgstr "Iniciando sesión..."
 
 #: lib/billing_web/live/user_live/confirmation.ex:88
+#, elixir-autogen, elixir-format
 msgid "Magic link is invalid or it has expired."
 msgstr "El enlace mágico no es válido o ha expirado."
 
 #: lib/billing_web/live/user_live/registration.ex:14
+#, elixir-autogen, elixir-format
 msgid "Register for an account"
 msgstr "Registrarse para obtener una cuenta"
 
 #: lib/billing_web/live/user_live/settings.ex:81
+#, elixir-autogen, elixir-format
 msgid "Save Settings"
 msgstr "Guardar configuración"
 
 #: lib/billing_web/live/user_live/settings.ex:201
+#, elixir-autogen, elixir-format
 msgid "Settings saved"
 msgstr "Configuración guardada"
 
 #: lib/billing_web/live/user_live/confirmation.ex:71
+#, elixir-autogen, elixir-format
 msgid "Tip: If you prefer passwords, you can enable them in the user settings."
 msgstr "Consejo: Si prefieres usar contraseñas, puedes habilitarlas en la configuración de usuario."
 
 #: lib/billing_web/live/user_live/settings.ex:78
+#, elixir-autogen, elixir-format
 msgid "Title"
 msgstr "Título"
 
 #: lib/billing_web/live/user_live/confirmation.ex:12
+#, elixir-autogen, elixir-format
 msgid "Welcome %{user_email}"
 msgstr "Bienvenido %{user_email}"
+
+#: lib/billing_web/live/live_sessions/store_session.ex:13
+#, elixir-autogen, elixir-format
+msgid "Store not available"
+msgstr "Tienda no disponible"

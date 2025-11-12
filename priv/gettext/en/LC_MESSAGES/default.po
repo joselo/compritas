@@ -855,3 +855,8 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Welcome %{user_email}"
 msgstr ""
+
+#: lib/billing_web/live/live_sessions/store_session.ex:13
+#, elixir-autogen, elixir-format
+msgid "Store not available"
+msgstr ""

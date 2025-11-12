@@ -8,7 +8,9 @@ defmodule BillingWeb.LiveSessions.StoreSession do
   alias Billing.Accounts.Scope
 
   defmodule StoreNotFoundError do
-    defexception message: "Tienda no disponible", plug_status: 404
+    use Gettext, backend: BillingWeb.Gettext
+
+    defexception message: gettext("Store not available"), plug_status: 404
   end
 
   def on_mount(:mount_store_scope, _params, %{"cart_uuid" => cart_uuid} = session, socket) do
