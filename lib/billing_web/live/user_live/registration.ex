@@ -3,6 +3,11 @@ defmodule BillingWeb.UserLive.Registration do
 
   alias Billing.Accounts
   alias Billing.Accounts.User
+  alias Billing.Accounts.Scope
+  alias Billing.Settings
+  alias Billing.Settings.Setting
+  alias Billing.Subdomains
+  alias BillingWeb.URLHelper
 
   @impl true
   def render(assigns) do
@@ -50,10 +55,14 @@ defmodule BillingWeb.UserLive.Registration do
   def handle_event("save", %{"user" => user_params}, socket) do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
+        scope = Scope.for_user(user)
+
+        {:ok, _setting} = save_default_settings(scope)
+
         {:ok, _} =
           Accounts.deliver_login_instructions(
             user,
-            &url(~p"/users/log-in/#{&1}")
+            &URLHelper.add_subdomain(scope, url(~p"/users/log-in/#{&1}"))
           )
 
         {:noreply,
@@ -65,7 +74,7 @@ defmodule BillingWeb.UserLive.Registration do
              user_email: user.email
            )
          )
-         |> push_navigate(to: ~p"/users/log-in")}
+         |> redirect_to_user_login(scope)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
@@ -80,5 +89,20 @@ defmodule BillingWeb.UserLive.Registration do
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     form = to_form(changeset, as: "user")
     assign(socket, form: form)
+  end
+
+  defp save_default_settings(%Scope{} = scope) do
+    {:ok, subdomain} = Subdomains.generate_unique_subdomain()
+    setting = %Setting{user_id: scope.user.id, subdomain: subdomain}
+
+    Settings.save_setting(scope, setting, %{title: gettext("My Store")})
+  end
+
+  def redirect_to_user_login(socket, %Scope{} = scope) do
+    if Billing.standalone_mode() do
+      push_navigate(socket, to: ~p"/users/log-in")
+    else
+      redirect(socket, external: URLHelper.add_subdomain(scope, url(~p"/users/log-in")))
+    end
   end
 end

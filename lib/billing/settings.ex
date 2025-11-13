@@ -23,12 +23,8 @@ defmodule Billing.Settings do
       ** (Ecto.NoResultsError)
 
   """
-  def get_setting(%Scope{} = scope) do
-    if setting = Repo.get_by(Setting, user_id: scope.user.id) do
-      setting
-    else
-      %Setting{user_id: scope.user.id}
-    end
+  def get_setting!(%Scope{} = scope) do
+    Repo.get_by!(Setting, user_id: scope.user.id)
   end
 
   @doc """

@@ -10,4 +10,8 @@ defmodule Billing do
   def get_storage_path do
     Application.get_env(:billing, :storage_path)
   end
+
+  def standalone_mode do
+    System.get_env("STANDALONE_MODE", "true") == "true"
+  end
 end
