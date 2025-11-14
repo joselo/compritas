@@ -4,7 +4,6 @@ defmodule BillingWeb.UserLive.Settings do
   on_mount {BillingWeb.UserAuth, :require_sudo_mode}
 
   alias Billing.Accounts
-  alias BillingWeb.URLHelper
 
   @impl true
   def render(assigns) do
@@ -119,10 +118,7 @@ defmodule BillingWeb.UserLive.Settings do
         Accounts.deliver_user_update_email_instructions(
           Ecto.Changeset.apply_action!(changeset, :insert),
           user.email,
-          &URLHelper.add_subdomain(
-            socket.assigns.current_scope,
-            url(~p"/users/settings/confirm-email/#{&1}")
-          )
+          &url(~p"/users/settings/confirm-email/#{&1}")
         )
 
         info = "A link to confirm your email change has been sent to the new address."

@@ -1,4 +1,36 @@
 <Layouts.flash_group flash={@flash} />
+
+<ul class="menu menu-horizontal">
+  <%= if @current_scope do %>
+    <li>
+      <.link navigate={~p"/dashboard"} class="rounded-full">
+        <.icon name="hero-inbox-arrow-down" /> {gettext("Manager")}
+      </.link>
+    </li>
+
+    <li>
+      <.link
+        href={~p"/users/log-out"}
+        method="delete"
+      >
+        <.icon name="hero-arrow-left-start-on-rectangle" /> {gettext("Log out")}
+      </.link>
+    </li>
+  <% else %>
+    <li>
+      <.link href={~p"/users/register"}>
+        <.icon name="hero-rocket-launch" /> {gettext("Register")}
+      </.link>
+    </li>
+
+    <li>
+      <.link href={~p"/users/log-in"}>
+        <.icon name="hero-arrow-right-end-on-rectangle" /> {gettext("Log in")}
+      </.link>
+    </li>
+  <% end %>
+</ul>
+
 <div class="left-[40rem] fixed inset-y-0 right-0 z-0 hidden lg:block xl:left-[50rem]">
   <svg
     viewBox="0 0 1480 957"

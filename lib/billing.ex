@@ -11,7 +11,7 @@ defmodule Billing do
     Application.get_env(:billing, :storage_path)
   end
 
-  def standalone_mode do
-    System.get_env("STANDALONE_MODE", "true") == "true"
+  def allow_registration do
+    System.get_env("ALLOW_REGISTRATION", "false") == "true"
   end
 end

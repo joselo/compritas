@@ -7,7 +7,6 @@ defmodule BillingWeb.UserLive.Registration do
   alias Billing.Settings
   alias Billing.Settings.Setting
   alias Billing.Subdomains
-  alias BillingWeb.URLHelper
 
   @impl true
   def render(assigns) do
@@ -62,7 +61,7 @@ defmodule BillingWeb.UserLive.Registration do
         {:ok, _} =
           Accounts.deliver_login_instructions(
             user,
-            &URLHelper.add_subdomain(scope, url(~p"/users/log-in/#{&1}"))
+            &url(~p"/users/log-in/#{&1}")
           )
 
         {:noreply,
@@ -74,7 +73,7 @@ defmodule BillingWeb.UserLive.Registration do
              user_email: user.email
            )
          )
-         |> redirect_to_user_login(scope)}
+         |> push_navigate(to: ~p"/users/log-in")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
@@ -96,13 +95,5 @@ defmodule BillingWeb.UserLive.Registration do
     setting = %Setting{user_id: scope.user.id, subdomain: subdomain}
 
     Settings.save_setting(scope, setting, %{title: gettext("My Store")})
-  end
-
-  def redirect_to_user_login(socket, %Scope{} = scope) do
-    if Billing.standalone_mode() do
-      push_navigate(socket, to: ~p"/users/log-in")
-    else
-      redirect(socket, external: URLHelper.add_subdomain(scope, url(~p"/users/log-in")))
-    end
   end
 end

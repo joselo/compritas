@@ -30,7 +30,7 @@ defmodule BillingWeb.SettingLive.Form do
         />
 
         <.input
-          :if={!Billing.standalone_mode()}
+          :if={Billing.allow_registration()}
           field={@form[:subdomain]}
           type="text"
           label={gettext("Subdomain")}

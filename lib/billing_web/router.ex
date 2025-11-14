@@ -16,7 +16,6 @@ defmodule BillingWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
-    plug SubdomainPlug
     plug SetupGatePlug
     plug CartPlug
   end
@@ -25,8 +24,12 @@ defmodule BillingWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :subdomain do
+    plug SubdomainPlug
+  end
+
   scope "/", BillingWeb do
-    pipe_through [:browser]
+    pipe_through [:browser, :subdomain]
 
     live_session :init_assings,
       on_mount: [{StoreSession, :mount_store_scope}, {BillingWeb.UserAuth, :mount_current_scope}] do

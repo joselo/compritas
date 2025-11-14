@@ -2,8 +2,6 @@ defmodule BillingWeb.UserLive.Login do
   use BillingWeb, :live_view
 
   alias Billing.Accounts
-  alias BillingWeb.URLHelper
-  alias Billing.Accounts.Scope
 
   @impl true
   def render(assigns) do
@@ -106,11 +104,9 @@ defmodule BillingWeb.UserLive.Login do
 
   def handle_event("submit_magic", %{"user" => %{"email" => email}}, socket) do
     if user = Accounts.get_user_by_email(email) do
-      scope = Scope.for_user(user)
-
       Accounts.deliver_login_instructions(
         user,
-        &URLHelper.add_subdomain(scope, url(~p"/users/log-in/#{&1}"))
+        &url(~p"/users/log-in/#{&1}")
       )
     end
 

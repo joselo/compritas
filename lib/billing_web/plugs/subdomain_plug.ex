@@ -1,15 +1,15 @@
 defmodule BillingWeb.Plugs.SubdomainPlug do
   import Plug.Conn
 
+  alias BillingWeb.PageController
+
   @register_path ["users", "register"]
   @ignored_subdomains ~w(www)
 
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    if Billing.standalone_mode() do
-      conn
-    else
+    if Billing.allow_registration() do
       case String.split(conn.host, ".") do
         [subdomain, _domain, _tld]
         when subdomain != "" and subdomain not in @ignored_subdomains ->
@@ -20,12 +20,12 @@ defmodule BillingWeb.Plugs.SubdomainPlug do
             conn
           else
             conn
-            |> put_status(404)
-            |> put_resp_content_type("text/plain")
-            |> send_resp(404, "Subdomain is required to access this page")
+            |> PageController.home(%{})
             |> halt()
           end
       end
+    else
+      conn
     end
   end
 end

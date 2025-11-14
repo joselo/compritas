@@ -21,9 +21,7 @@ defmodule Billing.Settings.Setting do
   end
 
   defp validate_subdomain(changeset) do
-    if Billing.standalone_mode() do
-      changeset
-    else
+    if Billing.allow_registration() do
       changeset
       |> validate_required([:subdomain])
       |> validate_format(:subdomain, ~r/^[a-z0-9][a-z0-9-]*[a-z0-9]$/,
@@ -35,6 +33,8 @@ defmodule Billing.Settings.Setting do
         message: "está reservado y no puede ser usado"
       )
       |> unique_constraint(:subdomain)
+    else
+      changeset
     end
   end
 

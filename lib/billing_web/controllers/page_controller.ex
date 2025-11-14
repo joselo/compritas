@@ -2,6 +2,8 @@ defmodule BillingWeb.PageController do
   use BillingWeb, :controller
 
   def home(conn, _params) do
-    render(conn, :home)
+    conn
+    |> put_view(BillingWeb.PageHTML)
+    |> render(:home)
   end
 end
