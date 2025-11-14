@@ -28,14 +28,6 @@ defmodule BillingWeb.SettingLive.Form do
           label={gettext("Title")}
           required
         />
-
-        <.input
-          :if={Billing.allow_registration()}
-          field={@form[:subdomain]}
-          type="text"
-          label={gettext("Subdomain")}
-          required
-        />
         <.button variant="primary" phx-disable-with={gettext("Changing...")}>
           {gettext("Save Settings")}
         </.button>

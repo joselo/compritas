@@ -13,30 +13,22 @@ defmodule BillingWeb.Plugs.SetupGatePlug do
   end
 
   def call(%{path_info: @register_path} = conn, _params) do
-    if Billing.allow_registration() do
+    if user_exists?() do
       conn
+      |> redirect(to: ~p"/")
+      |> halt()
     else
-      if user_exists?() do
-        conn
-        |> redirect(to: ~p"/")
-        |> halt()
-      else
-        conn
-      end
+      conn
     end
   end
 
   def call(%{path_info: _path_info} = conn, _params) do
-    if Billing.allow_registration() do
+    if user_exists?() do
       conn
     else
-      if user_exists?() do
-        conn
-      else
-        conn
-        |> redirect(to: ~p"/users/register")
-        |> halt()
-      end
+      conn
+      |> redirect(to: ~p"/users/register")
+      |> halt()
     end
   end
 

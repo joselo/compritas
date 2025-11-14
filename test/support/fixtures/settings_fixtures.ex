@@ -8,16 +8,13 @@ defmodule Billing.SettingsFixtures do
   Generate a setting.
   """
   def setting_fixture(scope, attrs \\ %{}) do
-    {:ok, subdomain} = Billing.Subdomains.generate_unique_subdomain()
-
     attrs =
       attrs
       |> Enum.into(%{
-        title: "My Store",
-        subdomain: subdomain
+        title: "My Store"
       })
 
-    setting = %Billing.Settings.Setting{user_id: scope.user.id, subdomain: subdomain}
+    setting = %Billing.Settings.Setting{user_id: scope.user.id}
 
     {:ok, setting} = Billing.Settings.save_setting(scope, setting, attrs)
 

@@ -6,7 +6,6 @@ defmodule BillingWeb.UserLive.Registration do
   alias Billing.Accounts.Scope
   alias Billing.Settings
   alias Billing.Settings.Setting
-  alias Billing.Subdomains
 
   @impl true
   def render(assigns) do
@@ -91,8 +90,7 @@ defmodule BillingWeb.UserLive.Registration do
   end
 
   defp save_default_settings(%Scope{} = scope) do
-    {:ok, subdomain} = Subdomains.generate_unique_subdomain()
-    setting = %Setting{user_id: scope.user.id, subdomain: subdomain}
+    setting = %Setting{user_id: scope.user.id}
 
     Settings.save_setting(scope, setting, %{title: gettext("My Store")})
   end

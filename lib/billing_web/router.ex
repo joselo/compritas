@@ -6,7 +6,6 @@ defmodule BillingWeb.Router do
   alias BillingWeb.Plugs.CartPlug
   alias BillingWeb.LiveSessions.StoreSession
   alias BillingWeb.Plugs.SetupGatePlug
-  alias BillingWeb.Plugs.SubdomainPlug
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -24,12 +23,8 @@ defmodule BillingWeb.Router do
     plug :accepts, ["json"]
   end
 
-  pipeline :subdomain do
-    plug SubdomainPlug
-  end
-
   scope "/", BillingWeb do
-    pipe_through [:browser, :subdomain]
+    pipe_through [:browser]
 
     live_session :init_assings,
       on_mount: [{StoreSession, :mount_store_scope}, {BillingWeb.UserAuth, :mount_current_scope}] do

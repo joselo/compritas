@@ -178,6 +178,37 @@ defmodule BillingWeb.Layouts do
         </.link>
       </div>
       <div class="flex justify-end items-center space-x-2">
+        <ul class="menu menu-horizontal">
+          <%= if @current_scope do %>
+            <li>
+              <.link navigate={~p"/dashboard"} class="rounded-full">
+                <.icon name="hero-inbox-arrow-down" /> {gettext("Manager")}
+              </.link>
+            </li>
+
+            <li>
+              <.link
+                href={~p"/users/log-out"}
+                method="delete"
+                class="tooltip tooltip-bottom rounded-full"
+                data-tip={gettext("Log out")}
+              >
+                <.icon name="hero-arrow-left-start-on-rectangle" />
+              </.link>
+            </li>
+          <% else %>
+            <li>
+              <.link
+                href={~p"/users/log-in"}
+                class="tooltip tooltip-bottom rounded-full"
+                data-tip={gettext("Log in")}
+              >
+                <.icon name="hero-power" />
+              </.link>
+            </li>
+          <% end %>
+        </ul>
+
         <div class="flex justify-end">
           <.theme_toggle />
         </div>
