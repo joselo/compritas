@@ -3,6 +3,7 @@ defmodule Billing.ElectronicInvoiceErrors do
 
   alias Billing.Quotes.ElectronicInvoice
   alias Billing.InvoiceHandler
+  alias Billing.Accounts.Scope
 
   @errors [
     identificador: "Identificador",
@@ -11,19 +12,19 @@ defmodule Billing.ElectronicInvoiceErrors do
     tipo: "Tipo"
   ]
 
-  def list_errors(%ElectronicInvoice{state: state, access_key: access_key})
+  def list_errors(%Scope{} = scope, %ElectronicInvoice{state: state, access_key: access_key})
       when state in [:back, :error] do
-    access_key
-    |> InvoiceHandler.xml_response_path()
+    scope
+    |> InvoiceHandler.xml_response_path(access_key)
     |> File.read!()
     |> parse_xml_errors()
     |> format_errors()
   end
 
-  def list_errors(%ElectronicInvoice{state: state, access_key: access_key})
+  def list_errors(%Scope{} = scope, %ElectronicInvoice{state: state, access_key: access_key})
       when state in [:unauthorized] do
-    access_key
-    |> InvoiceHandler.xml_auth_path()
+    scope
+    |> InvoiceHandler.xml_auth_path(access_key)
     |> File.read!()
     |> parse_xml_errors()
     |> format_errors()

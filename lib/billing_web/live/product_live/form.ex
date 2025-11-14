@@ -3,6 +3,7 @@ defmodule BillingWeb.ProductLive.Form do
 
   alias Billing.Products
   alias Billing.Products.Product
+  alias Billing.Storage
 
   @impl true
   def render(assigns) do
@@ -164,11 +165,12 @@ defmodule BillingWeb.ProductLive.Form do
       consume_uploaded_entries(socket, :files, fn %{path: path}, entry ->
         extname = Path.extname(entry.client_name)
         file_name = entry.uuid <> extname
-        dest = Path.join(Application.app_dir(:billing, "priv/static/uploads"), file_name)
+        user_id = socket.assigns.current_scope.user.id
+        dest = Storage.upload_path(socket.assigns.current_scope, file_name)
 
-        # You will need to create `priv/static/uploads` for `File.cp!/2` to work.
-        File.cp!(path, dest)
-        {:ok, ~p"/uploads/#{Path.basename(dest)}"}
+        Storage.copy_file!(path, dest)
+
+        {:ok, ~p"/uploads/#{user_id}/#{Path.basename(dest)}"}
       end)
 
     files = socket.assigns.product.files ++ uploaded_files

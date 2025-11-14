@@ -14,6 +14,8 @@ defmodule Billing.TaxiDriver do
 
   alias Billing.Util.Crypto
   alias Billing.Certificates
+  alias Billing.Storage
+  alias Billing.Accounts.Scope
 
   def build_invoice_xml(invoice_params) do
     json_body = Jason.encode!(invoice_params)
@@ -33,25 +35,25 @@ defmodule Billing.TaxiDriver do
     end
   end
 
-  def sign_invoice_xml(xml_path, certificate) do
-    p12_path = Path.join(Billing.get_storage_path(), certificate.file)
+  def sign_invoice_xml(%Scope{} = scope, xml_path, certificate) do
+    case Storage.p12_file_exists?(scope, certificate.file) do
+      {:ok, p12_path} ->
+        salt = Certificates.get_certificate_encryption_salt(certificate)
+        opts = Certificates.get_certificate_encryption_opts()
 
-    if File.exists?(p12_path) do
-      salt = Certificates.get_certificate_encryption_salt(certificate)
-      opts = Certificates.get_certificate_encryption_opts()
+        case Crypto.decrypt(salt, certificate.encrypted_password, opts) do
+          {:ok, p12_password} ->
+            sign_invoice_xml_with_password(xml_path, p12_path, p12_password)
 
-      case Crypto.decrypt(salt, certificate.encrypted_password, opts) do
-        {:ok, p12_password} ->
-          sign_invoice_xml_with_password(xml_path, p12_path, p12_password)
+          {:error, :expired} ->
+            {:error, "Contraseña del certificado expirado"}
 
-        {:error, :expired} ->
-          {:error, "Contraseña del certificado expirado"}
+          {:error, :invalid} ->
+            {:error, "Contraseña del certificado inválida"}
+        end
 
-        {:error, :invalid} ->
-          {:error, "Contraseña del certificado inválida"}
-      end
-    else
-      {:error, "El certificado no existe"}
+      {:error, error} ->
+        {:error, error}
     end
   end
 

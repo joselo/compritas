@@ -3,6 +3,7 @@ defmodule BillingWeb.CertificateLive.Form do
 
   alias Billing.Certificates
   alias Billing.Certificates.Certificate
+  alias Billing.Storage
 
   @impl true
   def render(assigns) do
@@ -175,12 +176,12 @@ defmodule BillingWeb.CertificateLive.Form do
   defp set_uploads_to_params(socket, params) do
     uploaded_files =
       consume_uploaded_entries(socket, :certificate_file, fn %{path: path}, entry ->
-        file_name = entry.uuid
+        extname = Path.extname(entry.client_name)
+        file_name = entry.uuid <> extname
+        dest = Storage.p12_path(socket.assigns.current_scope, file_name)
 
-        dest =
-          Path.join(Billing.get_storage_path(), file_name)
+        Storage.copy_file!(path, dest)
 
-        File.cp!(path, dest)
         {:ok, Path.basename(dest)}
       end)
 

@@ -9,8 +9,8 @@ defmodule BillingWeb.ElectronicInvoiceController do
       ElectronicInvoices.get_electronic_invoice!(conn.assigns.current_scope, id)
 
     pdf =
-      electronic_invoice.access_key
-      |> InvoiceHandler.pdf_path()
+      conn.assigns.current_scope
+      |> InvoiceHandler.pdf_path(electronic_invoice.access_key)
       |> File.read!()
 
     conn
@@ -27,8 +27,8 @@ defmodule BillingWeb.ElectronicInvoiceController do
       ElectronicInvoices.get_electronic_invoice!(conn.assigns.current_scope, id)
 
     xml =
-      electronic_invoice.access_key
-      |> InvoiceHandler.xml_auth_path()
+      conn.assigns.current_scope
+      |> InvoiceHandler.xml_auth_path(electronic_invoice.access_key)
       |> File.read!()
 
     conn
