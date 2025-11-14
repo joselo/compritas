@@ -17,7 +17,7 @@ defmodule Billing.Storage do
   end
 
   def p12_path(%Scope{} = scope, file_name) do
-    "#{Billing.get_storage_path()}/#{scope.user.id}/p12_files/#{file_name}"
+    "#{Billing.get_storage_path()}/#{scope.user.uuid}/p12_files/#{file_name}"
   end
 
   def p12_file_exists?(%Scope{} = scope, p12_file_path) do
@@ -33,7 +33,7 @@ defmodule Billing.Storage do
   def upload_path(%Scope{} = scope, file_name) do
     Path.join([
       Application.app_dir(:billing, "priv/static/uploads"),
-      "#{scope.user.id}",
+      "#{scope.user.uuid}",
       file_name
     ])
   end

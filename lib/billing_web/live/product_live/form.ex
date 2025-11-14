@@ -165,7 +165,7 @@ defmodule BillingWeb.ProductLive.Form do
       consume_uploaded_entries(socket, :files, fn %{path: path}, entry ->
         extname = Path.extname(entry.client_name)
         file_name = entry.uuid <> extname
-        user_id = socket.assigns.current_scope.user.id
+        user_id = socket.assigns.current_scope.user.uuid
         dest = Storage.upload_path(socket.assigns.current_scope, file_name)
 
         Storage.copy_file!(path, dest)

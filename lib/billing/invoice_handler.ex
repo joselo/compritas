@@ -220,23 +220,23 @@ defmodule Billing.InvoiceHandler do
   # Store files paths
 
   def xml_path(%Scope{} = scope, access_key) do
-    "#{Billing.get_storage_path()}/#{scope.user.id}/invoices/created/#{access_key}.xml"
+    "#{Billing.get_storage_path()}/#{scope.user.uuid}/invoices/created/#{access_key}.xml"
   end
 
   def xml_signed_path(%Scope{} = scope, access_key) do
-    "#{Billing.get_storage_path()}/#{scope.user.id}/invoices/signed/#{access_key}.xml"
+    "#{Billing.get_storage_path()}/#{scope.user.uuid}/invoices/signed/#{access_key}.xml"
   end
 
   def xml_response_path(%Scope{} = scope, access_key) do
-    "#{Billing.get_storage_path()}/#{scope.user.id}/invoices/sent/#{access_key}.xml"
+    "#{Billing.get_storage_path()}/#{scope.user.uuid}/invoices/sent/#{access_key}.xml"
   end
 
   def xml_auth_path(%Scope{} = scope, access_key) do
-    "#{Billing.get_storage_path()}/#{scope.user.id}/invoices/authorized/#{access_key}.xml"
+    "#{Billing.get_storage_path()}/#{scope.user.uuid}/invoices/authorized/#{access_key}.xml"
   end
 
   def pdf_path(%Scope{} = scope, access_key) do
-    "#{Billing.get_storage_path()}/#{scope.user.id}/invoices/pdfs/#{access_key}.pdf"
+    "#{Billing.get_storage_path()}/#{scope.user.uuid}/invoices/pdfs/#{access_key}.pdf"
   end
 
   # Store files section

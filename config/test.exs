@@ -41,3 +41,6 @@ config :phoenix_live_view,
   enable_expensive_runtime_checks: true
 
 config :billing, BillingWeb.Gettext, default_locale: "en"
+
+config :billing,
+  storage_path: "/tmp"
