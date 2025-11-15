@@ -30,7 +30,7 @@ defmodule Billing.ElectronicInvoiceErrors do
     |> format_errors()
   end
 
-  def list_errors(_electronic_invoice) do
+  def list_errors(_scope, _electronic_invoice) do
     []
   end
 

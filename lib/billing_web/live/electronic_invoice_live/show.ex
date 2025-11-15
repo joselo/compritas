@@ -225,7 +225,7 @@ defmodule BillingWeb.ElectronicInvoiceLive.Show do
       )
 
     electronic_invoice_errors =
-      ElectronicInvoiceErrors.list_errors(electronic_invoice)
+      ElectronicInvoiceErrors.list_errors(socket.assigns.current_scope, electronic_invoice)
 
     socket
     |> assign(:electronic_invoice, electronic_invoice)

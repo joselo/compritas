@@ -89,7 +89,6 @@ config :mime, :types, %{
 }
 
 config :billing,
-  storage_path: "./storage",
   crypto_key_base: "Ek/ZCeyFk1/yXXsEtjunrVHBHxqLPndOMgIIaoQEqW0qntrhBXoHtYS/RqA4bcdN"
 
 config :billing,

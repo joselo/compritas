@@ -8,6 +8,10 @@ defmodule Billing do
   """
 
   def get_storage_path do
-    Application.get_env(:billing, :storage_path)
+    System.get_env("STORAGE_PATH", "./storage")
+  end
+
+  def get_uploads_path do
+    System.get_env("STORAGE_PATH", "./priv/static/uploads")
   end
 end
