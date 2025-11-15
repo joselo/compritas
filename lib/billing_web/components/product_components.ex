@@ -2,6 +2,8 @@ defmodule BillingWeb.ProductComponents do
   use Phoenix.Component
   use Gettext, backend: BillingWeb.Gettext
 
+  import Billing.Storage, only: [cdn_url: 1]
+
   alias BillingWeb.CoreComponents
 
   attr :images, :list, required: true
@@ -14,7 +16,7 @@ defmodule BillingWeb.ProductComponents do
     <div>
       <ul class="space-y-4">
         <li :for={{image, _index} <- @images_with_index} class="">
-          <img src={image} alt={@title} loading="lazy" class="rounded" />
+          <img src={cdn_url(image)} alt={@title} loading="lazy" class="rounded" />
         </li>
       </ul>
     </div>
@@ -33,7 +35,8 @@ defmodule BillingWeb.ProductComponents do
     <img
       :if={@image}
       class="w-32 h-32 flex items-center justify-center bg-base-200 text-base-content rounded"
-      src={@image}
+      loading="lazy"
+      src={cdn_url(@image)}
     />
 
     <div

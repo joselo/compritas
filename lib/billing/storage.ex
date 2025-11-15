@@ -59,4 +59,8 @@ defmodule Billing.Storage do
         {:error, reason}
     end
   end
+
+  def cdn_url(path) when is_binary(path) do
+    path
+  end
 end
