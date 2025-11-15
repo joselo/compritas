@@ -47,4 +47,16 @@ defmodule Billing.Storage do
         {:error, reason}
     end
   end
+
+  def save_upload!(%Scope{} = scope, file_path, file_name) do
+    dest_path = upload_path(scope, file_name)
+
+    case ensure_directory_exists(dest_path) do
+      :ok ->
+        File.cp!(file_path, dest_path)
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
 end
