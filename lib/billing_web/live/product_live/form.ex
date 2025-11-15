@@ -166,11 +166,10 @@ defmodule BillingWeb.ProductLive.Form do
         extname = Path.extname(entry.client_name)
         file_name = entry.uuid <> extname
         user_id = socket.assigns.current_scope.user.uuid
-        dest = Storage.upload_path(socket.assigns.current_scope, file_name)
 
-        Storage.copy_file!(path, dest)
+        Storage.save_upload!(socket.assigns.current_scope, path, file_name)
 
-        {:ok, ~p"/uploads/#{user_id}/#{Path.basename(dest)}"}
+        {:ok, ~p"/uploads/#{user_id}/#{file_name}"}
       end)
 
     files = socket.assigns.product.files ++ uploaded_files
