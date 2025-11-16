@@ -89,7 +89,10 @@ config :mime, :types, %{
 }
 
 config :billing,
-  crypto_key_base: "Ek/ZCeyFk1/yXXsEtjunrVHBHxqLPndOMgIIaoQEqW0qntrhBXoHtYS/RqA4bcdN"
+  crypto_key_base: "Ek/ZCeyFk1/yXXsEtjunrVHBHxqLPndOMgIIaoQEqW0qntrhBXoHtYS/RqA4bcdN",
+  taxi_drive_adapter: Billing.TaxiDriverAdapter
+
+# taxi_drive_adapter: Billing.TaxiDriverApiAdapter
 
 config :billing,
        BillingWeb.Gettext,
