@@ -1,8 +1,6 @@
 defmodule BillingWeb.ProductLive.Show do
   use BillingWeb, :live_view
 
-  import Billing.Storage, only: [cdn_url: 1]
-
   alias Billing.Products
   alias BillingWeb.SharedComponents
 
@@ -33,7 +31,7 @@ defmodule BillingWeb.ProductLive.Show do
       <SharedComponents.markdown text={@product.content} />
 
       <div>
-        <img :for={file <- @product.files} src={cdn_url(file)} loading="lazy" />
+        <img :for={file <- @product.files} src={file} loading="lazy" />
       </div>
     </Layouts.app>
     """

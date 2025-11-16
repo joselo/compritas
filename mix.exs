@@ -74,7 +74,8 @@ defmodule Billing.MixProject do
       {:ecto_erd, "~> 0.6.4", only: [:dev]},
       {:sweet_xml, "~> 0.7.5"},
       {:langchain, "~> 0.4.0"},
-      {:earmark, "~> 1.4"}
+      {:earmark, "~> 1.4"},
+      {:billing_core, github: "joselo/billing-core", branch: "master"}
     ]
   end
 
