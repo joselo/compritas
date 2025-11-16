@@ -75,7 +75,7 @@ defmodule Billing.MixProject do
       {:sweet_xml, "~> 0.7.5"},
       {:langchain, "~> 0.4.0"},
       {:earmark, "~> 1.4"},
-      {:billing_core, github: "joselo/billing-core", branch: "master"}
+      {:billing_core, github: "joselo/compritas-core", branch: "master"}
     ]
   end
 
