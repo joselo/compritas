@@ -33,7 +33,7 @@ defmodule BillingWeb.Plugs.SetupGatePlug do
   end
 
   defp user_exists? do
-    if Mix.env() == :test do
+    if Application.get_env(:billing, :env) == :test do
       Repo.exists?(User)
     else
       case Process.get(:setup_gate_user_exists) do
