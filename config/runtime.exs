@@ -147,7 +147,7 @@ if config_env() == :prod do
       environment variable SMTP_PORT is missing.
       """
 
-  config :billing, BillingWeb.Mailer,
+  config :billing, Billing.Mailer,
     adapter: Swoosh.Adapters.SMTP,
     relay: System.get_env("SMTP_SERVER"),
     username: System.get_env("SMTP_USERNAME"),

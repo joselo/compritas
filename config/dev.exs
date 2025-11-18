@@ -90,12 +90,3 @@ config :swoosh, :api_client, false
 config :phoenix_live_view,
   debug_heex_annotations: true,
   debug_attributes: true
-
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :billing, Billing.Mailer, adapter: Swoosh.Adapters.Local
