@@ -1,6 +1,7 @@
 services:
   caddy:
     image: caddy:2.7.6
+    container_name: caddy
     restart: unless-stopped
     env_file: .env
     ports:
@@ -15,6 +16,7 @@ services:
 
   postgres:
     image: postgres:15
+    container_name: postgres
     restart: always
     env_file: .env
     expose:
@@ -27,6 +29,7 @@ services:
 
   compritas:
     image: ghcr.io/joselo/compritas:develop
+    container_name: compritas
     pull_policy: always
     depends_on:
       postgres:
@@ -46,6 +49,38 @@ services:
     expose:
       - "4000"
 
+  mailserver:
+    image: docker.io/mailserver/docker-mailserver:latest
+    container_name: mailserver
+    hostname: mail
+    domainname: ${MAIL_DOMAIN_NAME}
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "25:25"     # SMTP
+      - "587:587"   # Submission
+    volumes:
+      - mail_data:/var/mail/
+      - mail_state:/var/mail-state/
+      - mail_logs:/var/log/mail/
+      - mail_config:/tmp/docker-mailserver/
+      - caddy_data:/etc/letsencrypt/:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - ENABLE_FAIL2BAN=1
+      - SSL_TYPE=${MAIL_SSL_TYPE}
+      - PERMIT_DOCKER=network
+      - ONE_DIR=1
+      - ENABLE_POSTGREY=0
+      - ENABLE_CLAMAV=0
+      - ENABLE_SPAMASSASSIN=0
+      - SPOOF_PROTECTION=0
+    cap_add:
+      - NET_ADMIN
+      - SYS_PTRACE
+    networks:
+      - internal
+
 networks:
   internal:
 
@@ -55,3 +90,8 @@ volumes:
   postgres_data:
   storage:
   uploads:
+  mail_data:
+  mail_state:
+  mail_logs:
+  mail_config:
+

@@ -116,4 +116,46 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Req
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+
+  _from_email =
+    System.get_env("FROM_EMAIL") ||
+      raise """
+      environment variable FROM_EMAIL is missing.
+      """
+
+  _smtp_server =
+    System.get_env("SMTP_SERVER") ||
+      raise """
+      environment variable SMTP_SERVER is missing.
+      """
+
+  _smpt_username =
+    System.get_env("SMTP_USERNAME") ||
+      raise """
+      environment variable SMTP_USERNAME is missing.
+      """
+
+  _smpt_password =
+    System.get_env("SMTP_PASSWORD") ||
+      raise """
+      environment variable SMTP_PASSWORD is missing.
+      """
+
+  _smpt_port =
+    System.get_env("SMTP_PORT") ||
+      raise """
+      environment variable SMTP_PORT is missing.
+      """
+
+  config :billing, BillingWeb.Mailer,
+    adapter: Swoosh.Adapters.SMTP,
+    relay: System.get_env("SMTP_SERVER"),
+    username: System.get_env("SMTP_USERNAME"),
+    password: System.get_env("SMTP_PASSWORD"),
+    port: String.to_integer(System.get_env("SMTP_PORT")),
+    ssl: false,
+    tls: :if_available,
+    # ssl: true,
+    # tls: :always
+    auth: :always
 end
