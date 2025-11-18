@@ -153,9 +153,7 @@ if config_env() == :prod do
     username: System.get_env("SMTP_USERNAME"),
     password: System.get_env("SMTP_PASSWORD"),
     port: String.to_integer(System.get_env("SMTP_PORT")),
-    ssl: false,
-    tls: :if_available,
-    # ssl: true,
-    # tls: :always
+    ssl: true,
+    tls: :always,
     auth: :always
 end
