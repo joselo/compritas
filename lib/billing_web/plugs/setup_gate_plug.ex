@@ -8,8 +8,13 @@ defmodule BillingWeb.Plugs.SetupGatePlug do
   alias Billing.Repo
 
   @register_path ["users", "register"]
+  @health_checker_path ["up"]
 
   def init(_) do
+  end
+
+  def call(%{path_info: @health_checker_path} = conn, _params) do
+    conn
   end
 
   def call(%{path_info: @register_path} = conn, _params) do
