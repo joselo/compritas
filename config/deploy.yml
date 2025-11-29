@@ -25,15 +25,14 @@ env:
   clear:
     PHX_SERVER: true
   secret:
-    - DATABASE_URL
-    - SMTP_USERNAME
-    - SMTP_PASSWORD
     - SECRET_KEY_BASE
+    - DATABASE_URL
     - PHX_HOST
     - FROM_EMAIL
     - SMTP_SERVER
     - SMTP_PORT
-    - SMTP_TEST
+    - SMTP_USERNAME
+    - SMTP_PASSWORD
 
 aliases:
   migrate: app exec --reuse "/app/bin/migrate"
