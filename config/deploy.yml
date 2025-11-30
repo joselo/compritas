@@ -24,6 +24,8 @@ builder:
 env:
   clear:
     PHX_SERVER: true
+    STORAGE_PATH: /app/storage
+    UPLOADS_PATH: /app/priv/static/uploads 
   secret:
     - SECRET_KEY_BASE
     - DATABASE_URL
