@@ -41,3 +41,4 @@ priv/static/uploads/*
 
 # Ignore storage dir
 storage/**/*
+uploads/**/*
