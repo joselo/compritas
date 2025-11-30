@@ -58,6 +58,11 @@ defmodule Billing.Storage do
   def save_upload!(%Scope{} = scope, file_path, file_name) do
     dest_path = upload_path(scope, file_name)
 
+    Logger.info("-------------------")
+    Logger.info(file_path)
+    Logger.info(dest_path)
+    Logger.info("-------------------")
+
     case ensure_directory_exists(dest_path) do
       :ok ->
         File.cp!(file_path, dest_path)
