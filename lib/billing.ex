@@ -11,10 +11,6 @@ defmodule Billing do
     System.get_env("STORAGE_PATH", "./storage")
   end
 
-  def get_uploads_path do
-    System.get_env("UPLOADS_PATH", "./storage/uploads")
-  end
-
   def get_from_email do
     System.get_env("FROM_EMAIL", "contact@example.com")
   end

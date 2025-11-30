@@ -34,7 +34,8 @@ defmodule Billing.Storage do
 
   def upload_path(%Scope{} = scope, file_name) do
     Path.join([
-      "#{Billing.get_uploads_path()}",
+      "#{Billing.get_storage_path()}",
+      "uploads",
       "#{scope.user.uuid}",
       file_name
     ])
