@@ -25,7 +25,7 @@ env:
   clear:
     PHX_SERVER: true
     STORAGE_PATH: /app/storage
-    UPLOADS_PATH: /app/priv/static/uploads 
+    UPLOADS_PATH: /app/uploads 
   secret:
     - SECRET_KEY_BASE
     - DATABASE_URL
@@ -45,5 +45,5 @@ ssh:
 
 volumes:
   - storage:/app/storage
-  - uploads:/app/priv/static/uploads
+  - uploads:/app/uploads
 
