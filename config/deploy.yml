@@ -44,6 +44,6 @@ ssh:
   user: deploy
 
 volumes:
-  - "storage:/app/storage"
-  - "uploads:/app/priv/static/uploads"
+  - "/var/lib/compritas/storage:/app/storage"
+  - "/var/lib/compritas/uploads:/app/priv/static/uploads"
 
