@@ -48,7 +48,9 @@ defmodule Billing.Storage do
 
     case ensure_directory_exists(dest_path) do
       :ok ->
-        File.cp!(file_path, dest_path)
+        result = File.cp!(file_path, dest_path)
+        Logger.info(IO.inspect(result))
+        result
 
       {:error, reason} ->
         {:error, reason}
