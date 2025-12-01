@@ -41,3 +41,6 @@ priv/static/uploads/*
 
 # Ignore storage dir
 storage/**/*
+
+# Ignore expert LSP
+.expert/
