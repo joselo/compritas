@@ -1,4 +1,6 @@
 defmodule Billing.Storage do
+  require Logger
+
   alias Billing.Accounts.Scope
 
   def save_file(file_path, content) do
@@ -32,16 +34,24 @@ defmodule Billing.Storage do
 
   def upload_path(%Scope{} = scope, file_name) do
     Path.join([
-      "#{Billing.get_uploads_path()}",
+      "#{Billing.get_storage_path()}",
+      "uploads",
       "#{scope.user.uuid}",
       file_name
     ])
   end
 
   def copy_file!(file_path, dest_path) do
+    Logger.info("-------------------")
+    Logger.info(file_path)
+    Logger.info(dest_path)
+    Logger.info("-------------------")
+
     case ensure_directory_exists(dest_path) do
       :ok ->
-        File.cp!(file_path, dest_path)
+        result = File.cp!(file_path, dest_path)
+        Logger.info(IO.inspect(result))
+        result
 
       {:error, reason} ->
         {:error, reason}
@@ -50,6 +60,11 @@ defmodule Billing.Storage do
 
   def save_upload!(%Scope{} = scope, file_path, file_name) do
     dest_path = upload_path(scope, file_name)
+
+    Logger.info("-------------------")
+    Logger.info(file_path)
+    Logger.info(dest_path)
+    Logger.info("-------------------")
 
     case ensure_directory_exists(dest_path) do
       :ok ->

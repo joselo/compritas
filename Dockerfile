@@ -85,6 +85,10 @@ ENV LC_ALL=en_US.UTF-8
 WORKDIR "/app"
 RUN chown nobody /app
 
+# Create volume storage
+RUN mkdir -p /app/storage \
+    && chown -R nobody:root /app/storage
+
 # set runner ENV
 ENV MIX_ENV="prod"
 

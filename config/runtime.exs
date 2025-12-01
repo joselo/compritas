@@ -123,37 +123,47 @@ if config_env() == :prod do
       environment variable FROM_EMAIL is missing.
       """
 
-  _smtp_server =
+  smtp_server =
     System.get_env("SMTP_SERVER") ||
       raise """
       environment variable SMTP_SERVER is missing.
       """
 
-  _smpt_username =
-    System.get_env("SMTP_USERNAME") ||
-      raise """
-      environment variable SMTP_USERNAME is missing.
-      """
-
-  _smpt_password =
-    System.get_env("SMTP_PASSWORD") ||
-      raise """
-      environment variable SMTP_PASSWORD is missing.
-      """
-
-  _smpt_port =
+  smtp_port =
     System.get_env("SMTP_PORT") ||
       raise """
       environment variable SMTP_PORT is missing.
       """
 
-  config :billing, Billing.Mailer,
-    adapter: Swoosh.Adapters.SMTP,
-    relay: System.get_env("SMTP_SERVER"),
-    username: System.get_env("SMTP_USERNAME"),
-    password: System.get_env("SMTP_PASSWORD"),
-    port: String.to_integer(System.get_env("SMTP_PORT")),
-    ssl: true,
-    tls: :always,
-    auth: :always
+  smtp_username =
+    System.get_env("SMTP_USERNAME") ||
+      raise """
+      environment variable SMTP_USERNAME is missing.
+      """
+
+  smtp_password =
+    System.get_env("SMTP_PASSWORD") ||
+      raise """
+      environment variable SMTP_PASSWORD is missing.
+      """
+
+  if smtp_username == "" && smtp_password == "" do
+    config :billing, Billing.Mailer,
+      adapter: Swoosh.Adapters.SMTP,
+      relay: smtp_server,
+      port: String.to_integer(smtp_port),
+      ssl: false,
+      tls: :never,
+      auth: :never
+  else
+    config :billing, Billing.Mailer,
+      adapter: Swoosh.Adapters.SMTP,
+      relay: smtp_server,
+      username: smtp_username,
+      password: smtp_password,
+      port: String.to_integer(smtp_port),
+      ssl: true,
+      tls: :always,
+      auth: :always
+  end
 end
