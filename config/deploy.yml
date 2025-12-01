@@ -1,0 +1,47 @@
+service: compritas
+
+image: joselo/compritas
+
+servers:
+  web:
+    - compritas.test
+
+proxy:
+  ssl: false
+  host: compritas.test
+  app_port: 4000
+
+registry:
+  server: ghcr.io
+  username: joselo
+
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+builder:
+  arch: amd64
+
+env:
+  clear:
+    PHX_SERVER: true
+    STORAGE_PATH: /app/storage
+  secret:
+    - SECRET_KEY_BASE
+    - DATABASE_URL
+    - PHX_HOST
+    - FROM_EMAIL
+    - SMTP_SERVER
+    - SMTP_PORT
+    - SMTP_USERNAME
+    - SMTP_PASSWORD
+
+aliases:
+  migrate: app exec --reuse "/app/bin/migrate"
+  logs: app logs -f
+
+ssh:
+  user: deploy
+
+volumes:
+  - storage:/app/storage
+

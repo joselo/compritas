@@ -1,0 +1,19 @@
+(compritas) {
+    reverse_proxy {
+        to http://compritas:4000
+        header_up X-Real-IP {remote_host}
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}
+
+https://{$PHX_HOST} {
+    # tls internal
+    import compritas
+}
+

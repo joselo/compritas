@@ -44,3 +44,5 @@ config :billing, BillingWeb.Gettext, default_locale: "en"
 
 config :billing,
   storage_path: "/tmp"
+
+config :billing, :env, :test

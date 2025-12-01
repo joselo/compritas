@@ -26,6 +26,11 @@ defmodule BillingWeb.Endpoint do
     gzip: not code_reloading?,
     only: BillingWeb.static_paths()
 
+  plug Plug.Static,
+    at: "/uploads",
+    from: Path.expand("./storage/uploads"),
+    gzip: false
+
   if Code.ensure_loaded?(Tidewave) do
     plug Tidewave
   end

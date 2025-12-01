@@ -135,5 +135,6 @@ defmodule BillingWeb.Router do
 
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete
+    get "/up", HealthCheckerController, :index
   end
 end
