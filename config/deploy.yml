@@ -4,14 +4,12 @@ image: joselo/compritas
 
 servers:
   web:
-    hosts:
-      - <%= ENV['KAMAL_WEB_IP'] %>
+    - compritas.test
 
 proxy:
   ssl: false
+  host: compritas.test
   app_port: 4000
-  hosts:
-    - <%= ENV['PHX_HOST'] %>
 
 registry:
   server: ghcr.io
