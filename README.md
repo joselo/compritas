@@ -1,13 +1,13 @@
+# Compritas
 
-# Billing
+[![Compritas](https://github.com/joselo/compritas/workflows/Elixir%20CI/badge.svg)](https://github.com/joselo/compritas/actions)
 
-[![App](https://github.com/joselo/billing/workflows/Elixir%20CI/badge.svg)](https://github.com/joselo/billing/actions)
+Compritas es una aplicación web de comercio electrónico y facturación electrónica para Ecuador;  Use [Phoenix](https://phoenixframework.org/) un framework web escrito en el lenguaje [Elixir](https://elixir-lang.org/). 
 
-> IMPORTANTE: El desarrollo de la aplicación  está en procesos, aún no se libera el primer reléase
+> IMPORTANTE: El desarrollo de la aplicación está en proceso, aún no se libera el primer reléase.
 
-Billing es una aplicación web de facturación  electrónica para Ecuador escrita [Phoenix](https://phoenixframework.org/) un framework web escrito en el lenguaje [Elixir](https://elixir-lang.org/). El desarrollo de la aplicación la he estado desarrollando en vivo transmitiendo en YouTube:
 
-[Playlist en Youtube con el desarrollo del proyecto](https://www.youtube.com/watch?v=73sglmNSK5A&list=PLS3D8lZZio6oKttRZfuytjSgh1RGNTit7)
+Algunas secciones del desarrollo las he estado desarrollando en vivo transmitiendo en [YouTube](https://www.youtube.com/watch?v=73sglmNSK5A&list=PLS3D8lZZio6oKttRZfuytjSgh1RGNTit7).
 
 ## Requerimientos
 
@@ -17,10 +17,12 @@ Billing es una aplicación web de facturación  electrónica para Ecuador escrit
 
 ## Levantar el proyecto en el entorno local
 
+> Si ya estás familiarizado con Elixir y Phoenix y cuentas con todo instalado, puedes seguir los siguientes pasos; de lo contrario, mira los [Requerimientos para desarrollo](#requerimientos-para-desarrollo).
+
 Clonar el repositorio localmente e ingresar a la carpeta del proyecto
 
-    git clone https://github.com/joselo/billing
-    cd billing
+    git clone https://github.com/joselo/compritas
+    cd compritas
 
 Instalar las dependencias del proyecto y crear la base de datos
 
@@ -32,28 +34,25 @@ Iniciar el servidor de la aplicación
 
 Si todo ha ido correctamente visita: http://localhost:4000/
 
-# Notas de desarrollo
+# Funcionalidades
 
-## Api de facturación
+ - [x] Carrito de compras
+ - [x] Procesamiento de órdenes
+ - [x] Cotizaciones
+ - [x] Facturación electrónica
+ - [x] Catálogo de productos
+ - [x] Gestión de clientes
+ - [x] Gestión de empresas
+ - [x] Gestión de firmas electrónicas
+ - [ ] Asistente IA
+ - [ ] Temas para la tienda
+ - [ ] Notas de credito
+ - [ ] Notas de debito
+ - [ ] Guías de remisión
+ - [ ] Plataforma de pago
+ - [ ] Gestión de envios
 
-El proyecto usa el API de facturación [api.taxideral.com](https://api.taxideral.com/).
-
-## Actualiar traducciones
-
-    mix gettext.extract --merge
-## Diagrama ERB
-
-![Diagrama ERD](erd.png)
-
-## IA Tidewave
-
-El proyecto incluye una librería para realizar cambios usando inteligencia artificial:
-
- - [Tidewave](https://tidewave.ai/)
-
-Para realizar cambios en la aplicación usando IA abrir la siguiente dirección http://localhost:4000/tidewave
-
-## Requerimientos para desarrollo
+# Requerimientos para desarrollo
 
 Se recomienda usar [Hombrew](https://brew.sh):
 
@@ -86,8 +85,23 @@ Se recomienda tambien instalar las siguientes dependencias:
     sudo apt-get install build-essential libncurses5-dev libncursesw5-dev libssl-dev
 
 
+# Notas de desarrollo
+
+## Actualiar traducciones
+
+    mix gettext.extract --merge
+
+## IA Tidewave
+
+El proyecto incluye una librería para realizar cambios usando inteligencia artificial:
+
+ - [Tidewave](https://tidewave.ai/)
+
+Para realizar cambios en la aplicación usando IA abrir la siguiente dirección http://localhost:4000/tidewave
+
 ## Licencia
 
 Este proyecto está bajo la Licencia MIT.
 Consulta el archivo [LICENSE](./LICENSE.md) para más detalles.
+
 
