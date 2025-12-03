@@ -1,8 +1,10 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/joselo/compritas/develop/docs/images/compritas.png" alt="Compritas" width="300"/>
+</p>
+
 # Compritas
 
 [![Compritas](https://github.com/joselo/compritas/workflows/Elixir%20CI/badge.svg)](https://github.com/joselo/compritas/actions)
-
-![Compritas](./docs/images/compritas.png)
 
 Compritas es una aplicación web de comercio electrónico y facturación electrónica para Ecuador;  Use [Phoenix](https://phoenixframework.org/) un framework web escrito en el lenguaje [Elixir](https://elixir-lang.org/). 
 
