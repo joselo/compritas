@@ -105,7 +105,8 @@ Para realizar cambios en la aplicación usando IA abrir la siguiente dirección 
 
 ## Licencia
 
-Este proyecto está bajo la Licencia MIT.
-Consulta el archivo [LICENSE](./LICENSE.md) para más detalles.
+Este proyecto utiliza la **Licencia O'Saasy**.
 
+Consulta el archivo [LICENSE.md](./LICENSE.md) para la versión oficial en español  
+y [LICENSE.en.md](./LICENSE.en.md) para la versión en inglés.
 
