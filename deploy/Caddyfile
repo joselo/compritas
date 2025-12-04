@@ -13,7 +13,8 @@
 }
 
 https://{$PHX_HOST} {
-    tls internal
+    # Use tls internal only for local tests
+    # tls internal
     import compritas
 }
 
