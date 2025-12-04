@@ -1,3 +1,24 @@
+x-compritas-template: &compritas-service
+  image: ghcr.io/joselo/compritas:develop
+  pull_policy: always
+  networks:
+    - internal
+  volumes:
+    - storage:/app/storage
+  restart: always
+  env_file: .env
+  healthcheck:
+    test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/up"]
+    interval: 10s
+    timeout: 5s
+    retries: 3
+    start_period: 30s
+  expose:
+    - "4000"
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+
 services:
   caddy:
     image: caddy:2.7.6
@@ -14,25 +35,13 @@ services:
     networks:
       - internal
 
-  compritas:
-    image: ghcr.io/joselo/compritas:develop
-    container_name: compritas
-    pull_policy: always
-    networks:
-      - internal
-    volumes:
-      - storage:/app/storage
-    restart: always
-    env_file: .env
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://compritas:4000/up"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    expose:
-      - "4000"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+  compritas-blue:
+    <<: *compritas-service
+    container_name: compritas-blue
+
+  compritas-green:
+    <<: *compritas-service
+    container_name: compritas-green
 
 networks:
   internal:
