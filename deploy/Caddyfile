@@ -1,7 +1,22 @@
 (compritas) {
     reverse_proxy {
-        to http://compritas:4000
+        to compritas-blue:4000 compritas-green:4000
+
+        # Load balancing with sticky sessions for LiveView
+        lb_policy cookie compritas_lb
+        lb_try_duration 5s
+        lb_try_interval 250ms
+
+        # Health checks
+        health_uri /up
+        health_interval 10s
+        health_timeout 5s
+        health_status 2xx
+
+        # Headers
         header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
     }
 
     header {
@@ -17,4 +32,3 @@ https://{$PHX_HOST} {
     # tls internal
     import compritas
 }
-
